@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MathCompressionBench Task Difficulty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #FAFCFD; --surface: #FFFFFF; --surface-2: #EAF0F3; --ink: #20313F; --ink-2: #425563; --muted: #586C79;
+  --rule: #C8D3DB; --accent: #245E70; --helper: #84651F; --floor: #71818C;
+  --add-bg: #E3EEE8; --add-ink: #285D46; --del-bg: #F5E7EC; --del-ink: #8A3855;
+  --note-bg: #EEF2F5; --note-rule: #A8BAC6; --code-bg: #EEF3F6;
+  --s60: #245E70; --s120: #906724; --good: #28654E; --warn: #84651F; --crit: #9B3E56;
+  --ag1: #2a78d6; --ag2: #eb6834; --ag3: #1baf7a; --ag4: #eda100; --ag5: #e87ba4; --ag6: #008300;
+  --cat-automation: #2a78d6; --cat-library: #eb6834; --cat-sharing: #1baf7a; --cat-restructure: #eda100;
+  --cat-counting: #e87ba4; --cat-lemmas: #008300; --cat-other: #8A9398; --cat-mixed: #7d3c98;
+  --c-target: #84651F; --c-proof: #245E70;
+  --display: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --prose: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+    --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+    --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+    --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+    --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+    --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+    --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+    --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+    --c-target: #D9BD78; --c-proof: #96C6CE;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+  --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+  --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+  --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+  --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+  --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+  --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+  --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+  --c-target: #D9BD78; --c-proof: #96C6CE;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 24px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 36px; }
+main.wrap { padding-block: 0 48px; }
+header.top { background: var(--bg); border-top: 4px solid var(--ink); border-bottom: 1px solid var(--rule); }
+header.top .wrap { display: flex; gap: 8px 32px; align-items: baseline; flex-wrap: wrap; padding-block: 20px 16px; }
+header.top .brand { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: -.06em; color: var(--ink); text-decoration: none; }
+header.top nav { display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: baseline; font-size: 14px; }
+header.top nav a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 5px; white-space: nowrap; }
+header.top nav a:hover, header.top nav a:focus-visible, header.top nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
+.snap { font-family: var(--mono); font-size: 10px; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.tag { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--helper); border: 1px solid var(--helper); padding: 2px 7px; border-radius: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; }
+h1 { font-size: clamp(34px, 4.5vw, 52px); line-height: 1.05; letter-spacing: -.035em; margin: 52px 0 18px; max-width: 28ch; }
+h2 { font-size: 27px; line-height: 1.2; letter-spacing: -.02em; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid var(--ink); }
+h3 { font-size: 20px; line-height: 1.3; margin: 28px 0 10px; }
+p, li { max-width: 72ch; }
+.lede { font-family: var(--prose); font-size: 20px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; margin-top: 0; }
+.summary-line { font-family: var(--prose); font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 70ch; margin: 0 0 8px; }
+.kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.small { font-size: 13px; color: var(--muted); }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+code, pre, .mono, .diff { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 4px; border-radius: 0; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule);
+  border-radius: 0; padding: 10px 12px; overflow-x: auto; margin: 0; white-space: pre; max-width: 100%; }
+pre.src { max-height: 460px; overflow: auto; }
+.statement { white-space: pre-wrap; overflow-wrap: anywhere; }
+.note { background: var(--note-bg); border: 1px solid var(--note-rule); border-radius: 0; padding: 10px 14px; margin: 14px 0; max-width: 90ch; }
+.note > b:first-child { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.note ul { margin: 6px 0 0; padding-left: 20px; } .note li { margin: 4px 0; }
+details > summary { cursor: pointer; }
+details.more { margin: 10px 0; }
+details.flash { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+details.more > summary { font-weight: 500; color: var(--ink-2); }
+.formula { font-family: var(--prose); font-size: 21px; background: transparent; border-block: 1px solid var(--rule);
+  padding: 20px 0; overflow-x: auto; }
+.formula sub { font-size: 13px; }
+dl.terms { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 12px 0; font-size: 14px; max-width: 90ch; }
+dl.terms dt { font-weight: 600; } dl.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.terms dd { margin-bottom: 8px; } }
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+td.nw { white-space: nowrap; }
+/* a task set's or a release's name kept on one line (never broken at its hyphen) */
+.setname { white-space: nowrap; }
+th .sub { display: block; font-weight: 400; }
+td .sub { display: block; font-family: var(--body); font-size: 11px; color: var(--muted); white-space: normal; }
+td .sub.nw { white-space: nowrap; }
+td.none, span.none { color: var(--muted); }
+tbody tr:last-child td { border-bottom: 0; }
+.tablewrap { overflow-x: auto; max-width: 100%; border-top: 1px solid var(--ink-2); border-bottom: 1px solid var(--rule); background: transparent; margin: 16px 0 10px; }
+.tablewrap.tall { max-height: 640px; overflow-y: auto; }
+.tablewrap.tall thead th { position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 0 var(--rule); }
+table.pin th:first-child, table.pin td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); box-shadow: 1px 0 0 var(--rule); }
+th.sort { cursor: pointer; user-select: none; } th.sort:hover { color: var(--ink); }
+th .nw { white-space: nowrap; }
+th.sort[aria-sort="none"] .arr::after { content: " ↕"; font-size: 10px; opacity: .45; }
+th.sort[aria-sort="ascending"] .arr::after { content: " ▲"; font-size: 9px; } th.sort[aria-sort="descending"] .arr::after { content: " ▼"; font-size: 9px; }
+tr.group td { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+tr.sub td:first-child { padding-left: 1.6em; color: var(--ink-2); }
+td.ptitle, td.ponly { display: none; }
+td.notes { min-width: 210px; max-width: 280px; font-size: 12.5px; color: var(--ink-2); }
+.mark { color: var(--ink-2); font-weight: 700; margin-left: 2px; } a.mark { text-decoration: none; }
+.flag { display: inline-block; font-size: 11px; color: var(--ink-2); background: var(--surface-2); border-radius: 0; padding: 0 5px; margin: 0 3px 2px 0; }
+.mp-yes { color: var(--ink); font-weight: 700; } .mp-yes::before { content: "◆ "; font-size: 10px; vertical-align: 1px; } .mp-no { color: var(--ink-2); } .mp-pending { color: var(--muted); font-style: italic; }
+.res { font-size: 11.5px; padding: 0 6px; border-radius: 0; border: 1px solid var(--rule); white-space: nowrap; }
+.res.pass::before { content: "✓ "; color: var(--good); } .res.fail::before { content: "× "; color: var(--crit); }
+.st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12.5px; }
+.st i { font-style: normal; font-weight: 700; width: 14px; text-align: center; display: inline-flex; justify-content: center; }
+.st i svg { display: block; }
+.st-VALID i { color: var(--good); } .st-VALID_REPAIRED_VERIFIER i { color: var(--warn); }
+.st-RAW_FAILURE i { color: var(--crit); } .st-UNCONFIRMED i { color: var(--muted); }
+.st-VERIFIED i { color: var(--good); } .st-VERIFIED_PENDING_FIX i { color: var(--warn); }
+.st-REJECTED i { color: var(--crit); } .st-NO_SOURCE i { color: var(--muted); }
+.swipehint { display: none; font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+.tablewrap.overflows { -webkit-mask-image: linear-gradient(to right, #000 90%, transparent); mask-image: linear-gradient(to right, #000 90%, transparent); }
+.tablewrap.overflows.at-end { -webkit-mask-image: none; mask-image: none; }
+.tablewrap.overflows + .swipehint { display: block; }
+/* stacked rows on narrow screens */
+@media (max-width: 700px) {
+  table.stack thead { display: none; }
+  table.stack tr { display: block; border-bottom: 1px solid var(--rule); padding: 6px 0; }
+  table.stack tr.group { padding: 0; }
+  table.stack td { display: flex; gap: 10px; justify-content: space-between; border: 0; padding: 2px 10px; text-align: right; white-space: normal; }
+  table.stack td::before { content: attr(data-label); color: var(--muted); font-family: var(--body); font-size: 12px; text-align: left; }
+  table.stack td:not(.num) { text-align: left; }
+  table.stack td.num { flex-wrap: wrap; }
+  table.stack td.notes { display: block; text-align: left; min-width: 0; max-width: none; }
+  table.stack td.notes::before { display: block; }
+  table.stack tr.group td { display: block; text-align: left; } table.stack tr.group td::before { content: none; }
+  table.stack td:empty { display: none; }
+  table.stack td.mono { display: block; text-align: left; } table.stack td.mono::before { display: block; }
+  table.stack .cv .sub { display: inline; margin-left: 0; } table.stack .cv .sub::before { content: " · "; }
+  table.stack.compact tr:not(.group) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 14px; padding: 10px; }
+  table.stack.compact td { display: block; padding: 0; text-align: left; font-size: 13px; }
+  table.stack.compact td::before { display: block; font-size: 11px; line-height: 1.3; font-weight: 400; }
+  table.stack.compact td.k { display: none; }
+  table.stack.compact td:empty { display: none; }
+  table.stack.compact td.ptitle { display: block; order: -2; grid-column: 1 / -1; font-size: 14px; font-weight: 600; }
+  table.stack.compact td.ptitle::before { content: none; }
+  table.stack.compact td.ponly { display: block; order: -1; grid-column: 1 / -1; }
+  table.stack.compact td.notes { grid-column: 1 / -1; }
+  table.stack.compact td .sub, table.stack.compact td .sub.nw { white-space: normal; overflow-wrap: anywhere; }
+  .tablewrap.tall { max-height: none; overflow-y: visible; }
+}
+/* controls */
+.panel { border-block: 1px solid var(--rule); padding: 20px 0; }
+.controls { display: flex; gap: 10px 12px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+.controls label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.controls .count { font-size: 12.5px; color: var(--muted); margin-left: auto; align-self: center; }
+select, button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--rule); border-radius: 0; padding: 5px 8px; }
+button { cursor: pointer; } button[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+select:focus-visible, button:focus-visible, a:focus-visible, tr:focus-visible, th:focus-visible, [data-tip]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 0; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; border-radius: 0; }
+/* charts */
+.legend { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 8px; align-items: center; }
+.legend svg { vertical-align: -2px; margin-right: 5px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-family: var(--body); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart text.lab { fill: var(--ink-2); font-size: 12px; }
+.chart text.tlab { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.chart text.endlab { fill: var(--ink); font-size: 11.5px; font-weight: 600; }
+.chart text.markglyph { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .axis { stroke: var(--ink-2); stroke-width: 1; }
+.chart .bound { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart text.blab { paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.chart .gutter { fill: var(--surface-2); }
+.chart .band { fill: var(--surface-2); opacity: .55; }
+.chart g[data-tip] { cursor: pointer; } .chart g[data-tip]:focus { outline: none; }
+.caption { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; max-width: 90ch; }
+.tooltip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 0;
+  z-index: 50; max-width: 320px; line-height: 1.45; }
+/* number rows, part bars, code side by side */
+.figures { display: flex; gap: 10px 26px; flex-wrap: wrap; margin: 8px 0 12px; }
+.figures > div { min-width: 0; }
+.figures .v { font-family: var(--mono); font-size: 17px; font-variant-numeric: tabular-nums; }
+.figures .l { font-size: 12px; color: var(--muted); max-width: 30ch; }
+.bars { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 12.5px; margin: 8px 0 4px; }
+.bar { display: flex; height: 18px; gap: 2px; }
+.bar span { display: block; height: 100%; min-width: 2px; }
+.bar span:first-child { border-radius: 0; } .bar span:last-child { border-radius: 0; }
+.seg-target { background: var(--accent); } .seg-helper { background: var(--helper); }
+.seg-floor { background: repeating-linear-gradient(45deg, var(--floor) 0 3px, color-mix(in srgb, var(--floor) 55%, var(--surface)) 3px 6px); }
+.side { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+@media (max-width: 640px) { .side { grid-template-columns: minmax(0, 1fr); } .bars { grid-template-columns: 96px minmax(0, 1fr); } }
+.side > div { min-width: 0; }
+.side h5 { margin: 0 0 4px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+.diff { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 0;
+  overflow: auto; max-height: 460px; }
+.diff div { white-space: pre; padding: 0 10px 0 22px; position: relative; }
+.diff div::before { position: absolute; left: 7px; color: var(--muted); }
+.diff .add { background: var(--add-bg); color: var(--add-ink); } .diff .add::before { content: "+"; color: var(--add-ink); }
+.diff .del { background: var(--del-bg); color: var(--del-ink); } .diff .del::before { content: "−"; color: var(--del-ink); }
+.chip { display: inline-block; font-weight: 500; font-size: 11px; padding: 1px 7px; border-radius: 0; border: 1px solid var(--rule); color: var(--ink-2); white-space: nowrap; }
+/* case study cards */
+.card { border-top: 1px solid var(--rule); padding: 20px 0; margin: 24px 0; }
+.card h3 { margin-top: 2px; font-size: 20px; line-height: 1.3; max-width: 60ch; }
+.card .numbers { display: flex; gap: 14px 24px; flex-wrap: wrap; margin: 8px 0 12px; }
+.card .numbers > div { min-width: 0; overflow-wrap: anywhere; }
+.card .numbers .v { font-family: var(--mono); font-size: 14.5px; }
+.card .numbers .l { font-size: 11.5px; color: var(--muted); max-width: 34ch; }
+.card .numbers ul.v { margin: 0; padding-left: 16px; }
+.card p, .card li { overflow-wrap: anywhere; }
+.card .nltext { white-space: pre-line; }
+.card details > summary { font-size: 14px; margin-top: 10px; }
+.mech { border-top: 1px dashed var(--rule); padding-top: 12px; margin-top: 12px; }
+.mech h4 { margin: 0 0 4px; font-size: 15px; } .mech p { white-space: pre-line; }
+.caveats li { margin: 4px 0; font-size: 13.5px; }
+/* appendix links */
+.appendix { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 12px 0; padding: 0; list-style: none; }
+.appendix a { display: block; height: 100%; border-top: 1px solid var(--rule); padding: 14px 0; text-decoration: none; color: var(--ink-2); font-size: 13.5px; }
+.appendix a b { display: block; font-family: var(--display); font-size: 17px; color: var(--accent); margin-bottom: 2px; }
+.appendix a:hover { border-color: var(--accent); }
+footer { margin-top: 40px; padding-block: 20px 40px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--rule); }
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  h2 { font-size: 23px; }
+  header.top .wrap { gap: 10px 16px; padding-block: 16px; }
+  .snap { display: none; }
+}
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* A report's hierarchy: open sections, inset instruments, and a quiet running index. */
+main.wrap > p, main.wrap > ul, main.wrap > ol { overflow-wrap: anywhere; }
+main.wrap > .summary-line { max-width: 76ch; }
+main .toc { border-block: 1px solid var(--rule); padding-block: 12px; margin-block: 24px 32px; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+pre code { font-size: inherit; }
+tbody tr:hover td { background-color: color-mix(in srgb, var(--accent) 5%, var(--bg)); }
+.controls { padding-block: 12px; border-bottom: 1px solid var(--rule); }
+.controls label { min-width: 0; max-width: 100%; }
+select { max-width: 100%; }
+select, button { min-height: 34px; border-color: var(--muted); border-radius: 2px; }
+figcaption, .caption { line-height: 1.5; }
+footer p { max-width: none; }
+@media (max-width: 800px) {
+  header.top .wrap { gap: 10px 24px; }
+  header.top nav { order: 3; flex-basis: 100%; }
+}
+@media (max-width: 640px) {
+  h1 { margin-top: 32px; }
+  h2 { margin-top: 36px; }
+  .summary-line, .lede { font-size: 18px; }
+  header.top nav { gap: 8px 18px; font-size: 13px; }
+  .controls .count { flex-basis: 100%; margin-left: 0; }
+  .formula { font-size: 17px; }
+}
+</style>
+</head>
+<body data-page="difficulty">
+<header class="top"><div class="wrap">
+
+  <a class="brand" href="index.html">MathCompressionBench</a>
+  <nav aria-label="Pages" id="nav"><a href="index.html" data-p="home">Home</a><a href="difficulty.html" data-p="difficulty">Task difficulty</a><a href="rules.html" data-p="rules">Rules and scoring</a><a href="results.html" data-p="results">All results</a><a href="examples.html" data-p="examples">Worked examples</a><a href="index.html#submit" data-p="submit">Submit</a></nav>
+
+
+  <span class="snap" id="snap"></span>
+</div></header>
+<div class="tooltip" id="tip" hidden></div>
+<script>
+const DATA = {"snapshot": "2026-10-01", "dates": "the study's runs, up to 2026-10-01; the fundamental theorem of arithmetic example, 2026-10-01", "difficulty": {"measured": "2026-10-04", "ladder": [{"id": "flt-s1", "name": "FLT, small exponents n = 5, 7, 11, 13", "study": false, "targets": 4, "original": 3736207927, "best": 531066, "floor": 3566977965, "source": "Demonstration: a multi-step compression, not ranked; not in lcbench-v1"}, {"id": "compactness5", "name": "Compactness", "study": true, "targets": 5, "original": 1307221424, "best": 10294824, "floor": 592898545, "source": "best run in the study"}, {"id": "slt49", "name": "SLT49", "study": true, "targets": 49, "original": 406689591, "best": 22493330, "floor": 84106659, "source": "best run in the study"}, {"id": "slt26", "name": "SLT26", "study": true, "targets": 26, "original": 392854783, "best": 8647505, "floor": 81117394, "source": "best run in the study"}, {"id": "mathlib372", "name": "Mathlib372", "study": true, "targets": 372, "original": 186421329, "best": 7846177, "floor": 106071680, "source": "best run in the study"}, {"id": "mathlib197", "name": "Mathlib197", "study": true, "targets": 197, "original": 114567106, "best": 2336839, "floor": 91287826, "source": "best run in the study"}, {"id": "permanent2", "name": "Permanent", "study": true, "targets": 2, "original": 85690155, "best": 2875252, "floor": 45266597, "source": "best run in the study"}, {"id": "ramsey96", "name": "Ramsey96", "study": true, "targets": 96, "original": 11338478, "best": 441840, "floor": 2356449, "source": "best run in the study"}, {"id": "fta", "name": "Fundamental theorem of arithmetic", "study": false, "targets": 2, "original": 255416, "best": 1280, "floor": null, "source": "Demonstration: a multi-step compression, not ranked; not in lcbench-v1"}, {"id": "toyarith", "name": "Toy arithmetic", "study": false, "targets": 12, "original": 20190, "best": 1594, "floor": null, "source": "one agent run on all 12 targets"}], "tasks": [{"id": "ramsey96", "name": "Ramsey96", "study": true, "targets": 96, "orig_median": 18884.0, "orig_max": 1239409, "floor_median": 4012.0, "best_median": 1702.5, "statement_median": 520.5, "lemmas_median": 17.0, "background": "Mathlib", "shared_share": 0.0004575069997064832, "statement_side_share": 0.004517361148471602, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt26", "name": "SLT26", "study": true, "targets": 26, "orig_median": 13005737.5, "orig_max": 47777514, "floor_median": 692330.5, "best_median": 214669.0, "statement_median": 14992.5, "lemmas_median": 458.5, "background": "Mathlib", "shared_share": 0.4638956731599383, "statement_side_share": 0.0010599387305919603, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt49", "name": "SLT49", "study": true, "targets": 49, "orig_median": 5902282, "orig_max": 54587994, "floor_median": 430298, "best_median": 359635, "statement_median": 4601, "lemmas_median": 319, "background": "Mathlib", "shared_share": 0.32116883664265466, "statement_side_share": 0.0010694667619363782, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "permanent2", "name": "Permanent", "study": true, "targets": 2, "orig_median": 42825898.5, "orig_max": 65729201, "floor_median": 22614119.5, "best_median": 1418447.0, "statement_median": 21702.5, "lemmas_median": 689.0, "background": "Mathlib", "shared_share": 0.3136044419476687, "statement_side_share": 0.0004476360207307362, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "compactness5", "name": "Compactness", "study": true, "targets": 5, "orig_median": 412371854, "orig_max": 412567261, "floor_median": 191198766, "best_median": 1937274, "statement_median": 1014, "lemmas_median": 816, "background": "Mathlib", "shared_share": 0.9466118784531623, "statement_side_share": 1.0212500923638473e-06, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib197", "name": "Mathlib197", "study": true, "targets": 197, "orig_median": 2500, "orig_max": 6643090, "floor_median": 1195, "best_median": 1146, "statement_median": 2890, "lemmas_median": 7, "background": "Mathlib", "shared_share": 0.0003481857265698479, "statement_side_share": 0.7618739012225726, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib372", "name": "Mathlib372", "study": true, "targets": 372, "orig_median": 6230.5, "orig_max": 18362297, "floor_median": 1699.5, "best_median": 1538.5, "statement_median": 2906.5, "lemmas_median": 8.0, "background": "Mathlib", "shared_share": 0.0012286574257493119, "statement_side_share": 0.5207248147018628, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "toyarith", "name": "Toy arithmetic", "study": false, "targets": 12, "orig_median": 984.0, "orig_max": 6040, "floor_median": null, "best_median": null, "statement_median": 764.0, "lemmas_median": 1.0, "background": "core only", "shared_share": 0.0, "statement_side_share": null, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "fta", "name": "Fundamental theorem of arithmetic", "study": false, "targets": 2, "orig_median": 127672.5, "orig_max": 220896, "floor_median": null, "best_median": 604.5, "statement_median": 171.5, "lemmas_median": 48.5, "background": "core only", "shared_share": 0.0, "statement_side_share": null, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "flt-s1", "name": "FLT, small exponents n = 5, 7, 11, 13", "study": false, "targets": 4, "orig_median": 55138191.0, "orig_max": 3605217584, "floor_median": 2548528.5, "best_median": 124473.0, "statement_median": 12.0, "lemmas_median": 1735.0, "background": "Mathlib", "shared_share": 0.016528114920267897, "statement_side_share": 0.0, "toolchain": "own"}], "split_example": {"task": "compactness5", "name": "CompactnessConjecture.not_erdos_180", "value": 5, "proof": 412371854, "shared": 412371811}, "whole": {"id": "flt-whole", "name": "Fermat's Last Theorem, whole project", "label": "Demonstration: original only; not in lcbench-v1", "targets": 1, "original": "10243991188204256683", "share_pct": "99.994", "rest": "660722081607041", "declarations": 856143, "runs": 0}, "raw": [{"id": "flt-whole", "name": "Fermat's Last Theorem, whole project", "targets": 1, "original": "10243991188204256683"}, {"id": "flt-s1", "name": "FLT, small exponents n = 5, 7, 11, 13", "targets": 4, "original": "3736207927"}, {"id": "compactness5", "name": "Compactness", "targets": 5, "original": "1307221424"}, {"id": "slt49", "name": "SLT49", "targets": 49, "original": "406689591"}, {"id": "slt26", "name": "SLT26", "targets": 26, "original": "392854783"}, {"id": "mathlib372", "name": "Mathlib372", "targets": 372, "original": "186421329"}, {"id": "mathlib197", "name": "Mathlib197", "targets": 197, "original": "114567106"}, {"id": "permanent2", "name": "Permanent", "targets": 2, "original": "85690155"}, {"id": "ramsey96", "name": "Ramsey96", "targets": 96, "original": "11338478"}, {"id": "fta", "name": "Fundamental theorem of arithmetic", "targets": 2, "original": "255416"}, {"id": "toyarith", "name": "Toy arithmetic", "targets": 12, "original": "20190"}], "oai": {"upstream": {"commit": "adc7f1241b42e322a6451854ab7e4b4c146bf78a", "license": "Apache-2.0", "url": "https://github.com/openai/math"}, "counts": {"measured": 178, "included": 178, "awaiting": 0}, "challenges": [{"config": "MatrixFields", "title": "Staggered extraction for exact matrix multiplication over every field", "area": "LinearAlgebra", "targets": 1, "original": "1303134131072283"}, {"config": "PartitionPrinciple", "title": "The Partition Principle does not imply Choice", "area": "SetTheory", "targets": 1, "original": "9885404146154"}, {"config": "MatrixMultiplication", "title": "An Upper Bound of 9/4 for the Matrix Multiplication Exponent; Complex Matrix Multiplication Below 2.258 and Rectangular Bounds", "area": "LinearAlgebra", "targets": 3, "original": "1695225658242"}, {"config": "CoulombIonization", "title": "Generalized ionization energies for full Coulomb atoms", "area": "Analysis", "targets": 1, "original": "1268203008825"}, {"config": "KaplanskyQuasitrace", "title": "A counterexample to Kaplansky's quasitrace conjecture and failure of tensor-product stable finiteness", "area": "Analysis", "targets": 1, "original": "306337069272"}, {"config": "SmoothYau", "title": "Smooth counterexamples to Yau's nodal upper bound in dimensions three and four", "area": "Geometry", "targets": 2, "original": "240939716290"}, {"config": "FinitisticAsymmetry", "title": "An algebra of infinite little finitistic dimension", "area": "Algebra", "targets": 1, "original": "215476875409"}, {"config": "LittleFinitistic", "title": "An algebra of infinite little finitistic dimension", "area": "Algebra", "targets": 1, "original": "214870858111"}, {"config": "FactorGeneration", "title": "Relative generation and the generator problem for finite factors", "area": "Analysis", "targets": 1, "original": "127869426962"}, {"config": "MaximalSeshadriConstants", "title": "Maximal Seshadri constants on arbitrary polarized surfaces", "area": "AlgebraicGeometry", "targets": 1, "original": "123963820943"}, {"config": "Conductivity", "title": "Nonuniqueness for Bounded Measurable Scalar Conductivities in Three Dimensions", "area": "Analysis", "targets": 1, "original": "68888926799"}, {"config": "AuslanderReiten", "title": "An explicit counterexample to the Auslander-Reiten conjecture", "area": "Algebra", "targets": 1, "original": "58258102367"}, {"config": "Tachikawa", "title": "A counterexample to Tachikawa's second conjecture", "area": "RingTheory", "targets": 1, "original": "40354474639"}, {"config": "QuasiRiemannHypothesis", "title": "The Quasi-Riemann Hypothesis: A Zero-Free Half-Plane Re(s)>7/8", "area": "NumberTheory", "targets": 1, "original": "29467374583"}, {"config": "DirichletSevenEighths", "title": "The Quasi-Riemann Hypothesis: A Zero-Free Half-Plane Re(s)>7/8", "area": "NumberTheory", "targets": 1, "original": "29467370202"}, {"config": "HeckeSevenEighths", "title": "The Quasi-Riemann Hypothesis: A Zero-Free Half-Plane Re(s)>7/8", "area": "NumberTheory", "targets": 1, "original": "29467066621"}, {"config": "TamingCompatibility", "title": "Taming implies compatibility on four-manifolds", "area": "Geometry", "targets": 1, "original": "26290812101"}, {"config": "SimpleAmenable", "title": "An infinite finitely presented simple amenable group", "area": "GroupTheory", "targets": 1, "original": "26139118484"}, {"config": "OptimalMaxCut", "title": "A Direct Proof of Optimal Max-Cut Hardness", "area": "Computability", "targets": 1, "original": "24913437987"}, {"config": "UniqueGamesTheorem", "title": "The Unique Games Theorem", "area": "Computability", "targets": 1, "original": "24720523452"}, {"config": "CharacterCriterion", "title": "The Kirchberg–Rørdam character criterion", "area": "Analysis", "targets": 1, "original": "18661101158"}, {"config": "BiholderTransport", "title": "Uniform Bi-Hölder Transport from Weak MTW", "area": "Analysis", "targets": 1, "original": "13098081021"}, {"config": "PerfectCompleteness", "title": "Perfect completeness for 2-to-1 games", "area": "Computability", "targets": 1, "original": "10667007248"}, {"config": "EuclideanFiveColor", "title": "The Euclidean plane is not five-colorable", "area": "Geometry", "targets": 1, "original": "10320348649"}, {"config": "SiegelZeros", "title": "Uniform exclusion of Landau–Siegel zeros", "area": "NumberTheory", "targets": 2, "original": "8979652799"}, {"config": "Jacobsthal", "title": "A quadratic bound for Jacobsthal's function", "area": "NumberTheory", "targets": 1, "original": "8549158215"}, {"config": "YauCounterexample", "title": "Power-law violations of Yau's nodal upper bound", "area": "Geometry", "targets": 1, "original": "8342023944"}, {"config": "CompleteCrossing", "title": "The crossing number of complete graphs", "area": "Combinatorics", "targets": 1, "original": "7321246534"}, {"config": "HarmonicArtin", "title": "Harmonic heights and the Artin K(π,1) conjecture", "area": "Topology", "targets": 1, "original": "7113810119"}, {"config": "HyperbolicObstruction", "title": "A hyperbolic group with no geometric CAT(0) action", "area": "Geometry", "targets": 1, "original": "6981581179"}, {"config": "UniformGamma", "title": "Tracial projection methods and uniform property Γ", "area": "Analysis", "targets": 1, "original": "3664150969"}, {"config": "SingletonLoopMatching", "title": "Entropy and Face Dimension of the Perfect-Matching Polytope", "area": "Computability", "targets": 1, "original": "3431638438"}, {"config": "BinaryMatching", "title": "Entropy and Face Dimension of the Perfect-Matching Polytope", "area": "Computability", "targets": 1, "original": "3414548606"}, {"config": "Laughlin", "title": "A Fock-space inequality and the Laughlin spectral gap", "area": "Analysis", "targets": 1, "original": "2225036489"}, {"config": "WeakHessian", "title": "Weak Hessian bounds along every geodesic in RCD spaces", "area": "Geometry", "targets": 1, "original": "2151648937"}, {"config": "HarmonicGrowth", "title": "A counterexample to integer-degree harmonic dimension comparison", "area": "Geometry", "targets": 1, "original": "1811801979"}, {"config": "RationalHitting", "title": "Polynomial Hitting Lists for Noncommutative Rational Formulas", "area": "Computability", "targets": 1, "original": "1617170284"}, {"config": "RieszQuantitative", "title": "Riesz transforms and uniform rectifiability in higher codimension", "area": "Analysis", "targets": 1, "original": "1572787552"}, {"config": "SymmetricDomains", "title": "Symmetry of semialgebraic bounded domains with compact quotient", "area": "Analysis", "targets": 1, "original": "1523646923"}, {"config": "VlasovMaxwell", "title": "Global classical solutions of the three-dimensional relativistic Vlasov–Maxwell system", "area": "Analysis", "targets": 1, "original": "1503529838"}, {"config": "CompleteCrouzeix", "title": "The complete Crouzeix theorem: optimal similarity and a common positive boundary representation", "area": "Analysis", "targets": 1, "original": "1488176517"}, {"config": "IsometricImmersion", "title": "A Smooth Metric with No Local Isometric Immersion into Three-Space", "area": "Geometry", "targets": 1, "original": "1477324914"}, {"config": "StructuralCrouzeix", "title": "The complete Crouzeix theorem: optimal similarity and a common positive boundary representation", "area": "Analysis", "targets": 1, "original": "1473207324"}, {"config": "ThorpRouting", "title": "Routing densities and representation contraction for Thorp sweeps", "area": "Probability", "targets": 1, "original": "1443921121"}, {"config": "ConjugatePoints", "title": "A Three-Manifold Without Conjugate Points and Without a Nonpositively Curved Metric", "area": "Geometry", "targets": 1, "original": "1321577520"}, {"config": "SubsphereCurrent", "title": "Subsphere methods for memory–sample lower bounds in noiseless Gaussian regression", "area": "Probability", "targets": 1, "original": "1259529030"}, {"config": "CriticalSKMixing", "title": "Critical slowing down in the Sherrington–Kirkpatrick model", "area": "MathematicalPhysics", "targets": 1, "original": "1257364943"}, {"config": "GroupRingDeterminant", "title": "A Counterexample to the Group-Ring Determinant Conjecture", "area": "Analysis", "targets": 1, "original": "1239089062"}, {"config": "PettyProjectionVolume", "title": "Petty’s projection-volume conjecture in dimensions at least four", "area": "Geometry", "targets": 1, "original": "1220490613"}, {"config": "BinPackingGap", "title": "Additive hardness and unbounded configuration gaps in bin packing", "area": "Computability", "targets": 1, "original": "1220104744"}, {"config": "ArnoldCounterexample", "title": "Three fixed points on the symplectic quadric threefold", "area": "Geometry", "targets": 1, "original": "1181870273"}, {"config": "BinarySweep", "title": "Conditional coordinate sweeps and analytic transfer", "area": "Probability", "targets": 1, "original": "1140218943"}, {"config": "CommonBasesFPRAS", "title": "Approximate counting of common bases of two matroids", "area": "Combinatorics", "targets": 1, "original": "1139969905"}, {"config": "OddKaplansky", "title": "A Counterexample to Kaplansky's Direct-Finiteness Conjecture in Odd Characteristic", "area": "Algebra", "targets": 1, "original": "1070206920"}, {"config": "RandomizedMeanPayoff", "title": "Randomized quasipolynomial-time mean-payoff games", "area": "Computability", "targets": 1, "original": "1040396046"}, {"config": "ClassicalON", "title": "Exponential decay in two-dimensional classical O(n) models", "area": "Probability", "targets": 1, "original": "952789013"}, {"config": "WeakMTWGlobalSupport", "title": "Global Support and Convex Injectivity Domains under Weak MTW", "area": "Geometry", "targets": 1, "original": "916150041"}, {"config": "ComplexCancellation", "title": "An explicit failure of complex affine-space cancellation", "area": "Algebra", "targets": 1, "original": "814561575"}, {"config": "LogConcaveQuery", "title": "Subpolynomial query complexity for well-conditioned log-concave sampling", "area": "Probability", "targets": 1, "original": "796578819"}, {"config": "IndependentSets", "title": "Hardness of finding large independent sets in three-colorable graphs", "area": "Combinatorics", "targets": 1, "original": "777719321"}, {"config": "BassTrace", "title": "The Bass trace conjecture and the characteristic-zero Kaplansky idempotent conjecture", "area": "RingTheory", "targets": 1, "original": "775981011"}, {"config": "BoundedRecovery", "title": "Bounded recovery for modular spectral averages", "area": "Analysis", "targets": 1, "original": "765088029"}, {"config": "BackwardIntertwiners", "title": "Backward intertwiners and a transitive commutant", "area": "Analysis", "targets": 1, "original": "734090656"}, {"config": "PowerFreeValues", "title": "Squarefree values of quartics and power-free values of polynomials", "area": "NumberTheory", "targets": 1, "original": "716190850"}, {"config": "LipschitzEquivalence", "title": "Lipschitz Equivalent Separable Banach Spaces Need Not Be Linearly Isomorphic", "area": "Analysis", "targets": 1, "original": "716074788"}, {"config": "DeligneDrinfeld", "title": "The Deligne-Drinfeld conjecture", "area": "Algebra", "targets": 1, "original": "698583790"}, {"config": "LogBrunnMinkowski", "title": "The logarithmic Brunn–Minkowski conjecture", "area": "Geometry", "targets": 1, "original": "587445392"}, {"config": "FreeIsing", "title": "The sharp factor-of-IID threshold for the free Ising model on regular trees", "area": "Probability", "targets": 1, "original": "568179891"}, {"config": "PlanarL1", "title": "Planar Graph Metrics Embed into $L_1$ with Constant Distortion", "area": "Combinatorics", "targets": 1, "original": "548421843"}, {"config": "ExactFourier", "title": "Finite tensor savings and exact Fourier circuits", "area": "Computability", "targets": 1, "original": "526077380"}, {"config": "Saxl", "title": "A Cyclic Polytabloid Proof of Saxl's Conjecture", "area": "RepresentationTheory", "targets": 1, "original": "503170726"}, {"config": "SymmetricMahlerEquality", "title": "The symmetric Mahler conjecture and its equality cases", "area": "Analysis", "targets": 1, "original": "463465564"}, {"config": "GaussianPropeller", "title": "The Gaussian propeller bound in every dimension", "area": "Probability", "targets": 1, "original": "456691084"}, {"config": "DaugavetModuli", "title": "Exact asymptotic moduli in a Daugavet subspace of L1", "area": "Analysis", "targets": 3, "original": "441460328"}, {"config": "DirectionalBallisticity", "title": "Directional transience implies ballisticity", "area": "Probability", "targets": 1, "original": "422831863"}, {"config": "SingleFold", "title": "Single-fold Diophantine representations", "area": "NumberTheory", "targets": 1, "original": "411396610"}, {"config": "MahlerConjecture", "title": "The symmetric Mahler conjecture and its equality cases", "area": "Analysis", "targets": 1, "original": "395350203"}, {"config": "PinchedKahler", "title": "A negatively pinched Kähler threefold without bounded holomorphic coordinates", "area": "Geometry", "targets": 3, "original": "382059084"}, {"config": "SteinitzBergstrom", "title": "The Euclidean Steinitz–Bergström theorem", "area": "Analysis", "targets": 1, "original": "379147329"}, {"config": "QuinticLienard", "title": "Two limit cycles for quintic Liénard systems", "area": "Analysis", "targets": 1, "original": "372275322"}, {"config": "CoordinateSweeps", "title": "Conditional coordinate sweeps and analytic transfer", "area": "Probability", "targets": 2, "original": "362123386"}, {"config": "ChoicelessPolynomialTime", "title": "Choiceless polynomial time with counting does not capture polynomial time", "area": "ModelTheory", "targets": 1, "original": "354450426"}, {"config": "BorsukNine", "title": "A nine-dimensional counterexample to Borsuk's covering assertion", "area": "Geometry", "targets": 1, "original": "352294154"}, {"config": "PlanarFalconer", "title": "The Falconer distance conjecture in all dimensions", "area": "MeasureTheory", "targets": 1, "original": "350832709"}, {"config": "LiebThirring", "title": "Sharp one-dimensional Lieb–Thirring constants", "area": "Analysis", "targets": 1, "original": "350702085"}, {"config": "TorsionFreeZeroDivisors", "title": "A Torsion-Free Group Algebra with Zero Divisors", "area": "Algebra", "targets": 1, "original": "344644404"}, {"config": "KMedianRecovery", "title": "Single-exponential recovery and bounded-price strictness for metric k-median", "area": "Combinatorics", "targets": 1, "original": "329259019"}, {"config": "DixmierAllDiscrete", "title": "Unitarizability implies amenability for discrete groups", "area": "Analysis", "targets": 1, "original": "299369244"}, {"config": "CourtadeKumar", "title": "Sharp binary-information contraction on the discrete cube", "area": "InformationTheory", "targets": 1, "original": "298628272"}, {"config": "TorsionFreeHyperbolic", "title": "A torsion-free hyperbolic group that is not residually finite", "area": "GroupTheory", "targets": 1, "original": "277599716"}, {"config": "CriticalSK", "title": "Critical slowing down in the Sherrington–Kirkpatrick model", "area": "MathematicalPhysics", "targets": 3, "original": "277588943"}, {"config": "UniversalFInfinity", "title": "A universal group of type F∞", "area": "GroupTheory", "targets": 1, "original": "269852650"}, {"config": "Cotype", "title": "The cotype–cotype conjecture under the approximation property", "area": "Analysis", "targets": 1, "original": "245551534"}, {"config": "BipartiteCrossing", "title": "The crossing number of complete bipartite graphs", "area": "Combinatorics", "targets": 1, "original": "240066065"}, {"config": "SymmetricPolar", "title": "Symplectic Balls in Symmetric Polar Products", "area": "Geometry", "targets": 1, "original": "238965358"}, {"config": "SingleLatticeCovering", "title": "A single-lattice covering bound of order n log n", "area": "Geometry", "targets": 1, "original": "238674790"}, {"config": "VertexCover", "title": "The Factor-Two Hardness Threshold for Vertex Cover", "area": "Computability", "targets": 2, "original": "238147003"}, {"config": "KahlerSplitting", "title": "Universal-cover splitting for compact Kähler manifolds", "area": "Geometry", "targets": 1, "original": "235234547"}, {"config": "HenonEmden", "title": "The Subcritical Hénon–Lane–Emden Conjecture", "area": "Analysis", "targets": 1, "original": "213383228"}, {"config": "StrictMeans", "title": "A strict inverse-first-power bound for univalent functions", "area": "Analysis", "targets": 1, "original": "210844351"}, {"config": "HyperbolicCones", "title": "A nonspectrahedral hyperbolicity cone", "area": "Analysis", "targets": 1, "original": "208875020"}, {"config": "PlanarFirstPassage", "title": "Strict convexity and differentiability of the planar exponential first-passage limit shape", "area": "Probability", "targets": 1, "original": "199583087"}, {"config": "ContinuumTransition", "title": "A continuum temperature singularity for a radial pair potential", "area": "Probability", "targets": 1, "original": "188424654"}, {"config": "RadialTransition", "title": "A radial continuum phase transition with algebraic decay", "area": "Probability", "targets": 1, "original": "182137271"}, {"config": "Superstring", "title": "A Polynomial-Time 2-Approximation for Shortest Common Superstring", "area": "Computability", "targets": 1, "original": "181761512"}, {"config": "QuadricBundles", "title": "Ample rank-two bundles on the quadric surface without Griffiths-positive metrics", "area": "Geometry", "targets": 1, "original": "179761149"}, {"config": "Brennan", "title": "Brennan's conjecture and sharp inverse-square integral means", "area": "Analysis", "targets": 1, "original": "176104688"}, {"config": "AmplitudeDamping", "title": "Classical capacity and entropy inequalities for generalized amplitude damping", "area": "InformationTheory", "targets": 1, "original": "165660849"}, {"config": "ThompsonNonamenability", "title": "Thompson's group F is nonamenable", "area": "GroupTheory", "targets": 1, "original": "161486429"}, {"config": "EuclideanRamsey", "title": "A classification of finite Euclidean Ramsey configurations", "area": "Combinatorics", "targets": 1, "original": "131367639"}, {"config": "EgyptianFractions", "title": "Short Egyptian fractions", "area": "NumberTheory", "targets": 9, "original": "130369867"}, {"config": "StrongThinTree", "title": "The strong thin tree conjecture", "area": "Combinatorics", "targets": 1, "original": "129689050"}, {"config": "Nagata", "title": "Nagata's conjecture for plane curves", "area": "AlgebraicGeometry", "targets": 3, "original": "128256873"}, {"config": "TriangularHilbert", "title": "The maximal triangular Hilbert transform at the symmetric point", "area": "Analysis", "targets": 1, "original": "124550723"}, {"config": "GaussianReplacement", "title": "Replacing Gaussian observations in memory-constrained inference", "area": "Probability", "targets": 11, "original": "123612031"}, {"config": "ArtinCAT0", "title": "An Artin group with no geometric CAT(0) action", "area": "GroupTheory", "targets": 1, "original": "122160673"}, {"config": "UniformSparsestCut", "title": "Near-square-root logarithmic integrality gaps for uniform sparsest cut", "area": "Combinatorics", "targets": 1, "original": "122111556"}, {"config": "CycleDecomposition", "title": "A linear cycle-and-edge decomposition of every graph", "area": "Combinatorics", "targets": 1, "original": "118314550"}, {"config": "TwoWayDeterminization", "title": "An exponential state lower bound for two-way nondeterministic complementation", "area": "Combinatorics", "targets": 1, "original": "113729932"}, {"config": "PosteriorReplicas", "title": "Posterior replicas and conditional information in Gaussian regression", "area": "Probability", "targets": 1, "original": "113677854"}, {"config": "SignedFiniteBand", "title": "An Endpoint Gradient Bound for the Centered Disk Maximal Operator", "area": "Analysis", "targets": 1, "original": "109553447"}, {"config": "GrothendieckElementaryExpansion", "title": "The Grothendieck homotopy hypothesis via elementary expansions", "area": "CategoryTheory", "targets": 1, "original": "108902360"}, {"config": "MarkovType", "title": "Nontrivial Markov Type Forces Superreflexivity", "area": "Analysis", "targets": 1, "original": "106378143"}, {"config": "PinnedDistances", "title": "The weak pinned planar distance theorem", "area": "Geometry", "targets": 1, "original": "102766891"}, {"config": "GaussianMoat", "title": "Bounded-Step Walks on Gaussian Primes", "area": "NumberTheory", "targets": 1, "original": "100526767"}, {"config": "TwoWayComplementation", "title": "An exponential state lower bound for two-way nondeterministic complementation", "area": "Combinatorics", "targets": 1, "original": "97989341"}, {"config": "AsymptoticallyMinimalLittlewood", "title": "Asymptotically minimal maxima of real Littlewood polynomials", "area": "Analysis", "targets": 1, "original": "96558130"}, {"config": "GrahamSpherical", "title": "A classification of finite Euclidean Ramsey configurations", "area": "Combinatorics", "targets": 1, "original": "95088914"}, {"config": "RecursivePotentials", "title": "Midpoint convexity from two recursive potentials", "area": "Analysis", "targets": 1, "original": "91263238"}, {"config": "IndependentProducts", "title": "Independent products in real L1: asymptotic midpoint convexity without AUC renormings", "area": "Analysis", "targets": 4, "original": "88268552"}, {"config": "DirectCrouzeix", "title": "A direct proof of the complete Crouzeix inequality", "area": "Analysis", "targets": 2, "original": "83290806"}, {"config": "SubpolynomialLp", "title": "Subpolynomial dimension reduction in $L_p$", "area": "Analysis", "targets": 1, "original": "82502772"}, {"config": "RyserOddExtensions", "title": "A counterexample to Ryser's covering conjecture", "area": "Combinatorics", "targets": 1, "original": "78605854"}, {"config": "RyserCovering", "title": "A counterexample to Ryser's covering conjecture", "area": "Combinatorics", "targets": 1, "original": "78530143"}, {"config": "QuantitativeVanDerWaerden", "title": "Quantitative Superexponential Bounds for van der Waerden Numbers", "area": "Combinatorics", "targets": 1, "original": "73951922"}, {"config": "ProjectionVolume", "title": "A product counterexample to the simplex maximum for projection-body volume", "area": "Geometry", "targets": 1, "original": "72807770"}, {"config": "KaplanskyFinitelyPresented", "title": "A Counterexample to Kaplansky's Direct-Finiteness Conjecture in Characteristic Two", "area": "RingTheory", "targets": 1, "original": "71632127"}, {"config": "PeriodicTilingThree", "title": "A translational tile with no fully periodic tiling in dimension three", "area": "Geometry", "targets": 1, "original": "66284423"}, {"config": "DegreeRigidity", "title": "Rigidity of the Turing degrees", "area": "Computability", "targets": 1, "original": "66245420"}, {"config": "ProjectionCounterexample", "title": "A product counterexample to the simplex maximum for projection-body volume", "area": "Geometry", "targets": 1, "original": "65671998"}, {"config": "ProjectionMoments", "title": "Projection moments, positive cap domination, and Riesz estimates on the sphere", "area": "Probability", "targets": 1, "original": "58640911"}, {"config": "CriticalZ3", "title": "Critical bond and site percolation on the cubic lattice", "area": "Probability", "targets": 1, "original": "57229344"}, {"config": "MemoryPrecision", "title": "Memory and precision in noiseless Gaussian regression", "area": "Probability", "targets": 1, "original": "55921193"}, {"config": "CompactBanach", "title": "A doubling Hilbert subset with no finite-dimensional bi-Lipschitz embedding", "area": "Geometry", "targets": 1, "original": "55300508"}, {"config": "DepthThree", "title": "Beyond the Square-Root Exponent for Depth-Three Boolean Circuits", "area": "Computability", "targets": 1, "original": "53365253"}, {"config": "ForestSpace", "title": "Asymptotic midpoint uniform convexity and unbounded diamond distortion in a reflexive tree space", "area": "Analysis", "targets": 1, "original": "52907604"}, {"config": "C0Absorption", "title": "Bi-Lipschitz Absorption of $c_0$ Without a Linear Copy of $c_0$", "area": "Analysis", "targets": 1, "original": "52714778"}, {"config": "RegularParity", "title": "Regular trajectories, pruning and quantum parity", "area": "InformationTheory", "targets": 1, "original": "50590842"}, {"config": "QACParity", "title": "Product-projection localization and the QAC⁰ parity lower bound", "area": "InformationTheory", "targets": 1, "original": "50497460"}, {"config": "FoulkesHowe", "title": "Quadratic stabilization of the canonical Foulkes–Howe map", "area": "RepresentationTheory", "targets": 1, "original": "49161260"}, {"config": "BoundedTreewidthL1", "title": "$L_1$ Embeddings of Graphs of Bounded Treewidth", "area": "Combinatorics", "targets": 1, "original": "48847456"}, {"config": "EntangledGames", "title": "Threshold parallel repetition for finite-dimensional entangled games", "area": "Probability", "targets": 1, "original": "46224617"}, {"config": "SelfSimilar", "title": "The entropy-rate dimension formula for self-similar measures on the line", "area": "MeasureTheory", "targets": 1, "original": "41135060"}, {"config": "DiamondDistortion", "title": "Distortion of countably branching diamonds from midpoint and tree energies", "area": "Analysis", "targets": 1, "original": "35508549"}, {"config": "CliqueFreeLog", "title": "A logarithmic independence bound for clique-free graphs", "area": "Combinatorics", "targets": 1, "original": "35380100"}, {"config": "CirculantHadamard", "title": "The circulant Hadamard conjecture", "area": "LinearAlgebra", "targets": 1, "original": "33204538"}, {"config": "CHObstruction", "title": "A CH obstruction to a prescribed categoricity threshold", "area": "ModelTheory", "targets": 1, "original": "32225425"}, {"config": "TingleySphereIsometry", "title": "A positive solution to Tingley's problem", "area": "Analysis", "targets": 1, "original": "28239687"}, {"config": "DoublingHilbert", "title": "A doubling Hilbert subset with no finite-dimensional bi-Lipschitz embedding", "area": "Geometry", "targets": 1, "original": "25648061"}, {"config": "CommutingDerivations", "title": "An explicit noncoordinate polynomial with affine three-space zero fibre", "area": "AlgebraicGeometry", "targets": 1, "original": "22171341"}, {"config": "MatrixRemoval", "title": "Polynomial removal fails for ordered binary matrices", "area": "Combinatorics", "targets": 1, "original": "21041200"}, {"config": "ReflexiveFixedPoints", "title": "Fixed Points of Nonexpansive Maps in Reflexive Banach Spaces", "area": "Analysis", "targets": 1, "original": "20664671"}, {"config": "AbhyankarSathaye", "title": "An explicit noncoordinate polynomial with affine three-space zero fibre", "area": "AlgebraicGeometry", "targets": 1, "original": "17977324"}, {"config": "ThorpWeightedCompatibility", "title": "Compatibility entropy and the spectrum of a Thorp sweep", "area": "Probability", "targets": 1, "original": "15466513"}, {"config": "MatchingEntropy", "title": "Entropy and Face Dimension of the Perfect-Matching Polytope", "area": "Combinatorics", "targets": 1, "original": "14679411"}, {"config": "OneWayLiveness", "title": "An exponential two-way deterministic state lower bound for one-way liveness", "area": "Combinatorics", "targets": 1, "original": "14498534"}, {"config": "MidpointLenses", "title": "Midpoint lenses in segment spaces", "area": "Analysis", "targets": 1, "original": "13251645"}, {"config": "SensitivitySeparation", "title": "A superquadratic separation between sensitivity and block sensitivity", "area": "Combinatorics", "targets": 1, "original": "12419100"}, {"config": "GotsmanLinial", "title": "Average sensitivity of polynomial threshold functions", "area": "Combinatorics", "targets": 1, "original": "12217385"}, {"config": "SecondKahnKalai", "title": "The second Kahn–Kalai conjecture", "area": "Combinatorics", "targets": 1, "original": "12017547"}, {"config": "BoundedTreePotentials", "title": "Midpoint convexity from bounded tree potentials and path costs", "area": "Analysis", "targets": 1, "original": "11432102"}, {"config": "SeymourSecondNeighborhood", "title": "A proof of Seymour’s second-neighborhood conjecture", "area": "Combinatorics", "targets": 1, "original": "11133513"}, {"config": "InfiniteMatroid", "title": "A Counterexample to the Infinite Matroid Packing/Covering Conjecture", "area": "Combinatorics", "targets": 1, "original": "8589077"}, {"config": "TalagrandDiscreteConvexity", "title": "Talagrand's discrete-convexity conjecture", "area": "Combinatorics", "targets": 1, "original": "7734789"}, {"config": "TalagrandExpectationThreshold", "title": "Integral and fractional expectation thresholds are equivalent", "area": "Combinatorics", "targets": 1, "original": "7538076"}, {"config": "PlaneColoring", "title": "The Euclidean plane is not five-colorable", "area": "Geometry", "targets": 1, "original": "7525669"}, {"config": "MetricEntropyDuality", "title": "Counterexamples to the duality conjecture for metric entropy", "area": "Analysis", "targets": 1, "original": "5826381"}, {"config": "BrennanSharp", "title": "Brennan's conjecture and sharp inverse-square integral means", "area": "Analysis", "targets": 1, "original": "2164964"}], "agent_finals": {"agent": "Astra", "minutes": 60, "finals": {"ClassicalON": {"best": "41364257", "source": "Astra, 60 min, first attempt"}, "ComplexCancellation": {"best": "3478195", "source": "Astra, 60 min, first attempt"}, "BoundedRecovery": {"best": "2324365", "source": "Astra, 60 min, first attempt"}, "BackwardIntertwiners": {"best": "918744", "source": "Astra, 60 min, first attempt"}, "PowerFreeValues": {"best": "7539525", "source": "Astra, 60 min, first attempt"}, "LipschitzEquivalence": {"best": "31819289", "source": "Astra, 60 min, first attempt"}, "DeligneDrinfeld": {"best": "66131033", "source": "Astra, 60 min, first attempt"}, "LogBrunnMinkowski": {"best": "10084924", "source": "Astra, 60 min, first attempt"}, "PlanarL1": {"best": "226051448", "source": "Astra, 60 min, first attempt"}, "ExactFourier": {"best": "58315541", "source": "Astra, 60 min, first attempt"}, "Saxl": {"best": "10376781", "source": "Astra, 60 min, first attempt"}, "GaussianPropeller": {"best": "10319161", "source": "Astra, 60 min, first attempt"}, "DaugavetModuli": {"best": "2831254", "source": "Astra, 60 min, first attempt"}, "SingleFold": {"best": "9238314", "source": "Astra, 60 min, first attempt"}, "SteinitzBergstrom": {"best": "9444648", "source": "Astra, 60 min, first attempt"}, "CoordinateSweeps": {"best": "53667453", "source": "Astra, 60 min, first attempt"}, "ChoicelessPolynomialTime": {"best": "8494767", "source": "Astra, 60 min, first attempt"}, "LiebThirring": {"best": "33346396", "source": "Astra, 60 min, first attempt"}, "KMedianRecovery": {"best": "156849564", "source": "Astra, 60 min, first attempt"}, "DixmierAllDiscrete": {"best": "4429106", "source": "Astra, 60 min, first attempt"}, "TorsionFreeHyperbolic": {"best": "10601199", "source": "Astra, 60 min, first attempt"}, "CriticalSK": {"best": "65856596", "source": "Astra, 60 min, first attempt"}, "UniversalFInfinity": {"best": "23843765", "source": "Astra, 60 min, first attempt"}, "Cotype": {"best": "11976991", "source": "Astra, 60 min, first attempt"}, "SymmetricPolar": {"best": "5648090", "source": "Astra, 60 min, first attempt"}, "SingleLatticeCovering": {"best": "28034007", "source": "Astra, 60 min, first attempt"}, "KahlerSplitting": {"best": "7973514", "source": "Astra, 60 min, first attempt"}, "StrictMeans": {"best": "12305883", "source": "Astra, 60 min, first attempt"}, "PlanarFirstPassage": {"best": "12774240", "source": "Astra, 60 min, first attempt"}, "ContinuumTransition": {"best": "9645694", "source": "Astra, 60 min, first attempt"}, "RadialTransition": {"best": "5603627", "source": "Astra, 60 min, first attempt"}, "Superstring": {"best": "43401187", "source": "Astra, 60 min, first attempt"}, "QuadricBundles": {"best": "13111938", "source": "Astra, 60 min, first attempt"}, "Brennan": {"best": "3150384", "source": "Astra, 60 min, first attempt"}, "AmplitudeDamping": {"best": "5133038", "source": "Astra, 60 min, first attempt"}, "ThompsonNonamenability": {"best": "16356296", "source": "Astra, 60 min, first attempt"}, "EuclideanRamsey": {"best": "1778122", "source": "Astra, 60 min, first attempt"}, "TriangularHilbert": {"best": "3621811", "source": "Astra, 60 min, first attempt"}, "GaussianReplacement": {"best": "5140953", "source": "Astra, 60 min, first attempt"}, "ArtinCAT0": {"best": "6135789", "source": "Astra, 60 min, first attempt"}, "UniformSparsestCut": {"best": "5055405", "source": "Astra, 60 min, first attempt"}, "CycleDecomposition": {"best": "5782441", "source": "Astra, 60 min, first attempt"}, "TwoWayDeterminization": {"best": "1922360", "source": "Astra, 60 min, first attempt"}, "PosteriorReplicas": {"best": "5688042", "source": "Astra, 60 min, first attempt"}, "SignedFiniteBand": {"best": "5010431", "source": "Astra, 60 min, first attempt"}, "GrothendieckElementaryExpansion": {"best": "12511427", "source": "Astra, 60 min, first attempt"}, "MarkovType": {"best": "38518551", "source": "Astra, 60 min, first attempt"}, "PinnedDistances": {"best": "3302853", "source": "Astra, 60 min, first attempt"}, "GaussianMoat": {"best": "4078737", "source": "Astra, 60 min, first attempt"}, "TwoWayComplementation": {"best": "1983272", "source": "Astra, 60 min, first attempt"}, "AsymptoticallyMinimalLittlewood": {"best": "2686139", "source": "Astra, 60 min, first attempt"}, "GrahamSpherical": {"best": "321865", "source": "Astra, 60 min, first attempt"}, "IndependentProducts": {"best": "1376821", "source": "Astra, 60 min, first attempt"}, "DirectCrouzeix": {"best": "4276643", "source": "Astra, 60 min, first attempt"}, "SubpolynomialLp": {"best": "6208613", "source": "Astra, 60 min, first attempt"}, "RyserOddExtensions": {"best": "6082679", "source": "Astra, 60 min, first attempt"}, "RyserCovering": {"best": "4145054", "source": "Astra, 60 min, first attempt"}, "QuantitativeVanDerWaerden": {"best": "3632211", "source": "Astra, 60 min, first attempt"}, "KaplanskyFinitelyPresented": {"best": "21495534", "source": "Astra, 60 min, first attempt"}, "PeriodicTilingThree": {"best": "7651509", "source": "Astra, 60 min, first attempt"}, "ProjectionCounterexample": {"best": "680582", "source": "Astra, 60 min, first attempt"}, "ProjectionMoments": {"best": "2935755", "source": "Astra, 60 min, first attempt"}, "CriticalZ3": {"best": "2209165", "source": "Astra, 60 min, first attempt"}, "MemoryPrecision": {"best": "2227082", "source": "Astra, 60 min, first attempt"}, "CompactBanach": {"best": "1673876", "source": "Astra, 60 min, first attempt"}, "ForestSpace": {"best": "1749211", "source": "Astra, 60 min, first attempt"}, "C0Absorption": {"best": "1915536", "source": "Astra, 60 min, first attempt"}, "RegularParity": {"best": "1750296", "source": "Astra, 60 min, first attempt"}, "QACParity": {"best": "916639", "source": "Astra, 60 min, first attempt"}, "FoulkesHowe": {"best": "2060303", "source": "Astra, 60 min, first attempt"}, "BoundedTreewidthL1": {"best": "3067972", "source": "Astra, 60 min, first attempt"}, "EntangledGames": {"best": "2838667", "source": "Astra, 60 min, first attempt"}, "SelfSimilar": {"best": "1394402", "source": "Astra, 60 min, first attempt"}, "DiamondDistortion": {"best": "1357395", "source": "Astra, 60 min, first attempt"}, "CliqueFreeLog": {"best": "951719", "source": "Astra, 60 min, first attempt"}, "CirculantHadamard": {"best": "1660644", "source": "Astra, 60 min, first attempt"}, "CHObstruction": {"best": "1163113", "source": "Astra, 60 min, first attempt"}, "TingleySphereIsometry": {"best": "2086113", "source": "Astra, 60 min, first attempt"}, "DoublingHilbert": {"best": "989649", "source": "Astra, 60 min, first attempt"}, "CommutingDerivations": {"best": "662032", "source": "Astra, 60 min, first attempt"}, "AbhyankarSathaye": {"best": "174923", "source": "Astra, 60 min, first attempt"}, "ThorpWeightedCompatibility": {"best": "523992", "source": "Astra, 60 min, first attempt"}, "MatchingEntropy": {"best": "921487", "source": "Astra, 60 min, first attempt"}, "OneWayLiveness": {"best": "872531", "source": "Astra, 60 min, first attempt"}, "MidpointLenses": {"best": "941407", "source": "Astra, 60 min, first attempt"}, "SensitivitySeparation": {"best": "508485", "source": "Astra, 60 min, first attempt"}, "GotsmanLinial": {"best": "396508", "source": "Astra, 60 min, first attempt"}, "SecondKahnKalai": {"best": "1014934", "source": "Astra, 60 min, first attempt"}, "SeymourSecondNeighborhood": {"best": "355773", "source": "Astra, 60 min, first attempt"}, "TalagrandDiscreteConvexity": {"best": "313146", "source": "Astra, 60 min, first attempt"}, "TalagrandExpectationThreshold": {"best": "326605", "source": "Astra, 60 min, first attempt"}, "PlaneColoring": {"best": "35023", "source": "Astra, 60 min, first attempt"}, "MetricEntropyDuality": {"best": "480136", "source": "Astra, 60 min, first attempt"}, "BrennanSharp": {"best": "64034", "source": "Astra, 60 min, first attempt"}}}}}, "participation": {"code_repo": "https://github.com/MathCompressionBench/mcb", "code_branch": "main", "submissions_repo": "https://github.com/MathCompressionBench/mcb-submissions", "toy_release": "toyarith-rc.11", "toy_release_url": "https://github.com/MathCompressionBench/mcb/releases/tag/toyarith-rc.11", "toy_task": "toyarith-warm", "packages_release": "lcbench-v1-rc.11", "packages_release_url": "https://github.com/MathCompressionBench/mcb/releases/tag/lcbench-v1-rc.11", "packages_download_url": "https://github.com/MathCompressionBench/mcb/releases/download/lcbench-v1-rc.11", "oai_release": "oai-v1-rc.11", "oai_release_url": "https://github.com/MathCompressionBench/mcb/releases/tag/oai-v1-rc.11", "oai_set_url": "https://github.com/MathCompressionBench/mcb/blob/main/sets/oai-v1.json"}, "task_sets": {"lcbench-v1": {"set": "lcbench-v1", "tasks": 7, "without_target_proofs": true, "excluded": []}, "oai-v1": {"set": "oai-v1", "tasks": 175, "without_target_proofs": false, "excluded": ["CompleteCrossing", "EuclideanFiveColor", "Nagata"]}}, "measured": "2026-10-04", "page": "difficulty"};
+const SITE = null;
+const CARDS = [];
+</script>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const codeify = s => esc(s).replace(/``(.+?)``|`([^`]+)`/g, (m, dbl, one) => `<code>${dbl ?? one}</code>`);
+const fmt = n => n == null ? "—" : Number(n).toLocaleString("en-US");
+const pct = (a, b) => a ? (100 * (1 - b / a)).toFixed(1) + "%" : "—";
+const pc = (v, d = 2) => v == null ? "—" : (v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const avg = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+const fx = f => { if (f == null) return "—"; if (f === 1) return "1×"; let d = f >= 100 ? 0 : f >= 10 ? 1 : 2, t = f.toFixed(d);
+  while (Number(t) === 1 && d < 4) t = f.toFixed(++d); return Number(t) === 1 ? "≈1×" : f >= 1000 ? fmt(Number(t)) + "×" : t + "×"; };
+const nodeChange = (before, after) => after === before ? ", unchanged" : after > before ? ", larger" : "";
+const remText = r => { if (r == null) return "—"; const p = 100 * r; if (p === 100) return "100%";
+  if (p >= 99.5 && p < 100.5) { const t = p.toFixed(2); return Number(t) !== 100 ? t + "%" : p < 100 ? ">99.99%" : ">100%"; }
+  return (p >= 10 ? p.toFixed(1) : p >= 1 ? p.toFixed(2) : p.toPrecision(2)) + "%"; };
+const geo = v => v.length ? Math.exp(avg(v.map(Math.log))) : null;
+const med = v => { if (!v.length) return null; const w = v.slice().sort((p, q) => p - q), h = w.length >> 1; return w.length % 2 ? w[h] : (w[h - 1] + w[h]) / 2; };
+const removedText = (r, unit = "") => r == null ? "" : r < 0 ? `grew by ${fmt(-r)}${unit}` : `${fmt(r)}${unit} removed`;
+const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many}`;
+const declarationsChanged = d => !d.top.length && !d.owners_changed && !d.owners_added && !d.owners_removed
+  ? "No declaration's node count changed."
+  : `${fmt(d.owners_changed)} ${d.owners_changed === 1 ? "declaration" : "declarations"} changed, ${fmt(d.owners_added)} added, ${fmt(d.owners_removed)} removed.`;
+const numWord = n => ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] ?? String(n);
+const listText = xs => xs.length <= 1 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs.at(-1);
+function packagesText() {
+  const P = DATA.participation, L = DATA.task_sets["lcbench-v1"], O = DATA.task_sets["oai-v1"];
+  const release = (name, url) => `release <span class="setname"><a href="${esc(url)}">${esc(name)}</a></span>`;
+  const forms = T => "each with its original proofs" + (T.without_target_proofs ? " and also without its target proofs" : "");
+  const set = T => `<span class="setname">${esc(T.set)}</span>`;
+  return `Task packages to download: the toy task (${release(P.toy_release, P.toy_release_url)}); ` +
+    `the task set ${set(L)}, the study's ${numWord(L.tasks)} tasks, ${forms(L)} (${release(P.packages_release, P.packages_release_url)}); ` +
+    `the task set ${set(O)}, ${fmt(O.tasks)} tasks made from published math challenges, ${forms(O)} ` +
+    `(${release(P.oai_release, P.oai_release_url)}, <a href="difficulty.html#oai-tasks">about these tasks</a>).`;
+}
+const negZero = (v, d) => v != null && v < 0 && Math.abs(v) < 0.5 * 10 ** -d;
+const tip = $("#tip");
+let tipOwner = null;
+function placeTip(x, y, html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.max(4, Math.min(x + 12, innerWidth - 330)) + "px";
+  tip.style.top = Math.min(y + 14, innerHeight - tip.offsetHeight - 6) + "px"; }
+function hideTip() { tip.hidden = true; tipOwner = null; }
+function tipAtElement(el) { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, el.dataset.tip); tipOwner = el; }
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.addEventListener("mousemove", e => { placeTip(e.clientX, e.clientY, el.dataset.tip); tipOwner = el; });
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => tipAtElement(el));
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.stopPropagation(); tipOwner === el && !tip.hidden ? hideTip() : tipAtElement(el); });
+  });
+}
+document.addEventListener("click", hideTip);
+addEventListener("scroll", () => { if (tipOwner && document.activeElement !== tipOwner) hideTip(); }, {passive: true});
+
+DATA.models = DATA.models || []; DATA.tasks = DATA.tasks || []; DATA.order = DATA.order || [];
+DATA.models.sort((p, q) => DATA.order.indexOf(p.id) - DATA.order.indexOf(q.id));
+const TASK = Object.fromEntries(DATA.tasks.map(t => [t.id, t]));
+const MODEL = Object.fromEntries(DATA.models.map(m => [m.id, m]));
+const TASK_IDX = Object.fromEntries(DATA.tasks.map((t, i) => [t.id, i]));
+const MODEL_IDX = Object.fromEntries(DATA.models.map((m, i) => [m.id, i]));
+const REP_IDX = Object.fromEntries((DATA.repeats || []).map((r, i) => [r, i]));
+const agentColor = id => `var(--ag${DATA.order.indexOf(id) + 1})`;
+const STATUS_ORDER = Object.keys(DATA.status || {});
+const RECHECK_ICON = `<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.8 1.8v3.6h-3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON = {VALID: "✓", VALID_REPAIRED_VERIFIER: RECHECK_ICON, RAW_FAILURE: "×", UNCONFIRMED: "?",
+  VERIFIED: "✓", VERIFIED_PENDING_FIX: "✓*", REJECTED: "×", NO_SOURCE: "–"};
+const SHORT_STATUS = {};
+const statusLabel = s => ((DATA.status || {})[s] || (DATA.study_status || {})[s])[0];
+const stPill = (s, short = false) => short && SHORT_STATUS[s]
+  ? `<span class="st st-${s}" title="${esc(statusLabel(s))}"><i aria-hidden="true">${ICON[s]}</i>${esc(SHORT_STATUS[s])}</span>`
+  : `<span class="st st-${s}"><i aria-hidden="true">${ICON[s]}</i>${esc(statusLabel(s))}</span>`;
+const REP_LABELS = {};
+const repLabel = r => REP_LABELS[r] || r.replace(/^r(\d+)$/, "run $1");
+const SCORED_FILE = {study: "the run's final",
+  time_limit: "the files as they stood at the time limit (the study counted the run failed or unconfirmed)",
+  no_files: "no scored file: the run left no files", none: "none: the run left several candidate files and no single final"};
+const scoredText = s => SCORED_FILE[s.scored];
+const scoredLine = s => s.scored === "no_files" ? SCORED_FILE.no_files[0].toUpperCase() + SCORED_FILE.no_files.slice(1)
+  : s.scored && s.scored !== "study" ? `Scored file: ${scoredText(s)}` : "";
+const scorerWords = v => String(v).replace(/^(\d+\.\d+\.\d+)-rc\.(\d+)$/, "$1, release candidate $2");
+const shortN = (v, p = 2) => v >= 1e9 ? `${+(v / 1e9).toPrecision(p)}B` : v >= 1e6 ? `${+(v / 1e6).toPrecision(p)}M` : v >= 1e3 ? `${+(v / 1e3).toPrecision(p)}K` : String(v);
+const harnessName = h => h.replace(/\s+\d[\w.-]*/g, "").trim();
+const VALID_STATUS = new Set(["VERIFIED", "VERIFIED_PENDING_FIX", "VALID", "VALID_REPAIRED_VERIFIER"]);
+const isValid = s => VALID_STATUS.has(s.status);
+const isUnchanged = s => isValid(s) && s.a1 != null && s.a1 === s.a0;
+const S = DATA.slots || [];
+const count = f => S.filter(f).length;
+const MP = DATA.metaprog || {available: false, flags: {}};
+function mpOf(s) {
+  if (!MP.available) return {k: "pending", t: "check pending"};
+  const f = MP.flags[s.id];
+  if (!f) return {k: "none", t: "not checked"};
+  return f.m ? {k: "yes", t: f.c ? "yes (copy)" : "yes", e: f.e} : {k: "no", t: f.c ? "no (copy)" : "no", e: f.e};
+}
+const flagCount = k => count(s => s.flags.includes(k));
+const flagLabel = k => `“${DATA.flags[k][0]}”`;
+const MARK_ORDER = Object.keys(DATA.marks || {});
+const markSym = k => DATA.marks[k][0];
+const MARK_SHORT = {statement_differs: "run whose target statement is only definitionally equal to the original",
+  released_verifier_rejected: "run rejected by MathCompressionBench's verifier"};
+const marksOf = runs => MARK_ORDER.filter(k => runs.some(s => s.marks.includes(k)));
+const markHtml = keys => keys.map(k => `<span class="mark" title="${esc(DATA.marks[k][1])}">${esc(markSym(k))}</span>`).join("");
+const TASK_NOTE = DATA.task_notes || {};
+const taskMark = id => TASK_NOTE[id] ? `<span class="mark" title="${esc(TASK_NOTE[id].short)}">${esc(TASK_NOTE[id].mark)}</span>` : "";
+const runLabel = s => `${TASK[s.task].name}, ${MODEL[s.model].name}, ${s.budget} min, ${repLabel(s.repeat)}`;
+const linkCards = html => html.replace(/the (\w+) case study/g, (m, n) => CARDS.some(c => c.key === n.toLowerCase()) ? `the <a href="#card-${n.toLowerCase()}">${n} case study</a>` : m);
+
+const plainLabel = h => h.replace(/<[^>]*>/g, "");
+function labelCells(table) {
+  table.classList.add("stack");
+  const heads = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.dataset.label = heads[i]; }));
+}
+const sortLabel = l => l.replace(/(\S+)$/, `<span class="nw">$1<span class="arr" aria-hidden="true"></span></span>`);
+function cellHtml(c, r) {
+  let h = c.cell(r).replace(/^<td(?: class="([^"]*)")?/, (m, cls) => `<td data-label="${esc(plainLabel(c.label))}"${cls || c.k ? ` class="${[cls, c.k && "k"].filter(Boolean).join(" ")}"` : ""}`);
+  return h.replace(/^(<td[^>]*>)([\s\S]+)(<\/td>)$/, `$1<span class="cv">$2</span>$3`);
+}
+function sortableTable(el, cols, rows, st, groupBy, opts = {}) {
+  const sorted = rows.slice();
+  if (st.key) {
+    const c = cols.find(c => c.key === st.key), dir = st.dir;
+    sorted.sort((p, q) => { const a = c.sort(p), b = c.sort(q);
+      if (a == null && b == null) return 0; if (a == null) return 1; if (b == null) return -1;
+      return (a < b ? -1 : a > b ? 1 : 0) * dir; });
+  }
+  let html = "<thead><tr>" + cols.map(c => `<th class="${c.num ? "num " : ""}${c.sort ? "sort" : ""}" ${c.sort ? `tabindex="0" data-k="${c.key}" aria-sort="${st.key === c.key ? (st.dir > 0 ? "ascending" : "descending") : "none"}"` : ""} ${c.title ? `title="${esc(c.title)}"` : ""}>${c.sort ? sortLabel(c.label) : c.label}</th>`).join("") + "</tr></thead><tbody>";
+  let last = null;
+  for (const r of sorted) {
+    if (groupBy && !st.key) { const g = groupBy(r); if (g !== last) { html += `<tr class="group"><td colspan="${cols.length}">${esc(g)}</td></tr>`; last = g; } }
+    html += "<tr>" + cols.map(c => cellHtml(c, r)).join("") + (opts.extra ? opts.extra(r) : "") +
+      (opts.title ? `<td class="ptitle">${opts.title(r)}</td>` : "") + "</tr>";
+  }
+  el.innerHTML = html + "</tbody>";
+  el.querySelectorAll("th.sort").forEach(th => {
+    const go = () => { const k = th.dataset.k; if (st.key === k) { st.dir === 1 ? st.dir = -1 : (st.key = null); } else { st.key = k; st.dir = cols.find(c => c.key === k).num ? -1 : 1; } st.render(); };
+    th.onclick = go; th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  bindTips(el);
+}
+function fillSelect(sel, opts) { sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join(""); }
+
+function logTicks([l0, l1], px) {
+  const all = [];
+  for (let e = Math.floor(l0); e <= Math.ceil(l1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (Math.log10(v) >= l0 - 1e-9 && Math.log10(v) <= l1 + 1e-9) all.push(+v.toPrecision(3)); }
+  const perDecade = px / Math.max(0.3, l1 - l0);
+  return perDecade < 110 ? all.filter(v => Number.isInteger(Math.round(Math.log10(v) * 1e6) / 1e6)) : all;
+}
+const tickText = v => `${v >= 1 ? fmt(v) : Number(v.toPrecision(1))}×`;
+function lineDiff(a, b) {
+  const A = a.split("\n"), B = b.split("\n"), n = A.length, m = B.length;
+  if (n * m > 4e6) return [...A.map(t => ["del", t]), ...B.map(t => ["add", t])];
+  const L = Array.from({length: n + 1}, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n && j < m) { if (A[i] === B[j]) { out.push(["same", A[i]]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) out.push(["del", A[i++]]); else out.push(["add", B[j++]]); }
+  while (i < n) out.push(["del", A[i++]]); while (j < m) out.push(["add", B[j++]]);
+  return out;
+}
+const renderDiff = rows => rows.map(([k, t]) => `<div class="${k === "same" ? "" : k}">${esc(t) || " "}</div>`).join("");
+function partBar(parts, mx, names) {
+  return `<div class="bar" role="img" aria-label="${esc(Object.keys(names).map(k => `${names[k]} ${fmt(parts[k])}`).join(", "))}">` +
+    Object.keys(names).filter(k => parts[k] > 0).map(k => `<span class="seg-${k}" style="width:${(100 * parts[k] / mx).toFixed(2)}%" data-tip="${esc(names[k] + ": " + fmt(parts[k]) + " nodes")}"></span>`).join("") + "</div>";
+}
+function labelRows(items) {
+  const ends = [];
+  return items.map(it => {
+    let r = ends.findIndex(e => it.x >= e + 4);
+    if (r < 0) { r = ends.length; ends.push(0); }
+    ends[r] = it.x + it.w;
+    return r;
+  });
+}
+function lineChart(el, pts, opts) {
+  const cw = el.clientWidth || 760, W = Math.max(300, Math.min(760, Math.round(cw))), H = W < 560 ? 300 : 250, P = {l: 64, r: 14, t: 16, b: 34};
+  const valid = pts.filter(p => p.valid && p.y != null);
+  if (!valid.length) { el.innerHTML = "<p>No attempts yet.</p>"; return; }
+  const ys = valid.map(p => p.y), ymax = Math.max(...ys, opts.baseline || 0), ymin = Math.min(...ys);
+  const log = ymax / Math.max(ymin, 1) > 6;
+  const fy = log ? (v => Math.log10(v)) : (v => v);
+  const y0 = log ? Math.floor(fy(ymin) * 4) / 4 : 0, y1 = fy(ymax) * (log ? 1.02 : 1.05);
+  const xmin = Math.min(...pts.map(p => p.x)), xmax = Math.max(...pts.map(p => p.x), xmin + 1);
+  let ticks = [];
+  if (log) { for (let e = Math.floor(y0); e <= Math.ceil(y1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (fy(v) >= y0 && fy(v) <= y1) ticks.push(v); } }
+  else { const step = 10 ** Math.floor(Math.log10(ymax / 4)); const s = [1, 2, 5].map(k => k * step).find(k => ymax / k <= 6) || step * 10; for (let v = 0; v <= y1; v += s) ticks.push(v); }
+  P.l = 34 + 6.6 * Math.max(...ticks.map(t => fmt(t).length));
+  const hasBounds = (opts.bounds || []).length > 0, hasRej = pts.some(p => p.y == null || !p.valid);
+  const bx = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin);
+  const bl = (opts.bounds || []).map(b => { const text = W < 560 && b.short != null ? b.short : b.label; return {x: bx(b.x) + 3, w: 6.2 * text.length, at: b.x, text}; });
+  const named = bl.filter(b => b.text), namedRows = labelRows(named), rows = bl.map(b => b.text ? namedRows[named.indexOf(b)] : 0);
+  const nRows = named.length ? Math.max(...namedRows) + 1 : 0;
+  P.t = 16 + (hasBounds ? 14 + 12 * nRows : 0) + (hasRej ? 22 : 0);
+  if (!(opts.xticks || []).length) P.b = 22;
+  const labY = 18, rejY = P.t - 12;
+  const X = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin), Y = v => H - P.b - (H - P.t - P.b) * (fy(v) - y0) / (y1 - y0);
+  let low = opts.baseline ?? Infinity, stepPath = opts.baseline ? `M${X(xmin)},${Y(opts.baseline)}` : "";
+  for (const p of pts) if (p.valid && p.y < low) { stepPath += (stepPath ? `L${X(p.x)},${Y(low)}` : `M${X(p.x)},${Y(p.y)}`) + `L${X(p.x)},${Y(p.y)}`; low = p.y; }
+  if (stepPath) stepPath += `L${X(xmax)},${Y(low)}`;
+  const svg = [`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">`];
+  for (const t of ticks) svg.push(`<line class="grid" x1="${P.l}" x2="${W - P.r}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${P.l - 6}" y="${Y(t) + 4}" text-anchor="end">${fmt(t)}</text>`);
+  svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${H - P.b}" y2="${H - P.b}"/>`);
+  for (const x of opts.xticks || []) svg.push(`<line class="axis" x1="${X(x)}" x2="${X(x)}" y1="${H - P.b}" y2="${H - P.b + 4}"/><text x="${X(x)}" y="${H - P.b + 15}" text-anchor="middle">${x}</text>`);
+  const below = labY + 12 * Math.max(0, nRows - 1) + 4;
+  bl.forEach((b, i) => svg.push(`<line class="bound" x1="${X(b.at)}" x2="${X(b.at)}" y1="${b.text ? labY + 12 * rows[i] - 8 : below}" y2="${H - P.b}"/>`));
+  bl.forEach((b, i) => { if (b.text) svg.push(`<text class="blab" x="${b.x}" y="${labY + 12 * rows[i]}">${esc(b.text)}</text>`); });
+  if (hasRej) svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${P.t - 3}" y2="${P.t - 3}" style="stroke-width:.6"/><text x="${P.l - 6}" y="${rejY + 4}" text-anchor="end">rejected</text>`);
+  svg.push(`<text x="${(W + P.l) / 2}" y="${(opts.xticks || []).length ? H - 4 : H - P.b + 16}" text-anchor="middle">${esc(opts.xlabel)}</text>`);
+  svg.push(`<text x="14" y="${(H - P.b + P.t) / 2}" text-anchor="middle" transform="rotate(-90 14 ${(H - P.b + P.t) / 2})">${esc(opts.ylabel)}${log && W >= 560 ? " (log scale)" : ""}</text>`);
+  if (stepPath) svg.push(`<path d="${stepPath}" fill="none" stroke="var(--accent)" stroke-width="2"/>`);
+  pts.forEach(p => {
+    if (p.y == null || !p.valid) { svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "rejected attempt")}"><text x="${X(p.x)}" y="${rejY + 4}" text-anchor="middle" style="fill:var(--del-ink)">×</text><rect x="${X(p.x) - 6}" y="${rejY - 8}" width="12" height="16" fill="transparent"/></g>`); return; }
+    svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "")}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="10" fill="transparent"/></g>`);
+  });
+  if (opts.endLabel) { const p = pts.at(-1); svg.push(`<text class="endlab" x="${X(p.x)}" y="${Math.min(Y(p.y) + 17, H - P.b - 3)}" text-anchor="end">${esc(opts.endLabel)}</text>`); }
+  if (opts.startLabel) { const p = pts[0]; svg.push(`<text class="endlab" x="${X(p.x) + 6}" y="${Y(p.y) - 9}">${esc(opts.startLabel)}</text>`); }
+  svg.push("</svg>");
+  el.innerHTML = svg.join("") + (opts.caption ? `<p class="caption">${opts.caption}${log ? " The vertical scale is logarithmic." : ""}</p>` : "");
+  bindTips(el);
+}
+
+function studyRuns() {
+  const A = DATA.about;
+  return `The study's runs: ${A.tasks} tasks × ${A.agents} agents × (${A.runs60} runs at 60 min + ${A.runs120} at 120 min) = ${A.runs} runs.`;
+}
+const CHECK_WORDS = {confirmed: "confirmed", corrected: "corrected", unverifiable: "could not be verified", refuted: "refuted"};
+function renderCard(c, chart = "", extra = "") {
+  const val = v => v.split("; ").length > 2 ? `<ul class="v">${v.split("; ").map(x => `<li>${codeify(x)}</li>`).join("")}</ul>` : `<div class="v">${codeify(v)}</div>`;
+  const lab = n => n.label.toLowerCase().includes(n.metric.toLowerCase()) ? codeify(n.label) : `${codeify(n.label)} · ${codeify(n.metric)}`;
+  const nums = list => list.map(n => `<div>${val(n.value)}<div class="l">${lab(n)}</div></div>`).join("");
+  const mechs = c.mechanisms.map(m => `<div class="mech"><h4>${codeify(m.name)}</h4><p>${codeify(m.explanation)}</p>
+     <div class="side"><div><h5>Before</h5><pre>${esc(m.before)}</pre></div><div><h5>After</h5><pre>${esc(m.after)}</pre></div></div>
+     <p style="font-size:13px"><b>Effect:</b> ${codeify(m.effect)}</p></div>`).join("");
+  const chk = Object.entries(c.checks).map(([k, v]) => `${v} ${CHECK_WORDS[k] || k}`).join(", ");
+  return `<article class="card" id="card-${esc(c.key)}"><p class="kicker">${esc(c.name)}</p><h3>${codeify(c.headline)}</h3>
+    <p>${codeify(c.summary)}</p>${chart}<p class="small">${codeify(c.task)}</p>
+    <div class="numbers">${nums(c.numbers.slice(0, 4))}</div>${extra}
+    ${c.numbers.length > 4 ? `<details><summary>More numbers (${c.numbers.length - 4})</summary><div class="numbers">${nums(c.numbers.slice(4))}</div></details>` : ""}
+    ${c.nl ? `<details><summary>In words</summary><p class="nltext">${codeify(c.nl)}</p></details>` : ""}
+    <details><summary>Mechanisms, with before and after code (${c.mechanisms.length})</summary>${mechs}</details>
+    ${c.caveats.length ? `<details><summary>Caveats (${c.caveats.length})</summary><ul class="caveats">${c.caveats.map(x => `<li>${codeify(x)}</li>`).join("")}</ul></details>` : ""}
+    ${chk ? `<p class="small">Independent review of this card's claims: ${esc(chk)}.</p>` : ""}</article>`;
+}
+function markOverflow() {
+  document.querySelectorAll(".tablewrap").forEach(w => {
+    const upd = () => { w.classList.toggle("overflows", w.scrollWidth > w.clientWidth + 2); w.classList.toggle("at-end", w.scrollLeft + w.clientWidth >= w.scrollWidth - 2); };
+    if (!w.dataset.ov) { w.addEventListener("scroll", upd, {passive: true}); w.dataset.ov = "1"; }
+    upd();
+  });
+}
+function padForHeader() { document.documentElement.style.scrollPaddingTop = ($("header.top").offsetHeight + 12) + "px"; }
+const onResize = [];
+let lastWidth = innerWidth, resizeTimer = null;
+addEventListener("resize", () => { if (innerWidth === lastWidth) return; lastWidth = innerWidth; clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { onResize.forEach(f => f()); markOverflow(); padForHeader(); }, 150); });
+function openPanel(id, scroll = true) {
+  const d = document.getElementById(id);
+  if (!d) return false;
+  for (let p = d; p; p = p.parentElement && p.parentElement.closest("details")) if (p.tagName === "DETAILS") p.open = true;
+  d.classList.add("flash"); setTimeout(() => d.classList.remove("flash"), 1200);
+  if (scroll) d.scrollIntoView({block: "nearest", behavior: "smooth"});
+  try { history.replaceState(null, "", "#" + id); } catch (e) { /* the address stays as it was */ }
+  return true;
+}
+const openFromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) openPanel(id); };
+addEventListener("hashchange", openFromHash);
+function bindPanels(root, summary) {
+  root.querySelectorAll("[data-panel]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    const html = () => summary(el.dataset.panel) + "<br><i>Tap or click for details.</i>";
+    el.addEventListener("mousemove", e => placeTip(e.clientX, e.clientY, html()));
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, html()); });
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); hideTip(); openPanel(el.dataset.panel); });
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPanel(el.dataset.panel); } });
+  });
+}
+function initChrome() {
+  document.querySelectorAll("#nav a").forEach(a => { if (a.dataset.p === document.body.dataset.page) a.setAttribute("aria-current", "page"); });
+  $("#snap").textContent = `Preview · ${DATA.measured ? `measured ${DATA.measured}` : `results snapshot ${DATA.snapshot}`}`;
+  $("#foot-snap").textContent = DATA.snapshot;
+  if (DATA.measured) $("#foot-lead").textContent = `task sizes measured ${DATA.measured}, after the results snapshot of ${DATA.snapshot}`;
+  $("#foot-dates").innerHTML = DATA.dates;
+  document.querySelectorAll("[data-v]").forEach(el => { el.textContent = DATA.values[el.dataset.v]; });
+  markOverflow(); padForHeader();
+  setTimeout(openFromHash, 0);
+}
+</script>
+<style>
+/* the chart: one grid row per task (name, line, numbers); on a phone each row stacks, the line full width */
+.ladder { margin-top: 8px; }
+/* the preview variant: the published challenges collapsed under their summary */
+details.lsec-more > summary.lsec { cursor: pointer; }
+.lrow { display: grid; grid-template-columns: 210px minmax(0, 1fr) 270px; gap: 4px 14px; align-items: center; padding: 12px 0;
+  border-top: 1px solid var(--rule); }
+.lrow.axis { border-top: 0; padding: 0; }
+.lname b { font-weight: 600; overflow-wrap: anywhere; }
+.lname .sub, .lnums .sub { font-family: var(--body); display: block; font-size: 12px; color: var(--muted); }
+.lnums { font-family: var(--mono); font-size: 12px; font-variant-numeric: tabular-nums; }
+.lnums b { white-space: nowrap; }
+.ltrack svg { display: block; width: 100%; overflow: visible; }
+.ltrack .grid { stroke: var(--rule); stroke-width: 1; }
+.ltrack text { fill: var(--muted); font-family: var(--body); font-size: 11px; }
+.ltrack .rewrite { stroke: var(--accent); stroke-width: 2.5; }
+.ltrack .mech { stroke: var(--floor); stroke-width: 2.5; }
+.ltrack .whole { stroke: var(--muted); stroke-width: 1.5; }
+.ltrack .best { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.ltrack .floor { fill: var(--floor); stroke: var(--surface); stroke-width: 1.5; }
+.ltrack .orig { fill: var(--ink); }
+/* The ladder: one vertical log axis in the middle, a line at each power of ten; tasks with runs on the left at their
+   best verified final, tasks without runs on the right at their original. Bubbles spread sideways only to stay apart. */
+.lad-head { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); font-size: 14px; line-height: 1.2;
+  padding-bottom: 6px; }
+.lad-head > :first-child { text-align: right; } .lad-head small { display: block; font-size: 12px; color: var(--muted); }
+.lad-svg { display: block; width: 100%; overflow: visible; }
+.lad-svg .decade { fill: var(--surface-2); opacity: .55; }
+.lad-svg .thr { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 4; }
+.lad-svg .spine { fill: url(#lad-tone); }
+.lad-svg .thr-label { fill: var(--ink-2); font: 12px var(--mono); }
+.lad-svg .thr-tag { fill: var(--surface); }
+.lad-svg .gap-mark { stroke: var(--ink-2); stroke-width: 1.5; fill: none; }
+.lad-svg .bub { fill: var(--tone); stroke: var(--surface); stroke-width: 2; }
+.lad-svg .bub.untried { fill: var(--surface); stroke: var(--tone); stroke-width: 2; stroke-dasharray: 3 2.5; }
+/* a published challenge not yet tried: a plain bubble, lighter; its side of the axis already says it is not tried */
+.lad-svg .bub.faint { fill-opacity: .45; }
+.lad-svg .name { fill: var(--ink); font: 600 13px var(--body); }
+/* the source line's mark: a bubble as the chart draws one */
+.raw-sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 60%, var(--surface)); vertical-align: -1px; }
+.raw-source { margin-top: 6px; }
+@media (max-width: 640px) { .lad-svg .name { font-size: 11.5px; } }
+.lad-svg g[data-tip] { cursor: pointer; outline: none; }
+.lad-svg g[data-tip]:hover .bub, .lad-svg g[data-tip]:focus .bub { stroke: var(--ink); }
+.lad-svg g.pt { animation: lad-in .6s ease-out both; animation-delay: var(--d); }
+@keyframes lad-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .lad-svg g.pt { animation: none; } }
+@media (max-width: 640px) { .lad-head { grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); font-size: 13px; } }
+.ltrack .axis-line, .ltrack .axis-break { stroke: var(--ink-2); stroke-width: 1; fill: none; }
+#whole-note { margin-top: 4px; }
+/* the line beside the switch on the published challenges' finals, shown while it is on */
+#oai-finals-note { align-self: center; }
+.ltrack g[data-tip] { cursor: pointer; } .ltrack g[data-tip]:focus { outline: none; }
+.ltrack g[data-tip]:focus .hit { stroke: var(--accent); stroke-width: 1; }
+.ltrack .hit { fill: transparent; }
+/* the caption's marks in the chart's colours, large enough to match them */
+#ladder-caption .k-orig, #ladder-caption .k-floor, #ladder-caption .k-best { font-size: 16px; line-height: 1; }
+#dmeasured { white-space: nowrap; } #ladder-caption .k-orig { color: var(--ink); font-weight: 700; }
+#ladder-caption .k-floor { color: var(--floor); } #ladder-caption .k-best { color: var(--accent); }
+@media (max-width: 640px) { .lrow { grid-template-columns: 1fr; gap: 2px; } .lrow.axis .lname, .lrow.axis .lnums { display: none; }
+  .lname .sub { display: inline; } .lname .sub::before { content: " · "; } }
+.ddefs th { text-align: left; white-space: nowrap; vertical-align: top; padding-right: 14px; }
+#caveats li { margin-bottom: 6px; }
+/* on a phone each definition is its term over its one line */
+@media (max-width: 640px) { .ddefs tr, .ddefs th, .ddefs td { display: block; white-space: normal; } .ddefs th { border: 0; padding-bottom: 0; } }
+</style>
+<main class="wrap" id="top">
+  <h1>Task difficulty</h1>
+  <p class="summary-line">How far each task's original has been compressed, and how much of that the organizer's sharing pass alone removes. Per-target sizes measured <span id="dmeasured"></span>.</p>
+
+  <h2 id="raw-h">Length ladder</h2>
+  <div class="ladder" id="raw" aria-labelledby="raw-h" aria-describedby="raw-caption"></div>
+  <p class="caption" id="raw-caption">Log scale; a line at each power of ten; darker is longer. Bubble size grows with the number of targets.</p>
+  <p class="small" id="oai-tasks"></p>
+  <p class="small" id="whole-note"></p>
+
+  <h2 id="ladder-h">From the original to the best verified final</h2>
+  <div class="controls" id="oai-switch"><button type="button" id="oai-finals" aria-pressed="false">Show agent finals on the published challenges</button><span class="small" id="oai-finals-note" hidden></span></div>
+  <div class="ladder" id="ladder"></div>
+  <p class="caption" id="ladder-caption"><span class="k-orig">┃</span> original node count · <span class="k-floor">◆</span> after the organizer's automatic sharing pass · <span class="k-best">●</span> smallest verified final known; log scale<span id="axis-note"></span>. <span class="k-floor">◆</span> to <span class="k-orig">┃</span>: removed by the organizer's sharing pass; <span class="k-best">●</span> to <span class="k-floor">◆</span>: everything else, including agents' own sharing programs. No <span class="k-floor">◆</span>: no published measurement. Only <span class="k-orig">┃</span>: no runs yet. Lengths are node counts under MathCompressionBench's scoring, not a measure of mathematical difficulty.</p>
+  <h2 id="by-task">By task</h2>
+  <div class="tablewrap"><table id="dtable"></table></div>
+  <p class="swipehint">Scroll sideways for every column.</p>
+  <p class="small">Per target, in proof-term nodes; — : not measured. <span id="dlean"></span></p>
+
+  <h3 id="columns">What the columns mean</h3>
+  <div class="tablewrap"><table id="defs" class="def ddefs">
+    <tr><th scope="row">Targets</th><td>The theorems the task asks for (<a href="rules.html#g-target">target</a>).</td></tr>
+    <tr><th scope="row">Original proof</th><td>The target's proof term, the helpers only its proof reaches, and a 1/k share of each helper that k targets' proofs reach (<a href="rules.html#g-helper">helper</a>). The 1/k split is this page's reporting convention for attributing a task's nodes to its targets: the score charges each helper once per task and never splits it. With it, a task's original proofs and its statement side add up to the original's node total, up to rounding.</td></tr>
+    <tr><th scope="row">From shared helpers</th><td>The nodes charged as 1/k shares ÷ all original proof nodes of the task. This is node-weighted, not a median.</td></tr>
+    <tr><th scope="row">After the sharing pass</th><td>The original proof after the sharing pass, a fixed program run by the organizer that writes each repeated subterm once (<a href="results.html#floor-table">sharing pass</a>). It is shown where the chart has ◆.</td></tr>
+    <tr><th scope="row">In the best verified final</th><td>The target's size in the chart's best verified final, not the best the target reached in any run. The toy's joint run was not measured per target.</td></tr>
+    <tr><th scope="row">Statement</th><td>The target's statement plus the task's own declarations it reaches, including proofs inside those definitions and instances. A library constant costs one node per use plus its universe levels (<a href="rules.html#free">what is free</a>). The statement itself is free in the score, and a definition several statements reach is counted in full in each of them, so statements do not add up to a task total.</td></tr>
+    <tr><th scope="row">Library lemmas per proof</th><td>Distinct library theorems the proof and its helpers mention (<a href="rules.html#g-background">background</a>).</td></tr>
+    <tr><th scope="row">Background</th><td>The library the task builds on is free of charge. It is Mathlib, or core Lean only (<a href="rules.html#g-background">background</a>).</td></tr>
+  </table></div>
+
+  <h3 id="terms-h">Other terms</h3>
+  <div class="tablewrap"><table id="terms" class="def ddefs">
+    <tr><th scope="row">Proof-term nodes</th><td>The size of a kernel proof term, the score's unit (<a href="rules.html#nodes">how nodes are counted</a>).</td></tr>
+    <tr><th scope="row">Target</th><td>A theorem the task asks for (<a href="rules.html#g-target">target</a>).</td></tr>
+    <tr><th scope="row">Original</th><td>The proof the task provides. Its node count, the chart's ┃, is the task's baseline score: all its targets' proofs plus the charged definitions their statements reach.</td></tr>
+    <tr><th scope="row">Best verified final</th><td>The smallest final known for the task that MathCompressionBench's verifier accepted, the chart's ●. The chart names where it comes from.</td></tr>
+    <tr><th scope="row">Reaches</th><td>A declaration reaches the constants its statement and proof mention, and everything those reach (<a href="rules.html#charged">what is charged</a>). When the original is split by target, a proof's reach is not followed into another target, which it names at the cost of a reference, or into a definition some statement reaches, which stays on the statement side. Every node is therefore charged to one place.</td></tr>
+    <tr><th scope="row">Statement side</th><td>The task's own charged definitions that its targets' statements reach, with the proofs inside them, each counted once. These are the original's nodes that no proof is charged for.</td></tr>
+    <tr><th scope="row">Organizer</th><td>The people who run MathCompressionBench. They publish its tasks, run the sharing pass and sign the receipts.</td></tr>
+    <tr><th scope="row" id="extra">Extra examples</th><td>Rows not in lcbench-v1 and not ranked: the toy, a small prototype task on natural numbers defined from scratch in core Lean (<a href="index.html#example">worked example</a>); and, as demonstrations, the fundamental theorem of arithmetic (<a href="examples.html#fta">worked example</a>) and two tasks from a published Lean formalization of Fermat's Last Theorem, each on its own versions of Lean and Mathlib. FLT, small exponents n = 5, 7, 11, 13: the four classical small-exponent cases on its proof path, the smallest part of that proof that needs only Mathlib. Fermat's Last Theorem, whole project: one target, <code>fermat_last_theorem</code>, charged with everything its proof reaches; shown by its original only, with no runs yet.</td></tr>
+  </table></div>
+
+  <h3 id="caveats-h">Reading the numbers</h3>
+  <ul id="caveats"></ul>
+</main>
+<script>
+const ALT = DATA.variant === "alt";
+const D = DATA.difficulty;
+const DTASK = Object.fromEntries(D.tasks.map(t => [t.id, t]));
+const n0 = v => v == null ? "—" : fmt(Math.round(v));
+const sharePct = v => v == null ? "—" : v === 0 ? "0%" : remText(v);
+const short = n => n.split(".").pop();
+const W = D.whole;
+const targetsText = n => `${fmt(n)} target${n === 1 ? "" : "s"}`;
+function bigFmt(s) {
+  return String(s).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function countLog(value) {
+  const digits = String(value), mantissa = `${digits[0]}.${digits.slice(1, 15)}`;
+  return digits.length - 1 + Math.log10(Number(mantissa));
+}
+const sup = e => String(e).split("").map(c => c === "-" ? "⁻" : "⁰¹²³⁴⁵⁶⁷⁸⁹"[c]).join("");
+function countShort(value, divisor = 1) {
+  const n = BigInt(value), d = BigInt(divisor);
+  let exponent = (n / d).toString().length - 1;
+  const unit = d * 10n ** BigInt(exponent);
+  let mantissa = (n * 10n + unit / 2n) / unit;
+  if (mantissa === 100n) { mantissa = 10n; exponent++; }
+  return `${mantissa / 10n}.${mantissa % 10n}e${exponent}`;
+}
+const sci = s => { const [m, e] = countShort(s).split("e"); return `${m} × 10${sup(e)}`; };
+
+function logScale(w, data = D, broken = true) {
+  const intervals = data.ladder.concat(data.oai ? ladderOai(data) : []).map(r => [countLog(r.best), countLog(r.original)]);
+  if (data.whole) intervals.push([countLog(data.whole.original), countLog(data.whole.original)]);
+  intervals.sort((a, b) => a[0] - b[0]);
+  const lo = intervals[0][0] - 0.15, hi = Math.max(...intervals.map(r => r[1])) + 0.1;
+  const gaps = [];
+  let end = intervals[0][1];
+  for (const [start, stop] of intervals.slice(1)) {
+    const lower = Math.floor(end) + 1, upper = Math.floor(start) - 1;
+    if (upper > lower) gaps.push({lo: lower, hi: upper});
+    end = Math.max(end, stop);
+  }
+  const gapWidth = 24;
+  const scale = (w - 12 - gapWidth * gaps.length) / (hi - lo - gaps.reduce((s, b) => s + b.hi - b.lo, 0));
+  const position = log => 6 + (log - lo) * scale - (broken ? gaps.reduce((s, b) =>
+    s + (log >= b.hi ? (b.hi - b.lo) * scale - gapWidth : 0), 0) : 0);
+  const breaks = broken ? gaps.map(b => ({...b, x1: position(b.lo), x2: position(b.hi)})) : [];
+  const exps = [];
+  for (let e = Math.ceil(lo); e <= Math.floor(hi); e++) {
+    if (!breaks.some(b => b.lo < e && e < b.hi)) exps.push(e);
+  }
+  const step = Math.max(1, Math.ceil(44 / scale));
+  let labelled = exps.filter(e => e % step === 0 && !breaks.some(b =>
+    Math.abs(position(e) - b.x1) < 22 || Math.abs(position(e) - b.x2) < 22));
+  const top = exps[exps.length - 1];
+  if (top !== undefined && !labelled.includes(top))
+    labelled = labelled.filter(e => Math.abs(position(e) - position(top)) >= 22).concat(top);
+  const grid = exps.filter(e => labelled.includes(e) || !breaks.some(b => e === b.lo || e === b.hi));
+  return {lo, hi, scale, breaks, exps, labelled, grid, X: v => position(countLog(v))};
+}
+const svgTrack = (w, h, body) => `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${body}</svg>`;
+function axisSvg(w, S) {
+  let start = 6, axis = "";
+  for (const b of S.breaks) {
+    axis += `<path class="axis-line" d="M${start},3H${b.x1}"/>`;
+    const mid = (b.x1 + b.x2) / 2;
+    axis += `<path class="axis-break" d="M${mid - 7},6l4,-6M${mid + 1},6l4,-6"/>`;
+    start = b.x2;
+  }
+  axis += `<path class="axis-line" d="M${start},3H${w - 6}"/>`;
+  return svgTrack(w, 38, axis + S.labelled.map(e =>
+    `<text x="${S.X('1' + '0'.repeat(e))}" y="21" text-anchor="middle">10${sup(e)}</text>`).join("") +
+    `<text x="${w / 2}" y="35" text-anchor="middle">proof-term nodes (log scale)</text>`);
+}
+function breakCaption(S) {
+  return S.breaks.map(b => `axis broken between 10${sup(b.lo)} and 10${sup(b.hi)}`).join("; ");
+}
+const gridSvg = (S, h) => S.grid.map(e => `<line class="grid" x1="${S.X('1' + '0'.repeat(e))}" x2="${S.X('1' + '0'.repeat(e))}" y1="0" y2="${h}"/>`).join("");
+
+const GAP_H = 46;
+const bubbleR = targets => 6 + 2.5 * Math.log10(Math.max(1, targets));
+function rawRows(data) {
+  const finals = new Map(data.ladder.map(r => [r.id, r.best]));
+  const factors = new Map(data.ladder.map(r => [r.id, r.factor]));
+  const oai = data.oai.challenges.map(c => ({id: `oai-${c.config}`, name: c.config, title: c.title, targets: c.targets,
+    original: c.original, best: c.best, factor: c.factor, source: c.source, outcome: c.outcome, group: "oai"}));
+  const rows = data.raw.concat(oai).map(r => {
+    const best = finals.get(r.id) ?? r.best;
+    return {...r, best, factor: factors.get(r.id) ?? r.factor, tried: best != null, group: r.group ?? "study",
+      length: String(best ?? r.original)};
+  }).sort((a, b) => BigInt(a.length) > BigInt(b.length) ? -1 : BigInt(a.length) < BigInt(b.length) ? 1 : 0);
+  return rows.map(r => {
+    const n = BigInt(r.original), d = BigInt(r.targets), remainder = n % d, log = countLog(r.length);
+    return {...r, score: countShort(r.length), perTarget: countShort(r.original, r.targets), log, exp: Math.floor(log),
+      perTargetExact: bigFmt(n / d) + (remainder ? ` + ${remainder}/${d}` : "")};
+  });
+}
+function ladderScale(rows, h, top = 24) {
+  const occupied = new Set(rows.map(r => r.exp));
+  const hi = Math.max(...occupied), lo = Math.min(...occupied), segs = [];
+  for (let e = hi; e >= lo; e--) {
+    if (occupied.has(e)) { segs.push({exp: e}); continue; }
+    let k = e;
+    while (!occupied.has(k - 1)) k--;
+    segs.push({gap: [k, e]});
+    e = k;
+  }
+  const topFrac = Math.max(...rows.filter(r => r.exp === hi).map(r => r.log - hi));
+  segs[0].open = true;
+  let y = top;
+  for (const s of segs) { s.y1 = y; y += s.gap ? GAP_H : s.open ? Math.max(64, Math.min(h, (topFrac + 0.4) * h)) : h; s.y2 = y; }
+  const at = log => { const s = segs.find(s => s.exp === Math.floor(log)); return s.y2 - (log - s.exp) * h; };
+  return {segs, height: y + 18, decades: segs.filter(s => !s.gap).map(s => s.exp), gaps: segs.filter(s => s.gap).map(s => s.gap), y: at};
+}
+function rawTip(r) {
+  const untried = r.group !== "oai" ? "no runs yet" : "published math challenge";
+  return `<b>${esc(r.name)}</b>` + (r.title ? `<br>${esc(r.title)}` : "") + `<br>original ${bigFmt(r.original)}` +
+    (r.best != null ? `<br>${r.source ? "verified final" : "best verified final"} ${bigFmt(r.best)}${nodeChange(BigInt(r.original), BigInt(r.best))}` +
+      (r.source ? `<br>${esc(r.source)}` : "") : `<br>${untried}`) +
+    `<br>${targetsText(r.targets)}<br>per target ${r.perTargetExact}`;
+}
+function rawSource() {
+  const o = D.oai;
+  return `<p class="small raw-source"><i class="raw-sw"></i><a href="${esc(o.upstream.url)}">OpenAI's published math challenges</a> (${esc(o.upstream.license)}), fixed version` +
+    (o.counts.awaiting > 0 ? `;
+    ${fmt(o.counts.awaiting)} multi-target challenges, not yet counted.` : `.`) +
+    `</p>`;
+}
+function oaiTasksNote() {
+  const T = DATA.task_sets["oai-v1"], P = DATA.participation, n = T.excluded.length;
+  return `OpenAI's published math challenges can now be downloaded as tasks: the task set <span class="setname">${esc(T.set)}</span>, ` +
+    `${fmt(T.tasks)} tasks, each with its original proofs. ` +
+    (n ? `${numWord(n)[0].toUpperCase() + numWord(n).slice(1)} challenge${n === 1 ? " is" : "s are"} not tasks (${listText(T.excluded.map(esc))}): ` +
+      `a target statement differs from the challenge's only in the names of bound variables, and the check compares ` +
+      `statements exactly. ` : "") +
+    `Packages: release <span class="setname"><a href="${esc(P.oai_release_url)}">${esc(P.oai_release)}</a></span>; task list: ` +
+    `<a href="${esc(P.oai_set_url)}">sets/${esc(T.set)}.json</a>. Submissions work as for the other tasks, through the ` +
+    `<a href="${esc(P.submissions_repo)}">submissions repository</a>.`;
+}
+const OAI_BASE = D.oai.challenges;
+function setOaiFinals(on) {
+  const f = D.oai.agent_finals.finals;
+  D.oai.challenges = !on ? OAI_BASE : OAI_BASE.map(c => f[c.config] ?
+    {...c, ...f[c.config], factor: Number(c.original) / Number(f[c.config].best)} : c);
+}
+function oaiFinalsDetail() {
+  const f = D.oai.agent_finals;
+  return `${f.agent}, ${f.minutes}-minute runs; other agents have not been run on these challenges yet.`;
+}
+const wobble = id => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) % 23;
+function wrapName(name, maxChars) {
+  const lines = [""];
+  for (const w of name.split(" ")) {
+    const cur = lines[lines.length - 1];
+    if (cur && (cur + " " + w).length > maxChars) lines.push(w); else lines[lines.length - 1] = cur ? cur + " " + w : w;
+  }
+  return lines;
+}
+const LABEL_COST = {out: 0, in: 14, above: 22, below: 22};
+function placeSide(rows, S, sideW, phone, named = new Set()) {
+  const studyRows = rows.filter(r => r.group !== "oai" || named.has(r.id)), seed = [];
+  const oai = rows.filter(r => r.group === "oai" && !named.has(r.id));
+  const tries = [oai, [...oai].reverse(), oai.filter((_, i) => i % 2 === 0).concat(oai.filter((_, i) => i % 2)),
+    [...oai].sort((a, b) => wobble(a.id) - wobble(b.id))].map(o => {
+    const boxes = [], u = placeUnnamed(o, S, sideW, phone, boxes);
+    return {u, boxes, crowded: u.reduce((c, p) => c + p.crowded, 0)};
+  });
+  const pick = tries.reduce((a, b) => b.crowded < a.crowded ? b : a);
+  seed.push(...pick.boxes);
+  const unnamed = oai.map(r => pick.u.find(p => p.r === r));
+  const orders = [studyRows, [...studyRows].sort((a, b) => b.name.length - a.name.length),
+    [...studyRows].sort((a, b) => b.targets - a.targets), [...studyRows].reverse(),
+    ...studyRows.map((_, k) => [...studyRows.slice(k), ...studyRows.slice(0, k)]).slice(1)];
+  const layouts = orders.map(o => placeInOrder(o, S, sideW, phone, seed));
+  const score = l => l.reduce((c, p) => c + (p.crowded ?? 0) * 1e3 + p.d, 0);
+  const best = layouts.reduce((a, b) => score(b) < score(a) ? b : a);
+  const placed = studyRows.map(r => best.find(p => p.r === r));
+  return placed.concat(unnamed);
+}
+function placeInOrder(rows, S, sideW, phone, seed = []) {
+  const CH = phone ? 6 : 6.6, LH = 15, maxChars = Math.max(8, Math.min(phone ? 20 : 26, Math.floor((sideW - 30) / CH)));
+  const overlap = (p, q) => Math.max(0, Math.min(p.b, q.b) - Math.max(p.a, q.a)) * Math.max(0, Math.min(p.u, q.u) - Math.max(p.t, q.t));
+  const boxes = [...seed];
+  const clear = q => q.a >= 0 && q.b <= sideW && !boxes.some(o => overlap(q, o) > 0);
+  return rows.map(r => {
+    const rad = bubbleR(r.targets), cy = S.y(r.log), lines = wrapName(r.name, maxChars);
+    const lw = Math.max(...lines.map(l => l.length)) * CH, lh = lines.length * LH;
+    const label = (d, mode) => mode === "out" ? {a: d + rad + 4, b: d + rad + 6 + lw, t: cy - lh / 2, u: cy + lh / 2}
+      : mode === "in" ? {a: d - rad - 6 - lw, b: d - rad - 4, t: cy - lh / 2, u: cy + lh / 2}
+      : mode === "above" ? {a: d - lw / 2, b: d + lw / 2, t: cy - rad - 3 - lh, u: cy - rad - 3}
+      : {a: d - lw / 2, b: d + lw / 2, t: cy + rad + 3, u: cy + rad + 3 + lh};
+    const bubbleAt = d => ({a: d - rad - 3, b: d + rad + 3, t: cy - rad - 3, u: cy + rad + 3});
+    const start = 6 + rad + wobble(r.id) * (phone ? 0.5 : 1.5);
+    let best = null;
+    for (let d = start; d + rad <= sideW; d += 4) {
+      const bub = bubbleAt(d);
+      if (!clear(bub)) continue;
+      for (const mode of Object.keys(LABEL_COST)) {
+        const cost = d + LABEL_COST[mode];
+        if (best && cost >= best.cost) continue;
+        const lab = label(d, mode);
+        if (clear(lab)) best = {d, mode, bub, lab, cost};
+      }
+    }
+    if (!best) {
+      const covered = q => boxes.reduce((c, o) => c + overlap(q, o), 0);
+      const inside = q => q.a >= 0 && q.b <= sideW;
+      for (let d = 6 + rad; d + rad <= sideW; d += 4) {
+        const bub = bubbleAt(d), cb = covered(bub);
+        for (const mode of Object.keys(LABEL_COST)) {
+          const lab = label(d, mode);
+          if (!inside(lab)) continue;
+          const cost = 4 * cb + covered(lab) + 0.01 * (d + LABEL_COST[mode]);
+          if (!best || cost < best.cost) best = {d, mode, bub, lab, cost, crowded: 4 * cb + covered(lab)};
+        }
+      }
+    }
+    if (!best) best = {d: 6 + rad, mode: "out", bub: bubbleAt(6 + rad), lab: label(6 + rad, "out"), crowded: 1e6};
+    boxes.push(best.bub, best.lab);
+    return {r, d: best.d, mode: best.mode, dy: 0, rad, cy, lines, bub: best.bub, lab: best.lab, crowded: best.crowded ?? 0};
+  });
+}
+function placeUnnamed(rows, S, sideW, phone, boxes) {
+  const placed = [];
+  return rows.map(r => {
+    const rad = bubbleR(r.targets), cy = S.y(r.log);
+    const near = placed.filter(q => Math.abs(q.cy - cy) < q.rad + rad + 6);
+    const clear = d => near.every(q => (q.d - d) ** 2 + (q.cy - cy) ** 2 >= (q.rad + rad + 6) ** 2);
+    let d = 6 + rad + wobble(r.id) * (phone ? 0 : 1.5);
+    while (d + rad <= sideW && !clear(d)) d += 1;
+    const crowded = d + rad > sideW ? 1 : 0;
+    if (crowded) d = sideW - rad;
+    const p = {r, d, mode: "out", dy: 0, rad, cy, lines: [r.name], lab: null, crowded};
+    placed.push(p);
+    boxes.push({a: d - rad - 3, b: d + rad + 3, t: cy - rad - 3, u: cy + rad + 3});
+    return p;
+  });
+}
+const LABEL_MAX = 3;
+function labelQueue(rows, e) {
+  const big = s => BigInt(s), oai = rows.filter(r => r.exp === e && r.group === "oai");
+  const tried = oai.filter(r => r.tried).sort((a, b) => b.factor - a.factor);
+  const untried = oai.filter(r => !r.tried).sort((a, b) => big(b.original) > big(a.original) ? 1 : big(b.original) < big(a.original) ? -1 : 0);
+  const [one, two] = tried.length >= untried.length ? [tried, untried] : [untried, tried], queue = [];
+  for (let i = 0; i < Math.max(one.length, two.length); i++) queue.push(...[one[i], two[i]].filter(Boolean));
+  return queue;
+}
+function chooseNamed(rows, skipped) {
+  const named = new Set();
+  for (const e of new Set(rows.map(r => r.exp))) {
+    const slots = LABEL_MAX - rows.filter(r => r.exp === e && r.group !== "oai").length;
+    labelQueue(rows, e).filter(r => !skipped.has(r.id)).slice(0, Math.max(0, slots)).forEach(r => named.add(r.id));
+  }
+  return named;
+}
+function ladderLayout(W, data = D) {
+  const phone = W < 640, rows = rawRows(data), tried = rows.filter(r => r.tried), untried = rows.filter(r => !r.tried);
+  const share = 0.5 + 0.064 * Math.sign(tried.length - untried.length);
+  const mid = Math.round(W * share), gutter = phone ? 22 : 28, base = phone ? 132 : 124;
+  const widths = [mid - gutter, W - mid - gutter];
+  const place = (S, named) => placeBoth(rows, S, widths, phone, named);
+  const crowded = sides => sides.flat().filter(p => p.crowded);
+  let h = base, S = ladderScale(rows, h), sides = place(S, new Set());
+  while (h < 4 * base && crowded(sides).length) { h = Math.ceil(h * 1.1); S = ladderScale(rows, h); sides = place(S, new Set()); }
+  const skipped = new Set(rows.filter(r => r.group === "oai" && nameTooWide(r, widths, phone)).map(r => r.id));
+  const first = chooseNamed(rows, skipped), whole = place(S, first);
+  if (!crowded(whole).length) return {mid, gutter, widths, h, base, S, sides: whole, skipped};
+  const named = new Set();
+  for (const e of [...new Set(rows.map(r => r.exp))].sort((a, b) => b - a)) {
+    let slots = LABEL_MAX - rows.filter(r => r.exp === e && r.group !== "oai").length;
+    for (const r of labelQueue(rows, e)) {
+      if (slots <= 0) break;
+      if (skipped.has(r.id)) continue;
+      const next = place(S, new Set([...named, r.id]));
+      if (crowded(next).length) { skipped.add(r.id); continue; }
+      named.add(r.id); sides = next; slots--;
+    }
+  }
+  return {mid, gutter, widths, h, base, S, sides, skipped};
+}
+function placeBoth(rows, S, widths, phone, named) {
+  return [placeSide(rows.filter(r => r.tried), S, widths[0], phone, named).map(p => ({...p, dir: -1})),
+          placeSide(rows.filter(r => !r.tried), S, widths[1], phone, named).map(p => ({...p, dir: 1}))];
+}
+const nameTooWide = (r, widths, phone) => r.name.length * (phone ? 6 : 6.6) > widths[r.tried ? 0 : 1];
+function labelBlocked(W, ids, data = D) {
+  const L = ladderLayout(W, data), rows = rawRows(data), phone = W < 640, named = new Set(ids);
+  if (rows.some(r => named.has(r.id) && nameTooWide(r, L.widths, phone))) return true;
+  return placeBoth(rows, L.S, L.widths, phone, named).flat().some(p => p.crowded);
+}
+const toneAt = t => `color-mix(in srgb, var(--accent) ${Math.round(22 + 78 * Math.min(1, Math.max(0, t)))}%, var(--surface))`;
+function renderRaw() {
+  const el = $("#raw"), W = Math.max(300, el.clientWidth), {mid, gutter, S, sides} = ladderLayout(W);
+  const yTop = S.segs[0].y1, yBottom = S.segs.at(-1).y2, tone = y => toneAt((yBottom - y) / (yBottom - yTop));
+  let svg = `<defs><linearGradient id="lad-tone" gradientUnits="userSpaceOnUse" x1="0" y1="${yTop}" x2="0" y2="${yBottom}">
+    <stop offset="0" style="stop-color:${toneAt(1)}"/><stop offset="1" style="stop-color:${toneAt(0)}"/></linearGradient></defs>`;
+  const spine = (a, b) => `<rect class="spine" x="${mid - 5}" y="${a}" width="10" height="${b - a}" rx="5"/>`;
+  S.segs.forEach((s, i) => { if (!s.gap && i % 2 === 0) svg += `<rect class="decade" x="0" y="${s.y1}" width="${W}" height="${s.y2 - s.y1}"/>`; });
+  const lines = new Map();
+  for (const s of S.segs) if (!s.gap) { if (!s.open) lines.set(s.exp + 1, s.y1); lines.set(s.exp, s.y2); }
+  for (const [e, y] of lines) svg += `<line class="thr" x1="0" x2="${W}" y1="${y}" y2="${y}"/>`;
+  let y0 = yTop;
+  for (const s of S.segs.filter(s => s.gap)) {
+    svg += spine(y0, s.y1 + 8);
+    const m = (s.y1 + s.y2) / 2;
+    svg += `<path class="gap-mark" d="M${mid - 7},${m - 6}l14,-5M${mid - 7},${m + 5}l14,-5"/>`;
+    y0 = s.y2 - 8;
+  }
+  svg += spine(y0, yBottom);
+  for (const [e, y] of lines) svg += `<rect class="thr-tag" x="${mid - 22}" y="${y - 9}" width="44" height="18" rx="9"/>` +
+    `<text class="thr-label" x="${mid}" y="${y + 4}" text-anchor="middle">10${sup(e)}</text>`;
+  const total = sides[0].length + sides[1].length;
+  let k = 0;
+  for (const side of sides) for (const p of side) {
+    const cx = mid + p.dir * (gutter + p.d), pub = p.r.group === "oai";
+    const away = p.mode === "in" ? -p.dir : p.dir, beside = p.mode === "out" || p.mode === "in";
+    let name = "";
+    if (p.lab) {
+      const n = p.lines.length, tx = beside ? cx + away * (p.rad + 6) : cx, anchor = !beside ? "middle" : away < 0 ? "end" : "start";
+      const ty = beside ? p.cy - (n - 1) * 7.5 + 4.5 : p.mode === "above" ? p.cy - p.rad - 7 - (n - 1) * 15 : p.cy + p.rad + 15;
+      name = `<text class="name" x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${anchor}">${p.lines.map((l, i) =>
+        `<tspan x="${tx.toFixed(1)}" dy="${i ? 15 : 0}">${esc(l)}</tspan>`).join("")}</text>`;
+    }
+    svg += `<g class="pt${pub ? " pub" : ""}" data-task="${esc(p.r.id)}" data-tip="${esc(rawTip(p.r))}" style="--d:${(0.8 * k++ / total).toFixed(2)}s"
+      aria-label="${esc(rawTip(p.r).replace(/<[^>]*>/g, ' '))}">
+      <circle class="bub${p.r.tried ? "" : pub ? " faint" : " untried"}" style="--tone:${tone(p.cy)}" cx="${cx.toFixed(1)}" cy="${p.cy.toFixed(1)}" r="${p.rad.toFixed(1)}"/>${name}</g>`;
+  }
+  const right = sides[1].some(p => p.r.group === "oai") ? ["At original length", "no final shown"] : ["Not tried yet", "original"];
+  el.innerHTML = `<div class="lad-head" style="grid-template-columns:${mid - 22}px 44px minmax(0, 1fr)"><div><b>Tried</b><small>best verified final</small></div><span></span>
+    <div><b>${right[0]}</b><small>${right[1]}</small></div></div>` +
+    `<svg class="lad-svg" width="${W}" height="${S.height}" viewBox="0 0 ${W} ${S.height}" role="group" aria-labelledby="raw-h">${svg}</svg>` +
+    rawSource();
+  bindTips(el);
+  el.querySelectorAll("g[data-tip]").forEach(item => {
+    item.addEventListener("click", event => { event.stopImmediatePropagation(); tipAtElement(item); }, true);
+    item.addEventListener("keydown", event => { if (event.key === "Escape") hideTip(); });
+  });
+}
+function renderWholeNote() {
+  $("#whole-note").innerHTML = `${esc(W.name)}: one declaration is ${W.share_pct}% of its length. The other
+    ${fmt(W.declarations - 1)} declarations total ${bigFmt(W.rest)} nodes (≈ ${sci(W.rest)}).`;
+}
+
+function wholeTip() {
+  return `<b>${esc(W.name)}</b><br>original ${bigFmt(W.original)}<br>no runs yet`;
+}
+function wholeLine(S, h) {
+  const y = h / 2, xo = S.X(W.original);
+  return `${gridSvg(S, h)}<g data-tip="${esc(wholeTip())}" aria-label="${esc(`${W.name}: original ${bigFmt(W.original)}, no runs yet`)}">
+    <rect class="hit" x="${xo - 8}" y="1" width="16" height="${h - 2}" rx="4"/><rect class="orig" x="${xo - 1.5}" y="${y - 9}" width="3" height="18"/></g>`;
+}
+function ladderTip(r) {
+  return `<b>${esc(r.name)}</b><br>original ${bigFmt(r.original)}` + (r.floor != null ? `<br>after the sharing pass ${bigFmt(r.floor)}` : "") +
+    `<br>best verified final ${bigFmt(r.best)}${nodeChange(BigInt(r.original), BigInt(r.best))}`;
+}
+function ladderOai(data) {
+  const n = s => BigInt(s);
+  return data.oai.challenges.filter(c => c.best != null).map(c => ({id: `oai-${c.config}`, name: c.config, targets: c.targets,
+    original: c.original, best: c.best, floor: null, factor: c.factor, source: c.source}))
+    .sort((a, b) => n(b.original) > n(a.original) ? 1 : n(b.original) < n(a.original) ? -1 : 0);
+}
+function finalTrack(S, r, h) {
+  const X = S.X, y = h / 2, xb = X(r.best), xo = X(r.original), d = 5.5;
+  const grid = gridSvg(S, h);
+  const segs = r.floor != null
+    ? `<line class="rewrite" x1="${xb}" x2="${X(r.floor)}" y1="${y}" y2="${y}"/><line class="mech" x1="${X(r.floor)}" x2="${xo}" y1="${y}" y2="${y}"/>
+       <path class="floor" d="M${X(r.floor)},${y - d}L${X(r.floor) + d},${y}L${X(r.floor)},${y + d}L${X(r.floor) - d},${y}Z"/>`
+    : `<line class="whole" x1="${xb}" x2="${xo}" y1="${y}" y2="${y}"/>`;
+  return `${grid}<g data-tip="${esc(ladderTip(r))}" aria-label="${esc(`${r.name}: original ${bigFmt(r.original)}, best verified final ${bigFmt(r.best)}`)}">
+    <rect class="hit" x="${xb - 8}" y="1" width="${xo - xb + 16}" height="${h - 2}" rx="4"/>${segs}
+    <rect class="orig" x="${xo - 1.5}" y="${y - 9}" width="3" height="18"/><circle class="best" cx="${xb}" cy="${y}" r="5.5"/></g>`;
+}
+function ladderHtml() {
+  const head = `<div class="lrow axis"><div class="lname"></div><div class="ltrack"></div><div class="lnums"></div></div>`;
+  const whole = `<div class="lrow"><div class="lname"><b><a href="#extra">${esc(W.name)}</a></b><span class="sub">${targetsText(W.targets)}</span></div>
+    <div class="ltrack"></div><div class="lnums"><span class="nw">${bigFmt(W.original)}</span> · <b>no runs yet</b><span class="sub">${esc(W.label)}</span></div></div>`;
+  const oai = ladderOai(D);
+  const oaiRows = oai.map(r => `<div class="lrow"><div class="lname"><b>${esc(r.name)}</b><span class="sub">${targetsText(r.targets)}</span></div>
+    <div class="ltrack"></div>
+    <div class="lnums"><span class="nw">${bigFmt(r.original)} → <b>${bigFmt(r.best)}</b>${nodeChange(BigInt(r.original), BigInt(r.best))}</span><span class="sub">${esc(r.source)}</span></div></div>`).join("");
+  const tag = ALT ? "summary" : "h3", title = "Published math challenges";
+  const oaiHead = `<${tag} class="lsec" id="ladder-oai">${title}</${tag}>`;
+  const oaiPart = !oai.length ? "" : ALT ? `<details class="lsec-more">${oaiHead}${oaiRows}</details>` : oaiHead + oaiRows;
+  return head + whole + D.ladder.map(r => `<div class="lrow"><div class="lname"><b>${r.id === "flt-s1" ? `<a href="#extra">${esc(r.name)}</a>` : esc(r.name)}</b><span class="sub">${fmt(r.targets)} targets</span></div>
+    <div class="ltrack"></div>
+    <div class="lnums"><span class="nw">${fmt(r.original)} → <b>${fmt(r.best)}</b>${nodeChange(BigInt(r.original), BigInt(r.best))}</span><span class="sub">${esc(r.source)}</span></div></div>`).join("") +
+    oaiPart;
+}
+function renderLadder() {
+  const el = $("#ladder");
+  el.innerHTML = ladderHtml();
+  const w = el.querySelector(".lrow:not(.axis) .ltrack").clientWidth || 600;
+  const S = logScale(w);
+  const note = breakCaption(S);
+  $("#axis-note").textContent = note ? `; ${note}` : "";
+  el.querySelector(".lrow.axis .ltrack").innerHTML = axisSvg(w, S);
+  const rows = D.ladder.concat(ladderOai(D));
+  el.querySelectorAll(".lrow:not(.axis) .ltrack").forEach((t, i) =>
+    { t.innerHTML = svgTrack(w, 26, i === 0 ? wholeLine(S, 26) : finalTrack(S, rows[i - 1], 26)); });
+  bindTips(el);
+}
+
+function renderTable() {
+  const cols = [
+    {key: "name", label: "Task", k: true, cell: r => `<td>${esc(r.name)}</td>`, sort: r => r.name},
+    {key: "targets", label: "Targets", num: true, cell: r => `<td class="num">${fmt(r.targets)}</td>`, sort: r => r.targets},
+    {key: "orig_median", label: "Original proof, median", num: true, cell: r => `<td class="num">${n0(r.orig_median)}</td>`, sort: r => r.orig_median},
+    {key: "orig_max", label: "Original proof, largest", num: true, cell: r => `<td class="num">${n0(r.orig_max)}</td>`, sort: r => r.orig_max},
+    {key: "shared_share", label: "From shared helpers", num: true, cell: r => `<td class="num">${sharePct(r.shared_share)}</td>`, sort: r => r.shared_share},
+    {key: "floor_median", label: "After the sharing pass, median", num: true, cell: r => `<td class="num">${n0(r.floor_median)}</td>`, sort: r => r.floor_median},
+    {key: "best_median", label: "In the best verified final, median", num: true, cell: r => `<td class="num">${n0(r.best_median)}</td>`, sort: r => r.best_median},
+    {key: "statement_median", label: "Statement, median", num: true, cell: r => `<td class="num">${n0(r.statement_median)}</td>`, sort: r => r.statement_median},
+    {key: "lemmas_median", label: "Library lemmas per proof, median", num: true, cell: r => `<td class="num">${n0(r.lemmas_median)}</td>`, sort: r => r.lemmas_median},
+    {key: "background", label: "Background", cell: r => `<td class="nw">${r.background === "Mathlib" ? "Mathlib" : "core Lean only"}</td>`, sort: r => r.background},
+  ];
+  const st = {key: null, dir: 1, render: () => sortableTable($("#dtable"), cols, D.tasks, st, r => r.study ? "The study's seven tasks" : "Extra examples")};
+  st.render();
+  $("#dtable").classList.add("stack");
+  markOverflow();
+}
+function renderNotes() {
+  $("#dmeasured").textContent = DATA.measured;
+  const ver = id => DTASK[id].toolchain.replace(/^.*:v/, "");
+  const count = v => D.tasks.filter(t => ver(t.id) === v).length;
+  const usual = D.tasks.map(t => ver(t.id)).sort((a, b) => count(b) - count(a))[0];
+  const odd = D.tasks.filter(t => ver(t.id) !== usual);
+  $("#dlean").textContent = `Lean ${usual}` + (odd.length ? `; ${odd.map(t => `${t.name}: its own versions of Lean and Mathlib`).join("; ")}.` : ".");
+  const ex = D.split_example, byName = id => DTASK[id].name;
+  const stmt = D.tasks.filter(t => t.study && t.statement_side_share > 0.5);
+  $("#caveats").innerHTML = [
+    `Shared helpers can dominate: ${esc(byName(ex.task))}'s <code>${esc(short(ex.name))}</code> has a ${fmt(ex.value)}-node proof
+     term, but its original proof is ${fmt(ex.proof)} nodes, of which ${fmt(ex.shared)} are its 1/k share of shared helpers.`,
+    stmt.length ? `In ${stmt.map(t => `${esc(t.name)} (${sharePct(t.statement_side_share)})`).join(" and ")}, most of the original's
+     nodes are on the statement side, in proofs inside definitions and instances the statements reach.` : "",
+  ].filter(Boolean).map(x => `<li>${x}</li>`).join("");
+}
+if (ALT) $("#raw-h").before($("#ladder-h"), $("#oai-switch"), $("#ladder"), $("#ladder-caption"));
+renderRaw(); renderWholeNote(); renderLadder(); renderNotes(); renderTable();
+$("#oai-tasks").innerHTML = oaiTasksNote();
+onResize.push(renderRaw);
+onResize.push(renderLadder);
+$("#oai-finals").addEventListener("click", event => {
+  const button = event.currentTarget, on = button.getAttribute("aria-pressed") !== "true", top = button.getBoundingClientRect().top;
+  button.setAttribute("aria-pressed", String(on));
+  setOaiFinals(on);
+  $("#oai-finals-note").textContent = on ? oaiFinalsDetail() : "";
+  $("#oai-finals-note").hidden = !on;
+  renderRaw(); renderLadder();
+  window.scrollBy(0, button.getBoundingClientRect().top - top);
+});
+</script>
+
+<footer class="wrap">MathCompressionBench · <span id="foot-lead">results snapshot <span id="foot-snap"></span>, the date of the newest run shown</span>. Run dates: <span id="foot-dates"></span>. Preview; results may change.</footer>
+<script>initChrome();</script>
+</body>
+</html>

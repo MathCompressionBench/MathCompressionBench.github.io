@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MathCompressionBench Worked Examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #FAFCFD; --surface: #FFFFFF; --surface-2: #EAF0F3; --ink: #20313F; --ink-2: #425563; --muted: #586C79;
+  --rule: #C8D3DB; --accent: #245E70; --helper: #84651F; --floor: #71818C;
+  --add-bg: #E3EEE8; --add-ink: #285D46; --del-bg: #F5E7EC; --del-ink: #8A3855;
+  --note-bg: #EEF2F5; --note-rule: #A8BAC6; --code-bg: #EEF3F6;
+  --s60: #245E70; --s120: #906724; --good: #28654E; --warn: #84651F; --crit: #9B3E56;
+  --ag1: #2a78d6; --ag2: #eb6834; --ag3: #1baf7a; --ag4: #eda100; --ag5: #e87ba4; --ag6: #008300;
+  --cat-automation: #2a78d6; --cat-library: #eb6834; --cat-sharing: #1baf7a; --cat-restructure: #eda100;
+  --cat-counting: #e87ba4; --cat-lemmas: #008300; --cat-other: #8A9398; --cat-mixed: #7d3c98;
+  --c-target: #84651F; --c-proof: #245E70;
+  --display: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --prose: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+    --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+    --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+    --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+    --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+    --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+    --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+    --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+    --c-target: #D9BD78; --c-proof: #96C6CE;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+  --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+  --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+  --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+  --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+  --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+  --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+  --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+  --c-target: #D9BD78; --c-proof: #96C6CE;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 24px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 36px; }
+main.wrap { padding-block: 0 48px; }
+header.top { background: var(--bg); border-top: 4px solid var(--ink); border-bottom: 1px solid var(--rule); }
+header.top .wrap { display: flex; gap: 8px 32px; align-items: baseline; flex-wrap: wrap; padding-block: 20px 16px; }
+header.top .brand { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: -.06em; color: var(--ink); text-decoration: none; }
+header.top nav { display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: baseline; font-size: 14px; }
+header.top nav a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 5px; white-space: nowrap; }
+header.top nav a:hover, header.top nav a:focus-visible, header.top nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
+.snap { font-family: var(--mono); font-size: 10px; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.tag { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--helper); border: 1px solid var(--helper); padding: 2px 7px; border-radius: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; }
+h1 { font-size: clamp(34px, 4.5vw, 52px); line-height: 1.05; letter-spacing: -.035em; margin: 52px 0 18px; max-width: 28ch; }
+h2 { font-size: 27px; line-height: 1.2; letter-spacing: -.02em; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid var(--ink); }
+h3 { font-size: 20px; line-height: 1.3; margin: 28px 0 10px; }
+p, li { max-width: 72ch; }
+.lede { font-family: var(--prose); font-size: 20px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; margin-top: 0; }
+.summary-line { font-family: var(--prose); font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 70ch; margin: 0 0 8px; }
+.kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.small { font-size: 13px; color: var(--muted); }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+code, pre, .mono, .diff { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 4px; border-radius: 0; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule);
+  border-radius: 0; padding: 10px 12px; overflow-x: auto; margin: 0; white-space: pre; max-width: 100%; }
+pre.src { max-height: 460px; overflow: auto; }
+.statement { white-space: pre-wrap; overflow-wrap: anywhere; }
+.note { background: var(--note-bg); border: 1px solid var(--note-rule); border-radius: 0; padding: 10px 14px; margin: 14px 0; max-width: 90ch; }
+.note > b:first-child { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.note ul { margin: 6px 0 0; padding-left: 20px; } .note li { margin: 4px 0; }
+details > summary { cursor: pointer; }
+details.more { margin: 10px 0; }
+details.flash { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+details.more > summary { font-weight: 500; color: var(--ink-2); }
+.formula { font-family: var(--prose); font-size: 21px; background: transparent; border-block: 1px solid var(--rule);
+  padding: 20px 0; overflow-x: auto; }
+.formula sub { font-size: 13px; }
+dl.terms { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 12px 0; font-size: 14px; max-width: 90ch; }
+dl.terms dt { font-weight: 600; } dl.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.terms dd { margin-bottom: 8px; } }
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+td.nw { white-space: nowrap; }
+/* a task set's or a release's name kept on one line (never broken at its hyphen) */
+.setname { white-space: nowrap; }
+th .sub { display: block; font-weight: 400; }
+td .sub { display: block; font-family: var(--body); font-size: 11px; color: var(--muted); white-space: normal; }
+td .sub.nw { white-space: nowrap; }
+td.none, span.none { color: var(--muted); }
+tbody tr:last-child td { border-bottom: 0; }
+.tablewrap { overflow-x: auto; max-width: 100%; border-top: 1px solid var(--ink-2); border-bottom: 1px solid var(--rule); background: transparent; margin: 16px 0 10px; }
+.tablewrap.tall { max-height: 640px; overflow-y: auto; }
+.tablewrap.tall thead th { position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 0 var(--rule); }
+table.pin th:first-child, table.pin td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); box-shadow: 1px 0 0 var(--rule); }
+th.sort { cursor: pointer; user-select: none; } th.sort:hover { color: var(--ink); }
+th .nw { white-space: nowrap; }
+th.sort[aria-sort="none"] .arr::after { content: " ↕"; font-size: 10px; opacity: .45; }
+th.sort[aria-sort="ascending"] .arr::after { content: " ▲"; font-size: 9px; } th.sort[aria-sort="descending"] .arr::after { content: " ▼"; font-size: 9px; }
+tr.group td { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+tr.sub td:first-child { padding-left: 1.6em; color: var(--ink-2); }
+td.ptitle, td.ponly { display: none; }
+td.notes { min-width: 210px; max-width: 280px; font-size: 12.5px; color: var(--ink-2); }
+.mark { color: var(--ink-2); font-weight: 700; margin-left: 2px; } a.mark { text-decoration: none; }
+.flag { display: inline-block; font-size: 11px; color: var(--ink-2); background: var(--surface-2); border-radius: 0; padding: 0 5px; margin: 0 3px 2px 0; }
+.mp-yes { color: var(--ink); font-weight: 700; } .mp-yes::before { content: "◆ "; font-size: 10px; vertical-align: 1px; } .mp-no { color: var(--ink-2); } .mp-pending { color: var(--muted); font-style: italic; }
+.res { font-size: 11.5px; padding: 0 6px; border-radius: 0; border: 1px solid var(--rule); white-space: nowrap; }
+.res.pass::before { content: "✓ "; color: var(--good); } .res.fail::before { content: "× "; color: var(--crit); }
+.st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12.5px; }
+.st i { font-style: normal; font-weight: 700; width: 14px; text-align: center; display: inline-flex; justify-content: center; }
+.st i svg { display: block; }
+.st-VALID i { color: var(--good); } .st-VALID_REPAIRED_VERIFIER i { color: var(--warn); }
+.st-RAW_FAILURE i { color: var(--crit); } .st-UNCONFIRMED i { color: var(--muted); }
+.st-VERIFIED i { color: var(--good); } .st-VERIFIED_PENDING_FIX i { color: var(--warn); }
+.st-REJECTED i { color: var(--crit); } .st-NO_SOURCE i { color: var(--muted); }
+.swipehint { display: none; font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+.tablewrap.overflows { -webkit-mask-image: linear-gradient(to right, #000 90%, transparent); mask-image: linear-gradient(to right, #000 90%, transparent); }
+.tablewrap.overflows.at-end { -webkit-mask-image: none; mask-image: none; }
+.tablewrap.overflows + .swipehint { display: block; }
+/* stacked rows on narrow screens */
+@media (max-width: 700px) {
+  table.stack thead { display: none; }
+  table.stack tr { display: block; border-bottom: 1px solid var(--rule); padding: 6px 0; }
+  table.stack tr.group { padding: 0; }
+  table.stack td { display: flex; gap: 10px; justify-content: space-between; border: 0; padding: 2px 10px; text-align: right; white-space: normal; }
+  table.stack td::before { content: attr(data-label); color: var(--muted); font-family: var(--body); font-size: 12px; text-align: left; }
+  table.stack td:not(.num) { text-align: left; }
+  table.stack td.num { flex-wrap: wrap; }
+  table.stack td.notes { display: block; text-align: left; min-width: 0; max-width: none; }
+  table.stack td.notes::before { display: block; }
+  table.stack tr.group td { display: block; text-align: left; } table.stack tr.group td::before { content: none; }
+  table.stack td:empty { display: none; }
+  table.stack td.mono { display: block; text-align: left; } table.stack td.mono::before { display: block; }
+  table.stack .cv .sub { display: inline; margin-left: 0; } table.stack .cv .sub::before { content: " · "; }
+  table.stack.compact tr:not(.group) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 14px; padding: 10px; }
+  table.stack.compact td { display: block; padding: 0; text-align: left; font-size: 13px; }
+  table.stack.compact td::before { display: block; font-size: 11px; line-height: 1.3; font-weight: 400; }
+  table.stack.compact td.k { display: none; }
+  table.stack.compact td:empty { display: none; }
+  table.stack.compact td.ptitle { display: block; order: -2; grid-column: 1 / -1; font-size: 14px; font-weight: 600; }
+  table.stack.compact td.ptitle::before { content: none; }
+  table.stack.compact td.ponly { display: block; order: -1; grid-column: 1 / -1; }
+  table.stack.compact td.notes { grid-column: 1 / -1; }
+  table.stack.compact td .sub, table.stack.compact td .sub.nw { white-space: normal; overflow-wrap: anywhere; }
+  .tablewrap.tall { max-height: none; overflow-y: visible; }
+}
+/* controls */
+.panel { border-block: 1px solid var(--rule); padding: 20px 0; }
+.controls { display: flex; gap: 10px 12px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+.controls label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.controls .count { font-size: 12.5px; color: var(--muted); margin-left: auto; align-self: center; }
+select, button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--rule); border-radius: 0; padding: 5px 8px; }
+button { cursor: pointer; } button[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+select:focus-visible, button:focus-visible, a:focus-visible, tr:focus-visible, th:focus-visible, [data-tip]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 0; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; border-radius: 0; }
+/* charts */
+.legend { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 8px; align-items: center; }
+.legend svg { vertical-align: -2px; margin-right: 5px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-family: var(--body); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart text.lab { fill: var(--ink-2); font-size: 12px; }
+.chart text.tlab { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.chart text.endlab { fill: var(--ink); font-size: 11.5px; font-weight: 600; }
+.chart text.markglyph { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .axis { stroke: var(--ink-2); stroke-width: 1; }
+.chart .bound { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart text.blab { paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.chart .gutter { fill: var(--surface-2); }
+.chart .band { fill: var(--surface-2); opacity: .55; }
+.chart g[data-tip] { cursor: pointer; } .chart g[data-tip]:focus { outline: none; }
+.caption { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; max-width: 90ch; }
+.tooltip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 0;
+  z-index: 50; max-width: 320px; line-height: 1.45; }
+/* number rows, part bars, code side by side */
+.figures { display: flex; gap: 10px 26px; flex-wrap: wrap; margin: 8px 0 12px; }
+.figures > div { min-width: 0; }
+.figures .v { font-family: var(--mono); font-size: 17px; font-variant-numeric: tabular-nums; }
+.figures .l { font-size: 12px; color: var(--muted); max-width: 30ch; }
+.bars { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 12.5px; margin: 8px 0 4px; }
+.bar { display: flex; height: 18px; gap: 2px; }
+.bar span { display: block; height: 100%; min-width: 2px; }
+.bar span:first-child { border-radius: 0; } .bar span:last-child { border-radius: 0; }
+.seg-target { background: var(--accent); } .seg-helper { background: var(--helper); }
+.seg-floor { background: repeating-linear-gradient(45deg, var(--floor) 0 3px, color-mix(in srgb, var(--floor) 55%, var(--surface)) 3px 6px); }
+.side { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+@media (max-width: 640px) { .side { grid-template-columns: minmax(0, 1fr); } .bars { grid-template-columns: 96px minmax(0, 1fr); } }
+.side > div { min-width: 0; }
+.side h5 { margin: 0 0 4px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+.diff { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 0;
+  overflow: auto; max-height: 460px; }
+.diff div { white-space: pre; padding: 0 10px 0 22px; position: relative; }
+.diff div::before { position: absolute; left: 7px; color: var(--muted); }
+.diff .add { background: var(--add-bg); color: var(--add-ink); } .diff .add::before { content: "+"; color: var(--add-ink); }
+.diff .del { background: var(--del-bg); color: var(--del-ink); } .diff .del::before { content: "−"; color: var(--del-ink); }
+.chip { display: inline-block; font-weight: 500; font-size: 11px; padding: 1px 7px; border-radius: 0; border: 1px solid var(--rule); color: var(--ink-2); white-space: nowrap; }
+/* case study cards */
+.card { border-top: 1px solid var(--rule); padding: 20px 0; margin: 24px 0; }
+.card h3 { margin-top: 2px; font-size: 20px; line-height: 1.3; max-width: 60ch; }
+.card .numbers { display: flex; gap: 14px 24px; flex-wrap: wrap; margin: 8px 0 12px; }
+.card .numbers > div { min-width: 0; overflow-wrap: anywhere; }
+.card .numbers .v { font-family: var(--mono); font-size: 14.5px; }
+.card .numbers .l { font-size: 11.5px; color: var(--muted); max-width: 34ch; }
+.card .numbers ul.v { margin: 0; padding-left: 16px; }
+.card p, .card li { overflow-wrap: anywhere; }
+.card .nltext { white-space: pre-line; }
+.card details > summary { font-size: 14px; margin-top: 10px; }
+.mech { border-top: 1px dashed var(--rule); padding-top: 12px; margin-top: 12px; }
+.mech h4 { margin: 0 0 4px; font-size: 15px; } .mech p { white-space: pre-line; }
+.caveats li { margin: 4px 0; font-size: 13.5px; }
+/* appendix links */
+.appendix { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 12px 0; padding: 0; list-style: none; }
+.appendix a { display: block; height: 100%; border-top: 1px solid var(--rule); padding: 14px 0; text-decoration: none; color: var(--ink-2); font-size: 13.5px; }
+.appendix a b { display: block; font-family: var(--display); font-size: 17px; color: var(--accent); margin-bottom: 2px; }
+.appendix a:hover { border-color: var(--accent); }
+footer { margin-top: 40px; padding-block: 20px 40px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--rule); }
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  h2 { font-size: 23px; }
+  header.top .wrap { gap: 10px 16px; padding-block: 16px; }
+  .snap { display: none; }
+}
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* A report's hierarchy: open sections, inset instruments, and a quiet running index. */
+main.wrap > p, main.wrap > ul, main.wrap > ol { overflow-wrap: anywhere; }
+main.wrap > .summary-line { max-width: 76ch; }
+main .toc { border-block: 1px solid var(--rule); padding-block: 12px; margin-block: 24px 32px; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+pre code { font-size: inherit; }
+tbody tr:hover td { background-color: color-mix(in srgb, var(--accent) 5%, var(--bg)); }
+.controls { padding-block: 12px; border-bottom: 1px solid var(--rule); }
+.controls label { min-width: 0; max-width: 100%; }
+select { max-width: 100%; }
+select, button { min-height: 34px; border-color: var(--muted); border-radius: 2px; }
+figcaption, .caption { line-height: 1.5; }
+footer p { max-width: none; }
+@media (max-width: 800px) {
+  header.top .wrap { gap: 10px 24px; }
+  header.top nav { order: 3; flex-basis: 100%; }
+}
+@media (max-width: 640px) {
+  h1 { margin-top: 32px; }
+  h2 { margin-top: 36px; }
+  .summary-line, .lede { font-size: 18px; }
+  header.top nav { gap: 8px 18px; font-size: 13px; }
+  .controls .count { flex-basis: 100%; margin-left: 0; }
+  .formula { font-size: 17px; }
+}
+</style>
+</head>
+<body data-page="examples">
+<header class="top"><div class="wrap">
+
+  <a class="brand" href="index.html">MathCompressionBench</a>
+  <nav aria-label="Pages" id="nav"><a href="index.html" data-p="home">Home</a><a href="difficulty.html" data-p="difficulty">Task difficulty</a><a href="rules.html" data-p="rules">Rules and scoring</a><a href="results.html" data-p="results">All results</a><a href="examples.html" data-p="examples">Worked examples</a><a href="index.html#submit" data-p="submit">Submit</a></nav>
+
+
+  <span class="snap" id="snap"></span>
+</div></header>
+<div class="tooltip" id="tip" hidden></div>
+<script>
+const DATA = {"snapshot": "2026-10-01", "dates": "the study's runs, up to 2026-10-01; the fundamental theorem of arithmetic example, 2026-10-01", "tasks": [{"id": "ramsey96", "name": "Ramsey96", "domain": "Multicolour triangle Ramsey numbers", "targets": 96, "baseline_nodes": 11338478, "desc": "Targets cover multicolour triangle Ramsey numbers, including palette constructions, saturated-matrix counting, and the library's theorem that log R(k) = Θ(k·log k) (`triangleRamseyNumber_log_isTheta`), where R(k) is the library's `triangleRamseyNumber k`. All 96 statements are targets, not only the final bound.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt26", "name": "SLT26", "domain": "Statistical learning theory", "targets": 26, "baseline_nodes": 392854783, "desc": "Targets cover statistical learning theory (SLT) with supporting probability and matrix results. They are in 15 of the library's 65 modules and include Dudley bounds, Hanson–Wright concentration, spectral perturbation, random-matrix bounds, Gaussian concentration and least-squares error bounds.", "background": "Mathlib and its dependencies", "source": "the published SLT library, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt49", "name": "SLT49", "domain": "Statistical learning theory, more targets", "targets": 49, "baseline_nodes": 406689591, "desc": "The same library as SLT26 with more targets, in 29 of its 65 modules, also covering covering numbers, Efron–Stein, entropy, and Gaussian Poincaré and log-Sobolev inequalities.", "background": "Mathlib and its dependencies", "source": "the published SLT library, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "permanent2", "name": "Permanent", "domain": "Formula lower bounds for the permanent", "targets": 2, "baseline_nodes": 85690155, "desc": "Lower bounds for arithmetic formulas computing the permanent: the division-free and the rational-formula conclusions.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "compactness5", "name": "Compactness", "domain": "Counterexamples to compactness and degeneracy conjectures", "targets": 5, "baseline_nodes": 1307221424, "desc": "Five theorems from a formalization of the compactness and degeneracy conjectures: quantitative and asymptotic compactness counterexamples, the theorems the library calls `not_erdos_180` and `not_erdos_146`, and a two-degenerate extremal counterexample.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib197", "name": "Mathlib197", "domain": "Mathlib: algebra, calculus, category theory, manifolds, measure theory", "targets": 197, "baseline_nodes": 114567106, "desc": "Targets are theorems from 10 Mathlib modules in algebra, calculus, category theory, manifolds and measure theory. No other Mathlib module imports these modules.", "background": "Lean core and the 3,328 Mathlib modules the editable files import", "source": "Mathlib, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib372", "name": "Mathlib372", "domain": "Mathlib, the same areas: a larger collection", "targets": 372, "baseline_nodes": 186421329, "desc": "A larger collection from 20 Mathlib modules in the same five areas. No other Mathlib module imports these modules.", "background": "Lean core and the 3,718 Mathlib modules the editable files import", "source": "Mathlib, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}], "models": [{"id": "deepseek", "name": "DeepSeek", "effort": "high", "note": "DSH SDK: the harness used for DeepSeek, a software development kit for running the model as an agent.", "model_id": "deepseek-v4-pro", "harness": "DSH SDK", "harness_version": null}, {"id": "glm-flash", "name": "GLM-Flash", "effort": "low", "model_id": "glm-5.3-flash", "harness": "mini-swe-agent 2.4.6 + LiteLLM", "note": "", "harness_version": "2.4.6"}, {"id": "muse", "name": "Muse", "effort": "medium", "note": "", "model_id": "muse-spark-1.3-contributor", "harness": "Muse CLI", "harness_version": "1.4.0", "model_name": "Muse Spark 1.3"}, {"id": "fable", "name": "Fable", "effort": "high", "model_id": "claude-fable-5-1", "harness": "Claude Code CLI", "note": "", "harness_version": null}, {"id": "astra", "name": "Astra", "effort": "high", "model_id": "gpt-6-astra", "harness": "Codex CLI", "note": "", "harness_version": null}, {"id": "opus", "name": "Opus 5.5", "effort": "high", "model_id": "claude-opus-5-5", "harness": "Claude Code CLI 2.1.280", "note": "", "harness_version": "2.1.280"}], "values": {"run_example": "Ramsey96, Astra, 60 min, run 2: from 11,338,478 to 441,840 nodes"}, "fta": {"versions": {"original": {"nodes": 224139, "parts": {"target": 32664, "helper": 191404, "floor": 71}, "declarations": [{"name": "fta_exists._proof_1_5", "nodes": 64897, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_4", "nodes": 23832, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_7", "nodes": 22125, "part": "helper", "new": false}, {"name": "fta_unique", "nodes": 17310, "part": "target", "new": false}, {"name": "fta_unique._proof_1_3", "nodes": 16702, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_3", "nodes": 16673, "part": "helper", "new": false}, {"name": "fta_exists", "nodes": 15354, "part": "target", "new": false}, {"name": "fta_exists._proof_1_6", "nodes": 14463, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_1", "nodes": 11002, "part": "helper", "new": false}, {"name": "fta_unique._proof_1_4", "nodes": 10944, "part": "helper", "new": false}, {"name": "fta_unique._proof_1_1", "nodes": 5351, "part": "helper", "new": false}, {"name": "fta_unique._proof_1_2", "nodes": 2711, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_2", "nodes": 2704, "part": "helper", "new": false}, {"name": "IsPrime", "nodes": 71, "part": "floor", "new": false}], "source": "import Fta.Defs\n\nnamespace Fta.Verbose\nopen Fta\n\n/-- Existence: every number n ≥ 1 is the product of a list of primes. -/\ntheorem fta_exists (n : Nat) (hn : 1 ≤ n) :\n    ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n := by\n  induction n using Nat.strongRecOn with\n  | ind n ih =>\n  by_cases h1 : n = 1\n  · -- 1 is the empty product\n    refine ⟨[], ?_, ?_⟩\n    · intro p hp\n      simp at hp\n    · simp [h1]\n  · by_cases hprime : ∀ m, m ∣ n → m = 1 ∨ m = n\n    · -- n is prime: the one-element list\n      refine ⟨[n], ?_, ?_⟩\n      · intro p hp\n        simp at hp\n        subst hp\n        constructor\n        · omega\n        · exact hprime\n      · simp\n    · -- n is composite: n = m * k with 1 < m < n and 1 < k < n\n      have hex : ∃ m, m ∣ n ∧ ¬(m = 1 ∨ m = n) := by\n        apply Classical.byContradiction\n        intro hne\n        apply hprime\n        intro m hm\n        apply Classical.byContradiction\n        intro hm'\n        exact hne ⟨m, hm, hm'⟩\n      obtain ⟨m, hm, hm'⟩ := hex\n      have hm1 : m ≠ 1 := by\n        intro h\n        exact hm' (Or.inl h)\n      have hmn : m ≠ n := by\n        intro h\n        exact hm' (Or.inr h)\n      obtain ⟨k, hk⟩ := hm\n      have hm0 : m ≠ 0 := by\n        intro h\n        subst h\n        simp at hk\n        omega\n      have hk0 : k ≠ 0 := by\n        intro h\n        subst h\n        simp at hk\n        omega\n      have hmle : m ≤ n := by\n        rw [hk]\n        have hk1 : 1 ≤ k := by omega\n        calc m = m * 1 := by simp\n          _ ≤ m * k := Nat.mul_le_mul_left m hk1\n      have hkle : k ≤ n := by\n        rw [hk]\n        have hm1' : 1 ≤ m := by omega\n        calc k = 1 * k := by simp\n          _ ≤ m * k := Nat.mul_le_mul_right k hm1'\n      have hmlt : m < n := by omega\n      have hklt : k < n := by\n        apply Nat.lt_of_le_of_ne hkle\n        intro hkn\n        apply hm1\n        have h2 : m * k = 1 * k := by\n          rw [← hk, Nat.one_mul]\n          exact hkn.symm\n        exact Nat.eq_of_mul_eq_mul_right (by omega) h2\n      obtain ⟨l₁, hl₁, hp₁⟩ := ih m hmlt (by omega)\n      obtain ⟨l₂, hl₂, hp₂⟩ := ih k hklt (by omega)\n      refine ⟨l₁ ++ l₂, ?_, ?_⟩\n      · intro p hp\n        rw [List.mem_append] at hp\n        cases hp with\n        | inl h => exact hl₁ p h\n        | inr h => exact hl₂ p h\n      · -- the product of an appended list, re-derived by induction\n        have happ : ∀ a b : List Nat, (a ++ b).prod = a.prod * b.prod := by\n          intro a b\n          induction a with\n          | nil => simp\n          | cons x xs ihx =>\n            rw [List.cons_append, List.prod_cons, List.prod_cons, ihx, Nat.mul_assoc]\n        rw [happ, hp₁, hp₂, hk]\n\n/-- Uniqueness: two lists of primes with the same product are permutations of each other. -/\ntheorem fta_unique (l₁ l₂ : List Nat) (h₁ : ∀ p ∈ l₁, IsPrime p) (h₂ : ∀ p ∈ l₂, IsPrime p)\n    (h : l₁.prod = l₂.prod) : l₁.Perm l₂ := by\n  induction l₁ generalizing l₂ with\n  | nil =>\n    -- the other list has product 1, so it contains no prime\n    cases l₂ with\n    | nil => exact List.Perm.refl []\n    | cons q t =>\n      exfalso\n      have hq : IsPrime q := h₂ q (by simp)\n      have hq2 : 2 ≤ q := hq.1\n      have hdvd : q ∣ (q :: t).prod := by\n        rw [List.prod_cons]\n        exact Nat.dvd_mul_right q t.prod\n      rw [← h] at hdvd\n      simp at hdvd\n      omega\n  | cons p t ih =>\n    have hp : IsPrime p := h₁ p (by simp)\n    have hp2 : 2 ≤ p := hp.1\n    -- p divides the product of l₂ ...\n    have hdvd : p ∣ l₂.prod := by\n      rw [← h, List.prod_cons]\n      exact Nat.dvd_mul_right p t.prod\n    -- ... so p is a member of l₂ (Euclid's lemma, re-derived at every step of an induction over l₂)\n    have hmem : p ∈ l₂ := by\n      clear ih h\n      induction l₂ with\n      | nil =>\n        simp at hdvd\n        omega\n      | cons q r ihr =>\n        rw [List.prod_cons] at hdvd\n        have hq : IsPrime q := h₂ q (by simp)\n        have hq2 : 2 ≤ q := hq.1\n        -- Euclid's lemma for p ∣ q * r.prod, from the gcd of p and q\n        have hg : Nat.gcd p q = 1 ∨ Nat.gcd p q = p := hp.2 (Nat.gcd p q) (Nat.gcd_dvd_left p q)\n        cases hg with\n        | inl hg1 =>\n          -- p and q are coprime, so p divides r.prod\n          have hr : p ∣ r.prod := by\n            have h3 : p ∣ Nat.gcd (q * r.prod) (p * r.prod) := Nat.dvd_gcd hdvd (Nat.dvd_mul_right p r.prod)\n            rw [Nat.gcd_mul_right, Nat.gcd_comm, hg1, Nat.one_mul] at h3\n            exact h3\n          have hr' : p ∈ r := ihr (fun x hx => h₂ x (by simp [hx])) hr\n          simp [hr']\n        | inr hgp =>\n          -- p divides q, and q is prime, so p = q\n          have hpq : p ∣ q := by\n            have h4 := Nat.gcd_dvd_right p q\n            rw [hgp] at h4\n            exact h4\n          have hq' := hq.2 p hpq\n          cases hq' with\n          | inl h1 => omega\n          | inr h1 => simp [h1]\n    -- taking p out of l₂ divides its product by p (re-derived by induction)\n    have herase : ∀ l : List Nat, p ∈ l → l.prod = p * (l.erase p).prod := by\n      intro l hl\n      induction l with\n      | nil => simp at hl\n      | cons x xs ihx =>\n        by_cases hx : x = p\n        · subst hx\n          simp\n        · have hxs : p ∈ xs := by\n            simp at hl\n            cases hl with\n            | inl h' => exact absurd h'.symm hx\n            | inr h' => exact h'\n          rw [List.erase_cons_tail (by simpa using hx), List.prod_cons, List.prod_cons, ihx hxs]\n          rw [← Nat.mul_assoc, ← Nat.mul_assoc, Nat.mul_comm x p]\n    have hprod : t.prod = (l₂.erase p).prod := by\n      have h5 : p * t.prod = p * (l₂.erase p).prod := by\n        rw [← herase l₂ hmem, ← List.prod_cons]\n        exact h\n      exact Nat.eq_of_mul_eq_mul_left (by omega) h5\n    have hrest : t.Perm (l₂.erase p) :=\n      ih (l₂.erase p) (fun x hx => h₁ x (by simp [hx])) (fun x hx => h₂ x (List.mem_of_mem_erase hx)) hprod\n    exact (List.Perm.cons p hrest).trans (List.perm_cons_erase hmem).symm\n\nend Fta.Verbose\n", "lines": 172, "lemmas": 11, "auto": {"count": 11, "nodes": 191404}}, "compressed": {"nodes": 7914, "parts": {"target": 6431, "helper": 1412, "floor": 71}, "declarations": [{"name": "fta_exists", "nodes": 4271, "part": "target", "new": false}, {"name": "fta_unique", "nodes": 2160, "part": "target", "new": false}, {"name": "mem_of_dvd", "nodes": 906, "part": "helper", "new": false}, {"name": "dvd_mul", "nodes": 394, "part": "helper", "new": false}, {"name": "ne_one", "nodes": 112, "part": "helper", "new": false}, {"name": "IsPrime", "nodes": 71, "part": "floor", "new": false}], "source": "import Fta.Defs\n\nnamespace Fta.Hand\nopen Fta\n\n/-- A prime is not 1. -/\ntheorem ne_one {p : Nat} (hp : IsPrime p) : p ≠ 1 :=\n  Nat.ne_of_gt hp.1\n\n/-- Euclid's lemma: a prime that divides a product divides one of the factors. -/\ntheorem dvd_mul {p a b : Nat} (hp : IsPrime p) (h : p ∣ a * b) : p ∣ a ∨ p ∣ b :=\n  (hp.2 _ (Nat.gcd_dvd_left p a)).elim (fun g => .inr (Nat.Coprime.dvd_of_dvd_mul_left g h))\n    fun g => .inl (g ▸ Nat.gcd_dvd_right p a)\n\n/-- A prime that divides the product of a list of primes is in the list. -/\ntheorem mem_of_dvd {p : Nat} (hp : IsPrime p) {l : List Nat} (hl : ∀ q ∈ l, IsPrime q) (h : p ∣ l.prod) :\n    p ∈ l := by\n  induction l with\n  | nil => exact absurd (Nat.dvd_one.1 h) (ne_one hp)\n  | cons q l ih =>\n    exact (dvd_mul (a := q) (b := l.prod) hp h).elim\n      (fun d => ((hl q List.mem_cons_self).2 p d).resolve_left (ne_one hp) ▸ List.mem_cons_self)\n      fun d => List.mem_cons_of_mem q (ih (fun r m => hl r (List.mem_cons_of_mem q m)) d)\n\n/-- Existence: every number n ≥ 1 is the product of a list of primes. -/\ntheorem fta_exists (n : Nat) (hn : 1 ≤ n) :\n    ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n :=\n  Nat.strongRecOn (motive := fun n => 1 ≤ n → ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n) n\n    (fun n ih hn => (Nat.eq_or_lt_of_le hn).elim (fun e => ⟨[], fun _ m => absurd m List.not_mem_nil, e⟩) fun h2 =>\n      (Classical.em (∃ m, m ∣ n ∧ ¬(m = 1 ∨ m = n))).elim\n        (fun c => c.elim fun m hm => hm.1.elim fun k e =>\n          have hm0 := Nat.pos_of_mul_pos_right (b := k) (e ▸ hn)\n          have hk0 := Nat.pos_of_mul_pos_left (a := m) (e ▸ hn)\n          (ih m (e ▸ Nat.lt_of_le_of_ne (Nat.le_mul_of_pos_right m hk0) fun f => hm.2 (.inr (f.trans e.symm))) hm0).elim\n            fun l₁ h₁ => (ih k (e ▸ Nat.lt_of_le_of_ne (Nat.le_mul_of_pos_left k hm0) fun f => hm.2\n              (.inl (Nat.eq_of_mul_eq_mul_right hk0 (f.symm.trans (Nat.one_mul k).symm)))) hk0).elim\n            fun l₂ h₂ => ⟨l₁ ++ l₂, fun q m => (List.mem_append.1 m).elim (h₁.1 q) (h₂.1 q),\n              e ▸ h₁.2 ▸ h₂.2 ▸ List.prod_append_nat⟩)\n        fun c => ⟨[n], fun _ m => List.mem_singleton.1 m ▸\n          And.intro h2 fun m d => Classical.byContradiction fun f => c ⟨m, d, f⟩, Nat.mul_one n⟩) hn\n\n/-- Uniqueness: two lists of primes with the same product are permutations of each other. -/\ntheorem fta_unique (l₁ l₂ : List Nat) (h₁ : ∀ p ∈ l₁, IsPrime p) (h₂ : ∀ p ∈ l₂, IsPrime p)\n    (h : l₁.prod = l₂.prod) : l₁.Perm l₂ := by\n  induction l₁ generalizing l₂ with\n  | nil =>\n    cases l₂ with\n    | nil => exact .nil\n    | cons q r =>\n      exact (ne_one (h₂ q List.mem_cons_self) (Nat.dvd_one.1 (h ▸ Nat.dvd_mul_right q r.prod : q ∣ List.prod []))).elim\n  | cons p t ih =>\n    have hp := h₁ p List.mem_cons_self\n    have e := List.perm_cons_erase (mem_of_dvd hp h₂ (h ▸ Nat.dvd_mul_right p t.prod))\n    exact (List.Perm.cons p (ih _ (fun q m => h₁ q (List.mem_cons_of_mem p m)) (fun q m => h₂ q (List.mem_of_mem_erase m))\n      (Nat.eq_of_mul_eq_mul_left (Nat.lt_of_lt_of_le (by decide) hp.1) (h.trans e.prod_nat)))).trans e.symm\n\nend Fta.Hand\n", "lines": 57, "lemmas": 3}, "natural": {"nodes": 255416, "parts": {"target": 16578, "helper": 238767, "floor": 71}, "declarations": [{"name": "fta_exists._proof_1_3", "nodes": 73916, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_5", "nodes": 33840, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_2", "nodes": 26363, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_7", "nodes": 24887, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_6", "nodes": 22380, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_4", "nodes": 18032, "part": "helper", "new": false}, {"name": "fta_exists._proof_1_1", "nodes": 11002, "part": "helper", "new": false}, {"name": "fta_exists", "nodes": 10476, "part": "target", "new": false}, {"name": "fta_unique._proof_1_2", "nodes": 9637, "part": "helper", "new": false}, {"name": "prime_mem_of_dvd_prod._proof_1_2", "nodes": 7142, "part": "helper", "new": false}, {"name": "fta_unique", "nodes": 6102, "part": "target", "new": false}, {"name": "fta_unique._proof_1_1", "nodes": 5602, "part": "helper", "new": false}, {"name": "prime_mem_of_dvd_prod._proof_1_1", "nodes": 2828, "part": "helper", "new": false}, {"name": "prime_mem_of_dvd_prod", "nodes": 2636, "part": "helper", "new": false}, {"name": "prime_dvd_mul", "nodes": 502, "part": "helper", "new": false}, {"name": "IsPrime", "nodes": 71, "part": "floor", "new": false}], "source": "import Fta.Defs\n\nnamespace Fta.Natural\nopen Fta\n\n/-- Euclid's lemma: a prime that divides a product divides one of the factors. -/\ntheorem prime_dvd_mul {p a b : Nat} (hp : IsPrime p) (h : p ∣ a * b) : p ∣ a ∨ p ∣ b := by\n  rcases hp.2 (Nat.gcd p a) (Nat.gcd_dvd_left p a) with hg | hg\n  · right\n    exact Nat.Coprime.dvd_of_dvd_mul_left hg h\n  · left\n    rw [← hg]\n    exact Nat.gcd_dvd_right p a\n\n/-- A prime that divides the product of a list of primes is in the list. -/\ntheorem prime_mem_of_dvd_prod {p : Nat} (hp : IsPrime p) {l : List Nat} (hl : ∀ q ∈ l, IsPrime q)\n    (h : p ∣ l.prod) : p ∈ l := by\n  induction l with\n  | nil =>\n    simp at h\n    have := hp.1\n    omega\n  | cons q t ih =>\n    rw [List.prod_cons] at h\n    rcases prime_dvd_mul hp h with hq | ht\n    · rcases (hl q (by simp)).2 p hq with h1 | h1\n      · have := hp.1\n        omega\n      · simp [h1]\n    · have : p ∈ t := ih (fun r hr => hl r (by simp [hr])) ht\n      simp [this]\n\n/-- Existence: every number n ≥ 1 is the product of a list of primes. -/\ntheorem fta_exists (n : Nat) (hn : 1 ≤ n) :\n    ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n := by\n  induction n using Nat.strongRecOn with\n  | ind n ih =>\n    by_cases h1 : n = 1\n    · exact ⟨[], by simp, by simp [h1]⟩\n    by_cases hp : IsPrime n\n    · exact ⟨[n], by simpa using hp, by simp⟩\n    -- n is composite: it has a divisor m other than 1 and n\n    have hcomp : ∃ m, m ∣ n ∧ m ≠ 1 ∧ m ≠ n := by\n      apply Classical.byContradiction\n      intro hne\n      apply hp\n      refine ⟨by omega, fun m hm => ?_⟩\n      by_cases hm1 : m = 1\n      · exact Or.inl hm1\n      by_cases hmn : m = n\n      · exact Or.inr hmn\n      exact absurd ⟨m, hm, hm1, hmn⟩ hne\n    obtain ⟨m, ⟨k, rfl⟩, hm1, hmn⟩ := hcomp\n    have hm0 : m ≠ 0 := by\n      rintro rfl\n      simp at hn\n    have hk1 : k ≠ 1 := by\n      rintro rfl\n      simp at hmn\n    have hk0 : k ≠ 0 := by\n      rintro rfl\n      simp at hn\n    have hmk : m * 2 ≤ m * k := Nat.mul_le_mul_left m (by omega)\n    have hkm : 2 * k ≤ m * k := Nat.mul_le_mul_right k (by omega)\n    obtain ⟨l₁, hl₁, hp₁⟩ := ih m (by omega) (by omega)\n    obtain ⟨l₂, hl₂, hp₂⟩ := ih k (by omega) (by omega)\n    refine ⟨l₁ ++ l₂, ?_, ?_⟩\n    · intro p hp\n      rcases List.mem_append.mp hp with h | h\n      · exact hl₁ p h\n      · exact hl₂ p h\n    · rw [List.prod_append_nat, hp₁, hp₂]\n\n/-- Uniqueness: two lists of primes with the same product are permutations of each other. -/\ntheorem fta_unique (l₁ l₂ : List Nat) (h₁ : ∀ p ∈ l₁, IsPrime p) (h₂ : ∀ p ∈ l₂, IsPrime p)\n    (h : l₁.prod = l₂.prod) : l₁.Perm l₂ := by\n  induction l₁ generalizing l₂ with\n  | nil =>\n    cases l₂ with\n    | nil => exact List.Perm.refl []\n    | cons q t =>\n      -- a prime q would divide the empty product 1\n      exfalso\n      have hq := h₂ q (by simp)\n      have hdvd : q ∣ ([] : List Nat).prod := by\n        rw [h, List.prod_cons]\n        exact Nat.dvd_mul_right q t.prod\n      simp at hdvd\n      have := hq.1\n      omega\n  | cons p t ih =>\n    have hp := h₁ p (by simp)\n    have hmem : p ∈ l₂ := prime_mem_of_dvd_prod hp h₂ (by\n      rw [← h, List.prod_cons]\n      exact Nat.dvd_mul_right p t.prod)\n    have hperm := List.perm_cons_erase hmem\n    have hprod : t.prod = (l₂.erase p).prod := by\n      have hmul : p * t.prod = p * (l₂.erase p).prod := by\n        rw [← List.prod_cons, h, hperm.prod_nat, List.prod_cons]\n      have := hp.1\n      exact Nat.eq_of_mul_eq_mul_left (by omega) hmul\n    have hrest := ih (l₂.erase p) (fun q hq => h₁ q (by simp [hq]))\n      (fun q hq => h₂ q (List.mem_of_mem_erase hq)) hprod\n    exact (hrest.cons p).trans hperm.symm\n\nend Fta.Natural\n", "lines": 106, "lemmas": 13, "auto": {"count": 11, "nodes": 235629}}, "agent": {"nodes": 1280, "parts": {"target": 1022, "helper": 187, "floor": 71}, "declarations": [{"name": "fta_unique", "nodes": 519, "part": "target", "new": false}, {"name": "fta_exists", "nodes": 503, "part": "target", "new": false}, {"name": "IsPrime", "nodes": 71, "part": "floor", "new": false}, {"name": "Equivalent", "nodes": 30, "part": "helper", "new": true}, {"name": "FactorWitness", "nodes": 20, "part": "helper", "new": true}, {"name": "Primes", "nodes": 14, "part": "helper", "new": true}, {"name": "Product", "nodes": 14, "part": "helper", "new": true}, {"name": "Factors", "nodes": 12, "part": "helper", "new": true}, {"name": "NatBEq", "nodes": 10, "part": "helper", "new": true}, {"name": "PositiveFactors", "nodes": 10, "part": "helper", "new": true}, {"name": "UniqueFactors", "nodes": 10, "part": "helper", "new": true}, {"name": "Prepend", "nodes": 9, "part": "helper", "new": true}, {"name": "Equal", "nodes": 8, "part": "helper", "new": true}, {"name": "Member", "nodes": 7, "part": "helper", "new": true}, {"name": "NatList", "nodes": 7, "part": "helper", "new": true}, {"name": "Permutation", "nodes": 7, "part": "helper", "new": true}, {"name": "ListPred", "nodes": 6, "part": "helper", "new": true}, {"name": "NatPred", "nodes": 6, "part": "helper", "new": true}, {"name": "Empty", "nodes": 5, "part": "helper", "new": true}, {"name": "EmptyPrimes", "nodes": 4, "part": "helper", "new": true}, {"name": "OneEquals", "nodes": 4, "part": "helper", "new": true}, {"name": "Positive", "nodes": 4, "part": "helper", "new": true}], "source": "-- Fundamental theorem of arithmetic, using core Lean lemmas.\n-- The two target statements and the imported definition of IsPrime are unchanged.\nimport Fta.Defs\nimport Lean\n\n-- The target statements retain their prescribed, named proof binders.\nset_option linter.unusedVariables false\n\nnamespace ProofCompression\nopen Lean Meta\n\n/-- Fold specialized aliases, inline the proof helpers, and use smaller core eliminators. -/\ndef normalize (e : Expr) : CoreM Expr :=\n  Core.transform e (pre := fun e => do\n    let f := e.getAppFn\n    if f.isConst && [`Fta.prime_ne_one, `Fta.factors_prime, `Fta.factors_mul,\n        `Fta.prime_mem_of_dvd_prod].contains f.constName! then\n      if let some (.thmInfo info) := (← getEnv).find? f.constName! then\n        return .visit (info.value.betaRev e.getAppRevArgs (useZeta := true))\n    return .continue) (post := fun e => do\n    if e == .sort 0 then return .done (mkConst `Lean.Order.ImplicationOrder)\n    if e == mkApp (mkConst ``List [0]) (mkConst ``Nat) then\n      return .done (mkConst `Fta.NatList)\n    let e := e.eta\n    let args := e.getAppArgs\n    let f := e.getAppFn\n    if f.isConstOf ``Dvd.dvd && args.size == 2 && args[0]! == mkConst ``Nat then\n      return .done (.proj ``Dvd 0 args[1]!)\n    if f.isConstOf `Fta.Primes && args.size == 1 && args[0]!.isConstOf `Fta.Empty then\n      return .done (mkConst `Fta.EmptyPrimes)\n    if f.isConstOf `Fta.Equal && args.size >= 1 && args[0]! == mkRawNatLit 1 then\n      return .done (mkAppN (mkConst `Fta.OneEquals) (args.extract 1 args.size))\n    if f.isConstOf `Fta.Product && args.size == 1 then\n      if args[0]!.isConstOf `Fta.Empty then return .done (mkRawNatLit 1)\n    if (f.isConstOf ``Nat.le && args.size == 2 && args[0]! == mkRawNatLit 1) ||\n       (f.isConstOf ``Nat.lt && args.size == 2 && args[0]! == mkRawNatLit 0) then\n      return .done (mkApp (mkConst `Fta.Positive) args[1]!)\n    if f.isConstOf ``Nat.lt && args.size == 2 && args[0]! == mkRawNatLit 1 then\n      return .done (mkApp2 (mkConst ``Nat.le) (mkRawNatLit 2) args[1]!)\n    if f.isConstOf ``And && args.size == 2 && args[0]!.isAppOfArity `Fta.Primes 1 && args[1]!.isAppOfArity `Fta.Equal 2 then\n      let lhs := args[1]!.getAppArgs[0]!\n      if lhs.isAppOfArity `Fta.Product 1 && lhs.appArg! == args[0]!.appArg! then\n        return .done (mkApp2 (mkConst `Fta.FactorWitness) args[1]!.getAppArgs[1]! lhs.appArg!)\n    if f.isConstOf ``dite && f.constLevels! == [Level.zero] && args.size == 5 then\n      return .done (mkApp4 (mkConst ``Classical.byCases) args[1]! args[0]! args[3]! args[4]!)\n    for (name, alt, arity) in [(``Or.casesOn, ``Or.elim, 6), (``Exists.casesOn, ``Exists.elim, 5)] do\n      if f.isConstOf name && args.size == arity then\n        if let .lam _ _ b _ := args[2]! then\n          if !b.hasLooseBVar 0 then\n            return .done (mkAppN (mkConst alt f.constLevels!) (args.set! 2 (b.lowerLooseBVars 1 1)))\n    if f.isConstOf ``Eq.ndrec && args.size == 6 && f.constLevels!.head! == Level.zero then\n      let mut name := ``Eq.subst\n      let mut proof := args[5]!\n      if proof.isAppOfArity ``Eq.symm 4 then\n        name := ``Eq.substr\n        proof := proof.getAppArgs[3]!\n      return .done (mkAppN (mkConst name f.constLevels!.tail!)\n        #[args[0]!, args[2]!, args[1]!, args[4]!, proof, args[3]!])\n    if f.isConstOf ``Eq.rec && args.size == 6 then\n      if let .lam n t (.lam _ _ body _) bi := args[2]! then\n        if !body.hasLooseBVar 0 then\n          let motive := (Expr.lam n t (body.lowerLooseBVars 1 1) bi).eta\n          return .done (mkAppN (mkConst ``Eq.ndrec f.constLevels!) (args.set! 2 motive))\n    if f.isConstOf ``id && args.size == 2 then\n      return .done args[1]!\n    if f.isConstOf ``HAppend.hAppend && args.size >= 4 && args[0]! == mkConst `Fta.NatList then\n      return .done (mkAppN (mkApp (mkConst ``List.append [0]) (mkConst ``Nat)) (args.extract 4 args.size))\n    if args.size > 0 && args[0]! == mkConst ``Nat then\n      if f.isConstOf ``instBEqOfDecidableEq && args.size == 2 && args[1]!.isConstOf ``instDecidableEqNat then\n        return .done (mkConst `Fta.NatBEq)\n      if f.isConstOf ``Ne && args.size == 3 then\n        return .done (mkApp (mkConst ``Not) (mkApp2 (mkConst `Fta.Equal) args[1]! args[2]!))\n      if f.isConstOf ``OfNat.ofNat && args.size == 3 then\n        return .done args[1]!\n      if f.isConstOf ``LE.le && args.size == 4 then\n        return .done (mkApp2 (mkConst ``Nat.le) args[2]! args[3]!)\n      if f.isConstOf ``LT.lt && args.size == 4 then\n        return .done (mkApp2 (mkConst ``Nat.lt) args[2]! args[3]!)\n      if f.isConstOf ``Dvd.dvd && args.size == 4 then\n        return .done (mkApp2 (.proj ``Dvd 0 (mkConst ``Nat.instDvd)) args[2]! args[3]!)\n      if f.isConstOf ``HDiv.hDiv && args.size >= 4 then\n        return .done (mkAppN (mkConst ``Nat.div) (args.extract 4 args.size))\n      if f.isConstOf ``HMul.hMul && args.size >= 4 then\n        return .done (mkAppN (mkConst ``Nat.mul) (args.extract 4 args.size))\n      if f.isConstOf ``List.foldr && args.size >= 4 && args[2]! == mkConst ``Nat.mul && args[3]! == mkRawNatLit 1 then\n        return .done (mkAppN (mkConst `Fta.Product) (args.extract 4 args.size))\n      if f.isConstOf ``Membership.mem && args.size == 5 then\n        return .done (mkApp2 (mkConst `Fta.Member) args[4]! args[3]!)\n      if f.isConstOf ``List.prod && args.size >= 3 then\n        return .done (mkAppN (mkConst `Fta.Product) (args.extract 3 args.size))\n      for (name, aliasName, arity) in [(``Eq, `Fta.Equal, 1),\n          (``List.Mem, `Fta.Member, 1), (``List.Perm, `Fta.Permutation, 1),\n          (``List.cons, `Fta.Prepend, 1), (``List.nil, `Fta.Empty, 1)] do\n        if f.isConstOf name && args.size >= arity then\n          return .done (mkAppN (mkConst aliasName) (args.extract arity args.size))\n    for (name, structureName, idx) in [(``And.left, ``And, 0), (``And.right, ``And, 1),\n        (``Iff.mp, ``Iff, 0), (``Iff.mpr, ``Iff, 1)] do\n      if f.isConstOf name && args.size >= 3 then\n        return .done (mkAppN (.proj structureName idx args[2]!) (args.extract 3 args.size))\n    if let .forallE _ d b _ := e then\n      if d.isAppOfArity `Fta.Positive 1 && !b.hasLooseBVar 0 then\n        if b.lowerLooseBVars 1 1 == mkApp (mkConst `Fta.Factors) d.appArg! then\n          return .done (mkApp (mkConst `Fta.PositiveFactors) d.appArg!)\n      if d.isConstOf `Fta.NatList && b.isAppOfArity `Fta.Equivalent 2 then\n        let a := b.getAppArgs\n        if a[1]! == .bvar 0 && !a[0]!.hasLooseBVar 0 then\n          return .done (mkApp (mkConst `Fta.UniqueFactors) (a[0]!.lowerLooseBVars 1 1))\n    if let .forallE _ _ (.forallE _ mem conclusion _) _ := e then\n      if conclusion == mkApp (mkConst `Fta.IsPrime) (.bvar 1) && mem.isAppOfArity `Fta.Member 2 then\n        let ma := mem.getAppArgs\n        if ma[0]! == .bvar 0 && !ma[1]!.hasLooseBVar 0 then\n          return .done (mkApp (mkConst `Fta.Primes) (ma[1]!.lowerLooseBVars 1 1))\n    return .done e)\n\ndef levelSize : Level → Nat\n  | .zero | .param _ | .mvar _ => 1\n  | .succ l => levelSize l + 1\n  | .max l r | .imax l r => levelSize l + levelSize r + 1\n\ndef size : Expr → Nat\n  | .bvar _ | .fvar _ | .mvar _ | .lit _ => 1\n  | .sort u => 1 + levelSize u\n  | .const _ us => 1 + (us.map levelSize).sum\n  | .app f a => 1 + size f + size a\n  | .lam _ t b _ | .forallE _ t b _ => 1 + size t + size b\n  | .letE _ t v b _ => 1 + size t + size v + size b\n  | .mdata _ b => size b\n  | .proj _ _ b => 1 + size b\n\ndef frequencies (e : Expr) (counts : Std.HashMap Expr Nat) : Std.HashMap Expr Nat :=\n  let counts := if e.hasLooseBVars then counts else counts.insert e (counts.getD e 0 + 1)\n  match e with\n  | .app f a => frequencies a (frequencies f counts)\n  | .lam _ t b _ | .forallE _ t b _ => frequencies b (frequencies t counts)\n  | .letE _ t v b _ => frequencies b (frequencies v (frequencies t counts))\n  | .mdata _ b | .proj _ _ b => frequencies b counts\n  | _ => counts\n\n/-- Share the largest repeated term whose type and value cost less than its repetitions. -/\ndef share (e : Expr) : MetaM Expr := do\n  let mut e := e\n  for _ in [:32] do\n    let mut best := 0\n    let mut candidate := none\n    for (v, count) in (frequencies e {}).toArray do\n      if count < 2 then continue\n      let n := size v\n      if n < 3 || (count - 1) * n ≤ count + 1 then continue\n      let t ← normalize (← inferType v)\n      let saving := (count - 1) * n - count - 1 - size t\n      if saving > 0 && n > best then\n        best := n\n        candidate := some (v, t)\n    let some (v, t) := candidate | break\n    e ← withLetDecl `shared t v fun x =>\n      mkLetFVars #[x] (e.replace fun z => if z == v then some x else none)\n  return e\n\ndef uses (e : Expr) (idx : Nat) : Nat :=\n  match e with\n  | .bvar i => if i == idx then 1 else 0\n  | .app f a => uses f idx + uses a idx\n  | .lam _ t b _ | .forallE _ t b _ => uses t idx + uses b (idx + 1)\n  | .letE _ t v b _ => uses t idx + uses v idx + uses b (idx + 1)\n  | .mdata _ b | .proj _ _ b => uses b idx\n  | _ => 0\n\n/-- Remove bindings that became redundant after sharing at an enclosing scope. -/\ndef cleanup (e : Expr) : CoreM Expr := Core.transform e (post := fun e => do\n  if let .letE _ t v b _ := e then\n    if uses b 0 * (size v - 1) ≤ 1 + size t + size v then\n      return .visit (b.instantiate1 v)\n  if e.isHeadBetaTarget true then\n    let e' := e.getAppFn.betaRev e.getAppRevArgs (useZeta := true)\n    if size e' < size e then return .visit e'\n  return .done e)\n\n/-- Visit every binding scope so that sharing can include dependent binder types. -/\ndef scopedShare : Nat → Expr → MetaM Expr\n  | 0, e => return e\n  | fuel + 1, e => do\n    let e ← if size e < 8 then pure e else share e\n    match e with\n    | .lam n t b bi =>\n      let t ← scopedShare fuel t\n      withLocalDecl n bi t fun x => do\n        mkLambdaFVars #[x] (← scopedShare fuel (b.instantiate1 x))\n    | .forallE n t b bi =>\n      let t ← scopedShare fuel t\n      withLocalDecl n bi t fun x => do\n        mkForallFVars #[x] (← scopedShare fuel (b.instantiate1 x))\n    | .letE n t v b nd =>\n      let t ← scopedShare fuel t\n      let v ← scopedShare fuel v\n      withLetDecl n t v (nondep := nd) fun x => do\n        mkLetFVars #[x] (generalizeNondepLet := false) (← scopedShare fuel (b.instantiate1 x))\n    | .app f a => return mkApp (← scopedShare fuel f) (← scopedShare fuel a)\n    | .mdata _ b => scopedShare fuel b\n    | .proj n i b => return .proj n i (← scopedShare fuel b)\n    | _ => return e\n\ndef compress (e : Expr) : MetaM Expr := do\n  let mut e ← normalize e\n  for _ in [:4] do\n    let next ← scopedShare 128 e\n    let next ← cleanup (← normalize next)\n    if size next >= size e then break\n    e := next\n  return e\n\nend ProofCompression\n\n-- Elaboration and goal assignment check the resulting expression; the kernel checks it again.\nopen Lean Elab Tactic in\nelab \"compact \" t:term : tactic => closeMainGoalUsing `compact fun ty _ => do\n  let e ← instantiateMVars (← elabTermEnsuringType t ty)\n  ProofCompression.compress e\n\nnamespace Fta\n\n-- These definitional aliases share specialized types, predicates and operations.\n-- The core alias for Prop avoids repeated universe-level nodes without a charged helper.\nabbrev NatList : Type := List Nat\nabbrev NatPred : Type := Nat → Lean.Order.ImplicationOrder\nabbrev ListPred : Type := NatList → Lean.Order.ImplicationOrder\ndef Equal : Nat → NatPred := Eq\ndef OneEquals : NatPred := Equal (nat_lit 1)\n\ndef Member : Nat → ListPred := List.Mem\ndef Permutation : NatList → ListPred := List.Perm\ndef Prepend : Nat → NatList → NatList := List.cons\ndef Empty : NatList := []\nabbrev NatBEq : BEq Nat := @instBEqOfDecidableEq Nat instDecidableEqNat\n\ndef Positive : NatPred := Nat.le (nat_lit 1)\n\ndef Primes : ListPred := fun l => ∀ p, Member p l → IsPrime p\n\ndef EmptyPrimes : Lean.Order.ImplicationOrder := Primes Empty\n\ndef Product : NatList → Nat := List.foldr Nat.mul (nat_lit 1)\n\ndef FactorWitness : Nat → ListPred := fun n l => Primes l ∧ Equal (Product l) n\n\ndef Factors : NatPred := fun n => Exists (FactorWitness n)\n\ndef PositiveFactors : NatPred := fun n => Positive n → Factors n\n\ndef Equivalent : NatList → ListPred := fun a b =>\n  Primes a → Primes b → Equal (Product a) (Product b) → Permutation a b\n\ndef UniqueFactors : ListPred := fun l => ∀ k, Equivalent l k\n\ntheorem prime_ne_one : (by compact (∀ {p : Nat}, IsPrime p → p ≠ 1)) := by\n  compact (fun {_} hp => Nat.ne_of_gt hp.1)\n\n/-- If a prime is absent, every factor and hence the product is coprime to it. -/\ntheorem prime_mem_of_dvd_prod : (by compact (∀ {p : Nat}, IsPrime p → ∀ {l : List Nat},\n    (∀ q ∈ l, IsPrime q) → p ∣ l.prod → p ∈ l)) := by\n  compact (by\n    intro p hp l hl hd\n    apply Classical.byContradiction\n    intro hmem\n    apply prime_ne_one hp\n    apply Nat.Coprime.eq_one_of_dvd ?_ hd\n    apply List.foldrRecOn (motive := Nat.Coprime p) l Nat.mul\n    · exact Nat.coprime_one_right p\n    · intro b ih q hq\n      apply Nat.Coprime.mul_right ?_ ih\n      apply (hp.2 (Nat.gcd p q) (Nat.gcd_dvd_left p q)).resolve_right\n      intro hg\n      exact List.forall_mem_ne.mpr hmem q hq\n        (((hl q hq).2 p (Nat.gcd_eq_left_iff_dvd.mp hg)).resolve_left (prime_ne_one hp)))\n\ntheorem factors_prime : (by compact (∀ {n : Nat}, IsPrime n → Factors n)) := by\n  compact (fun {n} h => ⟨[n], List.forall_mem_singleton.mpr h, Nat.mul_one n⟩)\n\ntheorem factors_mul : (by compact (∀ {m n x : Nat}, Factors m → Factors n → m * n = x → Factors x)) := by\n  compact (fun {m n x} hm hn h => hm.elim fun l hl => hn.elim fun k hk =>\n    ⟨l ++ k, List.forall_mem_append.mpr ⟨hl.1, hk.1⟩,\n      (Eq.subst (motive := fun m => (l ++ k).prod = m * n) hl.2\n        (Eq.subst (motive := fun n => (l ++ k).prod = Product l * n) hk.2\n          List.prod_append_nat)).trans h⟩)\n\n/-- Strong induction: a nontrivial proper divisor and its quotient both have factors. -/\ntheorem fta_exists : ∀ (n : Nat) (hn : 1 ≤ n),\n    ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n := by\n  compact (by\n    intro n hn\n    change Factors n\n    induction n using Nat.strongRecOn with\n    | ind n ih =>\n      rcases Nat.eq_or_lt_of_le hn with h1 | hgt\n      · exact ⟨[], List.forall_mem_nil IsPrime, h1⟩\n      apply Classical.byContradiction\n      intro bad\n      apply bad\n      apply factors_prime\n      refine ⟨hgt, fun m hd => ?_⟩\n      apply Classical.or_iff_not_imp_left.mpr\n      intro hm1\n      apply Classical.byContradiction\n      intro hmn\n      have hm0 := Nat.pos_of_dvd_of_pos hd hn\n      have hm_lt := Nat.lt_of_le_of_ne (Nat.le_of_dvd hn hd) hmn\n      have hk0 := Nat.div_pos (Nat.le_of_dvd hn hd) hm0\n      have hk_lt := Nat.div_lt_self hn (Nat.lt_of_le_of_ne hm0 (Ne.symm hm1))\n      exact bad (factors_mul (ih m hm_lt hm0) (ih (n / m) hk_lt hk0) (Nat.mul_div_cancel' hd)))\n\n/-- Find the first prime in the other list, cancel it, and continue by induction. -/\ntheorem fta_unique : ∀ (l₁ l₂ : List Nat) (h₁ : ∀ p ∈ l₁, IsPrime p) (h₂ : ∀ p ∈ l₂, IsPrime p)\n    (h : l₁.prod = l₂.prod), l₁.Perm l₂ := by\n  compact (by\n    intro l₁\n    change ∀ l₂, Equivalent l₁ l₂\n    induction l₁ with\n    | nil =>\n      intro l₂\n      refine List.casesOn l₂ ?_ ?_\n      · intro _ _ _; exact List.Perm.nil\n      · intro q t\n        intro _ h₂ h\n        exact False.elim (prime_ne_one (h₂ q List.mem_cons_self)\n          (Nat.eq_one_of_mul_eq_one_right h.symm))\n    | cons p t ih =>\n      intro l₂ h₁ h₂ h\n      have hh := List.forall_mem_cons.mp h₁\n      have hp := hh.1\n      have hmem : p ∈ l₂ := prime_mem_of_dvd_prod hp h₂\n        (Eq.ndrec (motive := fun n => p ∣ n) (Nat.dvd_mul_right p (Product t)) h)\n      have hperm := List.perm_cons_erase hmem\n      have hprod : t.prod = (l₂.erase p).prod :=\n        Nat.eq_of_mul_eq_mul_left (Nat.zero_lt_of_lt hp.1) (h.trans hperm.prod_nat)\n      exact List.cons_perm_iff_perm_erase.mpr ⟨hmem, ih (l₂.erase p)\n        hh.2\n        (fun q hq => h₂ q (List.mem_of_mem_erase hq)) hprod⟩)\n\nend Fta\n", "lines": 338, "lemmas": 0}}, "statement": "/-- `p` is prime: it is at least 2, and its only divisors are 1 and `p`. -/\ndef IsPrime (p : Nat) : Prop := 2 ≤ p ∧ ∀ m, m ∣ p → m = 1 ∨ m = p\n\n/-- Existence: every number n ≥ 1 is the product of a list of primes. -/\ntheorem fta_exists (n : Nat) (hn : 1 ≤ n) :\n    ∃ l : List Nat, (∀ p ∈ l, IsPrime p) ∧ l.prod = n\n\n/-- Uniqueness: two lists of primes with the same product are permutations of each other. -/\ntheorem fta_unique (l₁ l₂ : List Nat) (h₁ : ∀ p ∈ l₁, IsPrime p) (h₂ : ∀ p ∈ l₂, IsPrime p)\n    (h : l₁.prod = l₂.prod) : l₁.Perm l₂", "background": "Init, Std and Lean", "toolchain": "leanprover/lean4:v4.32.0", "curve": {"runs": [{"label": "independent run 1", "checks": [{"total": null, "valid": false}, {"total": 8703, "valid": true}, {"total": 3651, "valid": true}, {"total": 1760, "valid": true}, {"total": 1510, "valid": true}]}, {"label": "independent run 2", "checks": [{"total": 255416, "valid": true}, {"total": 6096, "valid": true}, {"total": 2712, "valid": true}, {"total": null, "valid": false}, {"total": 2268, "valid": true}, {"total": 1849, "valid": true}, {"total": 1538, "valid": true}]}, {"label": "independent run 3", "checks": [{"total": 255416, "valid": true}, {"total": 7942, "valid": true}, {"total": 6698, "valid": true}, {"total": 3998, "valid": true}, {"total": 2312, "valid": true}, {"total": null, "valid": false}, {"total": 1665, "valid": true}]}, {"label": "continuation 1", "checks": [{"total": 1510, "valid": true}, {"total": null, "valid": false}]}, {"label": "continuation 2", "checks": [{"total": 1446, "valid": true}, {"total": 1367, "valid": true}]}, {"label": "continuation 3", "checks": [{"total": 1366, "valid": true}, {"total": 1321, "valid": true}]}, {"label": "continuation 4", "checks": [{"total": 1321, "valid": true}, {"total": 1300, "valid": true}]}, {"label": "continuation 5", "checks": [{"total": 1292, "valid": true}, {"total": 1286, "valid": true}]}, {"label": "continuation 6", "checks": [{"total": 1286, "valid": true}, {"total": 1280, "valid": true}]}], "best": 1280, "n_runs": 9, "plateau": true, "baseline": 255416, "finals": [{"label": "continuation 1", "best_check": 1510, "final": 1446}, {"label": "continuation 2", "best_check": 1367, "final": 1366}, {"label": "continuation 3", "best_check": 1321, "final": 1321}, {"label": "continuation 4", "best_check": 1300, "final": 1292}, {"label": "continuation 5", "best_check": 1286, "final": 1286}, {"label": "continuation 6", "best_check": 1280, "final": 1280}], "plateau_rule": "continue from the best verified final until 2 consecutive continuation runs improve the node count by less than 1.0%", "first_from": "independent run 1"}, "agent": {"id": "astra", "name": "Astra", "model_id": "gpt-6-astra", "effort": "high"}, "terms": {"agent": [{"name": "fta_exists", "nodes": 503, "term": "fun n =>\n  Nat.strongRecOn n fun n =>\n    let shared := Fta.OneEquals n;\n    let shared_1 := Nat.le 2 n;\n    let shared_2 := Fta.FactorWitness n;\n    let shared_3 := Fta.Factors n;\n    let shared_4 := Fta.Prepend n Fta.Empty;\n    fun ih hn =>\n    Or.elim (Nat.eq_or_lt_of_le hn)\n      (fun h1 => Exists.intro Fta.Empty ⟨List.forall_mem_nil Fta.IsPrime, h1⟩) fun hgt =>\n      Classical.byContradiction fun bad =>\n        bad\n          (Exists.intro shared_4\n            ⟨List.forall_mem_singleton.2\n                ⟨hgt, fun m =>\n                  let shared := n.div m;\n                  let shared_5 := Fta.Equal m n;\n                  let shared_6 := Fta.Equal m 1;\n                  fun hd =>\n                  let shared_7 := Nat.le_of_dvd hn hd;\n                  Classical.or_iff_not_imp_left.2 fun hm1 =>\n                    Classical.byContradiction fun hmn =>\n                      have hm0 := Nat.pos_of_dvd_of_pos hd hn;\n                      bad\n                        (Exists.elim (ih m (Nat.lt_of_le_of_ne shared_7 hmn) hm0) fun l hl =>\n                          Exists.elim\n                            (ih shared (Nat.div_lt_self hn (Nat.lt_of_le_of_ne hm0 (Ne.symm hm1)))\n                              (Nat.div_pos shared_7 hm0))\n                            fun k =>\n                            let shared_8 := List.append l k;\n                            let shared_9 := Fta.Equal (Fta.Product shared_8);\n                            fun hk =>\n                            Exists.intro shared_8\n                              ⟨List.forall_mem_append.2 ⟨hl.1, hk.1⟩,\n                                Eq.trans (Eq.subst hl.2 (Eq.subst hk.2 List.prod_append_nat))\n                                  (Nat.mul_div_cancel' hd)⟩)⟩,\n              Nat.mul_one n⟩)"}, {"name": "fta_unique", "nodes": 519, "term": "List.rec\n  (fun l₂ =>\n    List.casesOn l₂ (fun a a_1 a_2 => List.Perm.nil) fun q t =>\n      let shared := Fta.Prepend q t;\n      fun a h₂ h =>\n      False.elim\n        (Nat.ne_of_gt (h₂ q List.mem_cons_self).1 (Nat.eq_one_of_mul_eq_one_right (Eq.symm h))))\n  fun p t =>\n  let shared := Fta.Prepend p t;\n  let shared_1 := Fta.Product t;\n  fun ih l₂ =>\n  let shared_2 := Fta.Member p l₂;\n  let shared_3 := Fta.Product l₂;\n  let shared_4 := List.erase l₂ p;\n  fun h₁ h₂ h =>\n  have hh := List.forall_mem_cons.1 h₁;\n  have hmem :=\n    Classical.byContradiction fun hmem =>\n      Nat.ne_of_gt hh.1.1\n        (Nat.Coprime.eq_one_of_dvd\n          (List.foldrRecOn l₂ Nat.mul (Nat.coprime_one_right p) fun b ih q =>\n            let shared := p.gcd q;\n            let shared_5 := Fta.Equal shared;\n            fun hq =>\n            Nat.Coprime.mul_right\n              (Or.resolve_right (hh.1.2 shared (Nat.gcd_dvd_left p q)) fun hg =>\n                List.forall_mem_ne.2 hmem q hq\n                  (Or.resolve_left ((h₂ q hq).2 p (Nat.gcd_eq_left_iff_dvd.1 hg))\n                    (Nat.ne_of_gt hh.1.1)))\n              ih)\n          (Eq.subst h (Nat.dvd_mul_right p shared_1)));\n  List.cons_perm_iff_perm_erase.2\n    ⟨hmem,\n      ih shared_4 hh.2 (fun q hq => h₂ q (List.mem_of_mem_erase hq))\n        (Nat.eq_of_mul_eq_mul_left (Nat.zero_lt_of_lt hh.1.1)\n          (Eq.trans h (List.Perm.prod_nat (List.perm_cons_erase hmem))))⟩"}], "natural": [{"name": "fta_exists._proof_1_3", "nodes": 73916, "excerpt": "fun m k hm1 hmn hm0 hk1 hk0 hmk a =>\n  Or.elim (Nat.lt_or_gt_of_ne hk0)\n    (fun h₁ =>\n      Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n        (Lean.Omega.Constraint.combine_sat'\n          (Lean.Omega.Constraint.addInequality_sat\n            (le_of_le_of_eq (Int.natCast_nonneg k)\n              (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)))\n          (Lean.Omega.tidy_sat\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq\n                (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₁)))\n                (Eq.trans\n                  (Lean.Omega.Int.sub_congr (id (Eq.refl ↑0))\n                    (Eq.trans\n                      (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                        (id (Eq.refl 1)))\n                      (Eq.symm\n                        (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 0, 1] } { const := 1 }\n                          (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.sub_eval { } { const := 1, coeffs := [0, 0, 1] }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))))))\n    fun h₂ =>\n    Or.elim (Nat.lt_or_gt_of_ne hk1)\n      (fun h₁ =>\n        Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n          (Lean.Omega.Constraint.combine_sat'\n            (Lean.Omega.tidy_sat\n              (Lean.Omega.Constraint.addInequality_sat\n                (le_of_le_of_eq\n                  (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₁)))\n                  (Eq.trans\n                    (Lean.Omega.Int.sub_congr (id (Eq.refl ↑1))\n                      (Eq.trans\n                        (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                          (id (Eq.refl 1)))\n                        (Eq.symm\n                          (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 0, 1] } { const := 1 }\n                            (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))\n                    (Eq.symm\n                      (Lean.Omega.LinearCombo.sub_eval { const := 1 }\n                        { const := 1, coeffs := [0, 0, 1] }\n                        (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))))\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq\n                (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₂)))\n                (Eq.trans\n                  (Lean.Omega.Int.sub_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                    (id (Eq.refl (↑0 + 1))))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.sub_eval { coeffs := [0, 0, 1] } { const := 1 }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k]))))))))\n      fun h₂ =>\n      Or.elim (Nat.lt_or_gt_of_ne hm0)\n        (fun h₁ =>\n          Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n            (Lean.Omega.Constraint.combine_sat'\n              (Lean.Omega.tidy_sat\n                (Lean.Omega.Constraint.addInequality_sat"}, {"name": "fta_exists._proof_1_5", "nodes": 33840, "excerpt": "fun m k hm0 hk1 hk0 a =>\n  Or.elim (Nat.lt_or_gt_of_ne hk0)\n    (fun h₁ =>\n      Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n        (Lean.Omega.Constraint.combine_sat'\n          (Lean.Omega.tidy_sat\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq\n                (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₁)))\n                (Eq.trans\n                  (Lean.Omega.Int.sub_congr (id (Eq.refl ↑0))\n                    (Eq.trans\n                      (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                        (id (Eq.refl 1)))\n                      (Eq.symm\n                        (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 0, 1] } { const := 1 }\n                          (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.sub_eval { } { const := 1, coeffs := [0, 0, 1] }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))))\n          (Lean.Omega.tidy_sat\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq Lean.Omega.Int.ofNat_mul_nonneg\n                (Eq.trans\n                  (Lean.Omega.Int.mul_congr (id (Eq.refl ↑2))\n                    (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.mul_eval { const := 2 } { coeffs := [0, 0, 1] }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])\n                      (of_decide_eq_true (id (Eq.refl true)))))))))))\n    fun h₂ =>\n    Or.elim (Nat.lt_or_gt_of_ne hk1)\n      (fun h₁ =>\n        Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n          (Lean.Omega.Constraint.combine_sat'\n            (Lean.Omega.tidy_sat\n              (Lean.Omega.Constraint.addInequality_sat\n                (le_of_le_of_eq\n                  (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₁)))\n                  (Eq.trans\n                    (Lean.Omega.Int.sub_congr (id (Eq.refl ↑1))\n                      (Eq.trans\n                        (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                          (id (Eq.refl 1)))\n                        (Eq.symm\n                          (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 0, 1] } { const := 1 }\n                            (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))\n                    (Eq.symm\n                      (Lean.Omega.LinearCombo.sub_eval { const := 1 }\n                        { const := 1, coeffs := [0, 0, 1] }\n                        (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k])))))))\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq\n                (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₂)))\n                (Eq.trans\n                  (Lean.Omega.Int.sub_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_2)\n                    (id (Eq.refl (↑0 + 1))))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.sub_eval { coeffs := [0, 0, 1] } { const := 1 }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑m, ↑k]))))))))"}, {"name": "fta_exists._proof_1_2", "nodes": 26363, "excerpt": "fun m k hk1 hk0 a =>\n  Or.elim (Nat.lt_or_gt_of_ne hk0)\n    (fun h₁ =>\n      Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n        (Lean.Omega.Constraint.combine_sat'\n          (Lean.Omega.tidy_sat\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq\n                (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₁)))\n                (Eq.trans\n                  (Lean.Omega.Int.sub_congr (id (Eq.refl ↑0))\n                    (Eq.trans\n                      (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_1)\n                        (id (Eq.refl 1)))\n                      (Eq.symm\n                        (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 1] } { const := 1 }\n                          (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k])))))\n                  (Eq.symm\n                    (Lean.Omega.LinearCombo.sub_eval { } { const := 1, coeffs := [0, 1] }\n                      (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k])))))))\n          (Lean.Omega.Constraint.combine_sat'\n            (Lean.Omega.Constraint.addInequality_sat\n              (le_of_le_of_eq (Int.natCast_nonneg k)\n                (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_1)))\n            (Lean.Omega.tidy_sat\n              (Lean.Omega.Constraint.addInequality_sat\n                (le_of_le_of_eq\n                  (Int.sub_nonneg_of_le\n                    (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt (Nat.lt_of_not_le a))))\n                  (Eq.trans\n                    (Lean.Omega.Int.sub_congr (id (Eq.refl ↑2))\n                      (Eq.trans\n                        (Lean.Omega.Int.add_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_1)\n                          (id (Eq.refl 1)))\n                        (Eq.symm\n                          (Lean.Omega.LinearCombo.add_eval { coeffs := [0, 1] } { const := 1 }\n                            (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k])))))\n                    (Eq.symm\n                      (Lean.Omega.LinearCombo.sub_eval { const := 2 }\n                        { const := 1, coeffs := [0, 1] }\n                        (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k]))))))))))\n    fun h₂ =>\n    Or.elim (Nat.lt_or_gt_of_ne hk1)\n      (fun h₁ =>\n        Lean.Omega.Constraint.not_sat'_of_isImpossible (of_decide_eq_true (id (Eq.refl true)))\n          (Lean.Omega.tidy_sat\n            (Lean.Omega.combo_sat' { lowerBound := some 1, upperBound := some 1 }\n              { lowerBound := some 0, upperBound := none } 1 [0, 1] 1 [0, -1]\n              (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k])\n              (Lean.Omega.Constraint.combine_sat'\n                (Lean.Omega.Constraint.addInequality_sat\n                  (le_of_le_of_eq\n                    (Int.sub_nonneg_of_le (Int.add_one_le_of_lt (Lean.Omega.Int.ofNat_lt_of_lt h₂)))\n                    (Eq.trans\n                      (Lean.Omega.Int.sub_congr (Eq.symm Lean.Omega.LinearCombo.coordinate_eval_1)\n                        (id (Eq.refl (↑0 + 1))))\n                      (Eq.symm\n                        (Lean.Omega.LinearCombo.sub_eval { coeffs := [0, 1] } { const := 1 }\n                          (Lean.Omega.Coeffs.ofList [↑m * ↑k, ↑k]))))))\n                (Lean.Omega.Constraint.combine_sat'"}]}}, "order": ["astra", "opus", "fable", "deepseek", "muse", "glm-flash"], "deep": {"shown": [{"id": "add_comm", "title": "a + b = b + a on home-made natural numbers", "before": {"nodes": 2689, "proof_part": 2020, "proof_part_before": null}, "after": {"nodes": 858, "proof_part": 189, "proof_part_before": 2020}}, {"id": "compactness5", "title": "Compactness: Astra's best run", "before": {"nodes": 1307221424}, "after": {"nodes": 10294824, "proof_part": null, "proof_part_before": null}, "final": {"panel": "compactness5-astra", "label": "Compactness, Astra, 120 min, run 1", "verified": true, "decls": {"owners_changed": 689, "owners_added": 13, "owners_removed": 0, "top": [{"owner": "CompactnessConjecture.common_neighbors_triangle_eq_of_cycle_free", "before": 423159682, "after": 7525, "delta": -423152157, "module": "CompactnessAndDegeneracy"}, {"owner": "CompactnessConjecture.symplecticLinesOnPointEquivSubmodule", "before": 402157300, "after": 161586, "delta": -401995714, "module": "CompactnessAndDegeneracy"}, {"owner": "CompactnessConjecture.symplecticPointsOnLineEquivSubmodule", "before": 85871868, "after": 97804, "delta": -85774064, "module": "CompactnessAndDegeneracy"}, {"owner": "CompactnessConjecture.symplecticLineCoordinateEquiv_form", "before": 74992895, "after": 55846, "delta": -74937049, "module": "CompactnessAndDegeneracy"}, {"owner": "CompactnessConjecture.common_neighbor_unique_of_four_cycle_free", "before": 58770408, "after": 3392, "delta": -58767016, "module": "CompactnessAndDegeneracy"}, {"owner": "CompactnessConjecture.kTemplate_adj_color_ne", "before": 23291735, "after": 140, "delta": -23291595, "module": "CompactnessAndDegeneracy"}], "rest_delta": -229009005}}}, {"id": "ramsey96", "title": "Ramsey96: Astra's best run", "before": {"nodes": 11338478}, "after": {"nodes": 441840, "proof_part": null, "proof_part_before": null}, "final": {"panel": "ramsey96-astra", "label": "Ramsey96, Astra, 60 min, run 2", "verified": true, "decls": {"owners_changed": 96, "owners_added": 1684, "owners_removed": 1, "top": [{"owner": "ErdosProblems.MulticolourTriangleRamsey.palette_exp_loss_bound", "before": 1239409, "after": 20211, "delta": -1219198, "module": "MulticolorTriangleRamsey"}, {"owner": "ErdosProblems.MulticolourTriangleRamsey.paletteGrowthBound_succ", "before": 1005317, "after": 8026, "delta": -997291, "module": "MulticolorTriangleRamsey"}, {"owner": "ErdosProblems.MulticolourTriangleRamsey.paletteColourCount_adjacent_scaled_sharp", "before": 945272, "after": 16530, "delta": -928742, "module": "MulticolorTriangleRamsey"}, {"owner": "ErdosProblems.MulticolourTriangleRamsey.stageWidths_succ_le", "before": 759325, "after": 19655, "delta": -739670, "module": "MulticolorTriangleRamsey"}, {"owner": "ErdosProblems.MulticolourTriangleRamsey.saturatedMatrixRows_adjacent_scaled_sharp", "before": 575660, "after": 14437, "delta": -561223, "module": "MulticolorTriangleRamsey"}, {"owner": "ErdosProblems.MulticolourTriangleRamsey.exists_stage_palette_packing_exp", "before": 507451, "after": 7104, "delta": -500347, "module": "MulticolorTriangleRamsey"}], "rest_delta": -5950167}}}, {"id": "mathlib197", "title": "Mathlib197: Astra's best run", "before": {"nodes": 114567106}, "after": {"nodes": 2336839, "proof_part": null, "proof_part_before": null}, "final": {"panel": "mathlib197-astra", "label": "Mathlib197, Astra, 120 min, run 1", "verified": true, "decls": {"owners_changed": 160, "owners_added": 17, "owners_removed": 22, "top": [{"owner": "CategoryTheory.Mat_.hasFiniteBiproducts", "before": 79006116, "after": 30326, "delta": -78975790, "module": "Mathlib.CategoryTheory.Preadditive.Mat"}, {"owner": "iteratedDerivWithin_vcomp_three", "before": 6643090, "after": 4340, "delta": -6638750, "module": "Mathlib.Analysis.Calculus.IteratedDeriv.FaaDiBruno"}, {"owner": "Ring.DirectLimit.exists_of", "before": 4657424, "after": 12943, "delta": -4644481, "module": "Mathlib.Algebra.Colimit.Ring"}, {"owner": "riemannianMetricVectorSpace", "before": 4748892, "after": 211902, "delta": -4536990, "module": "Mathlib.Geometry.Manifold.Riemannian.Basic"}, {"owner": "contMDiff_mulInvariantVectorField", "before": 3108870, "after": 44896, "delta": -3063974, "module": "Mathlib.Geometry.Manifold.GroupLieAlgebra"}, {"owner": "ProbabilityTheory.IsGaussianProcess.isPreBrownianReal_of_covariance", "before": 2099478, "after": 24749, "delta": -2074729, "module": "Mathlib.Probability.BrownianMotion.Basic"}], "rest_delta": -12295553}}}], "terms": {"original_outline": "2020  fun a\n  1  binder type: MyNat   = MyNat\n  2018  body: fun b\n    1  binder type: MyNat   = MyNat\n    2016  body: app MyNat.rec.{0} (4 args)\n      6  [head MyNat.rec.{0} + 4 app nodes]\n      51  arg1: fun b1\n        1  binder type: MyNat   = MyNat\n        49  body: app Eq.{1} (3 args)\n      648  arg2: app id.{0} (2 args)\n        4  [head id.{0} + 2 app nodes]\n        49  arg1: app Eq.{1} (3 args)\n        595  arg2: let h1\n      1310  arg3: fun n\n        1  binder type: MyNat   = MyNat\n        1308  body: fun ih\n      1  arg4: b   = b", "original_nodes": 2020}}, "add_comm_example": {"name": "add_comm_eq", "agent": "Astra", "statement": "theorem add_comm_eq (a b : MyNat) : a + b = b + a", "proof": ":= by\n  induction b with\n  | zero =>\n    show add a zero = add zero a\n    have h1 : add a zero = a := rfl\n    have h2 : ∀ w : MyNat, add zero w = w := by\n      intro w\n      induction w with\n      | zero => rfl\n      | succ n ih =>\n        have k1 : add zero (succ n) = succ (add zero n) := rfl\n        rw [k1, ih]\n    rw [h1, h2 a]\n  | succ n ih =>\n    show add a (succ n) = add (succ n) a\n    have h1 : add a (succ n) = succ (add a n) := rfl\n    have h2 : ∀ w : MyNat, add (succ n) w = succ (add n w) := by\n      intro w\n      induction w with\n      | zero => rfl\n      | succ m ihm =>\n        have k1 : add (succ n) (succ m) = succ (add (succ n) m) := rfl\n        have k2 : add n (succ m) = succ (add n m) := rfl\n        rw [k1, k2, ihm]\n    have h3 : add a n = add n a := ih\n    rw [h1, h2 a, h3]", "definitions": 669, "original": {"total": 2689, "proof": 2020, "lines": 26, "chars": 797}, "final": {"total": 858, "proof": 189, "lines": 6, "chars": 344, "source": "theorem add_comm_eq (a b : MyNat) : a + b = b + a :=\n  MyNat.rec (motive := fun a => add a b = add b a)\n    (MyNat.rec (motive := fun b => add zero b = b)\n      (Eq.refl zero) (fun _ => congrArg succ) b)\n    (fun n =>\n      Eq.ndrec (motive := fun x => add (succ n) b = succ x) (MyNat.rec (motive := fun b => add (succ n) b = succ (add n b))\n        (Eq.refl (succ n)) (fun _ => congrArg succ) b)) a"}, "decls": [{"name": "MyNat.add_comm_eq", "original": 2020, "final": 189, "role": "target"}, {"name": "MyNat.brecOn.go", "original": 178, "final": 178, "role": "definition"}, {"name": "MyNat.add._f", "original": 101, "final": 101, "role": "definition"}, {"name": "MyNat.add.match_1", "original": 91, "final": 91, "role": "definition"}, {"name": "MyNat.rec", "original": 85, "final": 85, "role": "definition"}, {"name": "MyNat.below", "original": 62, "final": 62, "role": "definition"}, {"name": "MyNat.casesOn", "original": 59, "final": 59, "role": "definition"}, {"name": "MyNat.brecOn", "original": 52, "final": 52, "role": "definition"}, {"name": "MyNat.add", "original": 24, "final": 24, "role": "definition"}, {"name": "MyNat.instAdd", "original": 10, "final": 10, "role": "definition"}, {"name": "MyNat", "original": 3, "final": 3, "role": "definition"}, {"name": "MyNat.succ", "original": 3, "final": 3, "role": "definition"}, {"name": "MyNat.zero", "original": 1, "final": 1, "role": "definition"}], "files": {"original": [{"part": "definitions", "region": "target", "text": "inductive MyNat where\n  | zero : MyNat\n  | succ : MyNat → MyNat\n\ndef add : MyNat → MyNat → MyNat\n  | a, zero => a\n  | a, succ b => succ (add a b)\n\ninstance : Add MyNat := ⟨add⟩", "nodes": 669}, {"part": "statement", "region": "target", "text": "theorem add_comm_eq (a b : MyNat) : a + b = b + a :=", "nodes": null}, {"part": "proof", "region": "editable", "text": " by\n  induction b with\n  | zero =>\n    show add a zero = add zero a\n    have h1 : add a zero = a := rfl\n    have h2 : ∀ w : MyNat, add zero w = w := by\n      intro w\n      induction w with\n      | zero => rfl\n      | succ n ih =>\n        have k1 : add zero (succ n) = succ (add zero n) := rfl\n        rw [k1, ih]\n    rw [h1, h2 a]\n  | succ n ih =>\n    show add a (succ n) = add (succ n) a\n    have h1 : add a (succ n) = succ (add a n) := rfl\n    have h2 : ∀ w : MyNat, add (succ n) w = succ (add n w) := by\n      intro w\n      induction w with\n      | zero => rfl\n      | succ m ihm =>\n        have k1 : add (succ n) (succ m) = succ (add (succ n) m) := rfl\n        have k2 : add n (succ m) = succ (add n m) := rfl\n        rw [k1, k2, ihm]\n    have h3 : add a n = add n a := ih\n    rw [h1, h2 a, h3]", "nodes": 2020}, {"part": "other", "region": "other", "text": "", "nodes": null, "count": 13}], "final": [{"part": "definitions", "region": "target", "text": "inductive MyNat where\n  | zero : MyNat\n  | succ : MyNat → MyNat\n\ndef add : MyNat → MyNat → MyNat\n  | a, zero => a\n  | a, succ b => succ (add a b)\n\ninstance : Add MyNat := ⟨add⟩", "nodes": 669}, {"part": "statement", "region": "target", "text": "theorem add_comm_eq (a b : MyNat) : a + b = b + a :=", "nodes": null}, {"part": "proof", "region": "editable", "text": "\n  MyNat.rec (motive := fun a => add a b = add b a)\n    (MyNat.rec (motive := fun b => add zero b = b)\n      (Eq.refl zero) (fun _ => congrArg succ) b)\n    (fun n =>\n      Eq.ndrec (motive := fun x => add (succ n) b = succ x) (MyNat.rec (motive := fun b => add (succ n) b = succ (add n b))\n        (Eq.refl (succ n)) (fun _ => congrArg succ) b)) a", "nodes": 189}, {"part": "other", "region": "other", "text": "", "nodes": null, "count": 13}]}, "nat": {"tactic": {"text": "by omega", "total": 12519, "chars": 8}, "lemma": {"text": "Nat.add_comm a b", "total": 9, "chars": 16}}, "original_written": "written for MathCompressionBench, its proofs deliberately verbose", "task": {"targets": 12, "original": 20190}}, "flows": {"groups": [{"key": "mechanical", "label": "Mechanical", "categories": [{"key": "sharing", "label": "Mechanical sharing"}, {"key": "automation", "label": "Removing automation"}, {"key": "counting", "label": "Counting-rule effects"}]}, {"key": "mathematical", "label": "Mathematical", "categories": [{"key": "restructure", "label": "Proof restructuring"}, {"key": "lemmas", "label": "New lemmas"}]}, {"key": "library", "label": "Library reuse", "categories": [{"key": "library", "label": "Library lemmas"}]}, {"key": "other", "label": "Other", "categories": [{"key": "other", "label": "Not broken down"}, {"key": "mixed", "label": "Mixed changes"}]}], "examples": [{"id": "add_comm", "from": 2689, "to": 858, "split": false}, {"id": "compactness5", "from": 1307221424, "to": 10294824, "split": true, "unchanged": 0, "measured": [{"name": "Sharing first", "saved": 1296926600, "added": 0, "mixed": ["automation", "lemmas", "restructure", "sharing"]}, {"name": "Proof edits first", "saved": 1296926600, "added": 0, "mixed": ["lemmas", "restructure"]}], "rows": [{"category": "sharing", "group": "mechanical", "nodes": [1279427593, 638953828], "mid": 959190710.5, "share": [0.4926676868220607, 0.9865073266289703]}, {"category": "automation", "group": "mechanical", "nodes": [0, 627933167], "mid": 313966583.5, "share": [0.0, 0.4841701658366788]}, {"category": "lemmas", "group": "mathematical", "nodes": [0, 729477], "mid": 364738.5, "share": [0.0, 0.0005624659097901146]}, {"category": "mixed", "group": "other", "nodes": [17499007, 29310128], "mid": 23404567.5, "share": [0.013492673371029633, 0.02259968143147037]}], "inflow": [], "saved": 1296926600.0, "added": 0}, {"id": "ramsey96", "from": 11338478, "to": 441840, "split": true, "unchanged": 0, "measured": [{"name": "Sharing first", "saved": 10896638, "added": 0, "mixed": ["automation", "restructure", "sharing"]}, {"name": "Proof edits first", "saved": 10896638, "added": 0, "mixed": []}], "rows": [{"category": "sharing", "group": "mechanical", "nodes": [10855961, 8805361], "mid": 9830661.0, "share": [0.8080805290585958, 0.9962670137339609]}, {"category": "automation", "group": "mechanical", "nodes": [0, 1805103], "mid": 902551.5, "share": [0.0, 0.16565687508385615]}, {"category": "counting", "group": "mechanical", "nodes": [0, 42702], "mid": 21351.0, "share": [0.0, 0.003918823402227366]}, {"category": "restructure", "group": "mathematical", "nodes": [0, 243472], "mid": 121736.0, "share": [0.0, 0.022343772455320623]}, {"category": "mixed", "group": "other", "nodes": [40677, 0], "mid": 20338.5, "share": [0.0, 0.0037329862660391215]}], "inflow": [], "saved": 10896638.0, "added": 0}, {"id": "mathlib197", "from": 114567106, "to": 2336839, "split": true, "unchanged": 0, "measured": [{"name": "Proof edits first", "saved": 112230267, "added": 0, "mixed": []}, {"name": "Sharing first", "saved": 112230267, "added": 0, "mixed": ["restructure", "sharing"]}], "rows": [{"category": "sharing", "group": "mechanical", "nodes": [23581612, 110967335], "mid": 67274473.5, "share": [0.21011811368140113, 0.9887469571822368]}, {"category": "automation", "group": "mechanical", "nodes": [611863, 32385], "mid": 322124.0, "share": [0.0002885585222745661, 0.005451853732113103]}, {"category": "restructure", "group": "mathematical", "nodes": [77029992, 0], "mid": 38514996.0, "share": [0.0, 0.6863566670477581]}, {"category": "lemmas", "group": "mathematical", "nodes": [11006800, 190912], "mid": 5598856.0, "share": [0.0017010740961705098, 0.09807336553872763]}, {"category": "mixed", "group": "other", "nodes": [0, 1039635], "mid": 519817.5, "share": [0.0, 0.009263410199318157]}], "inflow": [], "saved": 112230267.0, "added": 0}, {"id": "fta", "from": 255416, "to": 1280, "split": true, "unchanged": 0, "measured": [{"name": null, "saved": 254179, "added": 43, "mixed": []}], "rows": [{"category": "sharing", "group": "mechanical", "nodes": [157], "mid": 157.0, "share": [0.0006176749456091967, 0.0006176749456091967]}, {"category": "automation", "group": "mechanical", "nodes": [241396], "mid": 241396.0, "share": [0.9497086698743799, 0.9497086698743799]}, {"category": "counting", "group": "mechanical", "nodes": [4087], "mid": 4087.0, "share": [0.016079219762450872, 0.016079219762450872]}, {"category": "restructure", "group": "mathematical", "nodes": [3428], "mid": 3428.0, "share": [0.013486558685021187, 0.013486558685021187]}, {"category": "library", "group": "library", "nodes": [5111], "mid": 5111.0, "share": [0.02010787673253888, 0.02010787673253888]}], "inflow": [{"category": "lemmas", "group": "mathematical", "nodes": [43], "mid": 43.0}], "saved": 254179.0, "added": 43.0}]}, "toy_joint": {"targets": 12, "definitions_each": 8673, "definitions_once": 806, "rows": [{"key": "a", "separate": 9877, "joint": 1594, "ratio": 6.196}, {"key": "b", "separate": 2010, "joint": 1594, "ratio": 1.261}, {"key": "c", "separate": 1204, "joint": 788, "ratio": 1.528}]}, "toy_reuse": {"proof": "theorem add_right_comm_eq (a b c : MyNat) : a + b + c = a + c + b :=\n  let r := add (add a c) b\n  let cb := add c b\n  Eq.trans (a := add (add a b) c) (b := add a (add b c)) (c := r) (add_assoc_eq a b c)\n    (Eq.substr (p := fun x => E (add a x) r) (a := cb) (b := add b c)\n      (add_comm_eq b c) (Eq.symm (add_assoc_eq a c b)))", "helpers": "def E : MyNat → MyNat → Prop := Eq", "statement": "a + b + c = a + c + b", "calls": {"add_assoc_eq": 2, "add_comm_eq": 1}, "rows": [{"target": "add_right_comm_eq", "single_best": 832, "single_proof": 163, "joint_own_proof": 113, "joint_with_reached": 375}, {"target": "mul_comm_eq", "single_best": 1222, "single_proof": 426, "joint_own_proof": 73, "joint_with_reached": 642}, {"target": "zero_add_eq", "single_best": 716, "single_proof": 47, "joint_own_proof": 30, "joint_with_reached": 84}]}, "kinds": {"rows": [{"task": "mathlib197", "final": "mathlib197-astra", "model": "astra", "from": 114567106, "to": 2336839, "saved": 112230267, "ranges": {"sharing": [23581612, 110967335], "automation": [32385, 611863], "counting": [0, 0], "restructure": [0, 77029992], "lemmas": [190912, 11006800], "other": [0, 1039635]}, "math_share": [0.0017010740961705098, 0.7844300325864858], "edits": null}, {"task": "ramsey96", "final": "ramsey96-astra", "model": "astra", "from": 11338478, "to": 441840, "saved": 10896638, "ranges": {"sharing": [8805361, 10855961], "automation": [0, 1805103], "counting": [0, 42702], "restructure": [0, 243472], "lemmas": [0, 0], "other": [0, 40677]}, "math_share": [0.0, 0.022343772455320623], "edits": null}, {"task": "compactness5", "final": "compactness5-astra", "model": "astra", "from": 1307221424, "to": 10294824, "saved": 1296926600, "ranges": {"sharing": [638953828, 1279427593], "automation": [0, 627933167], "counting": [0, 0], "restructure": [0, 0], "lemmas": [0, 729477], "other": [17499007, 29310128]}, "math_share": [0.0, 0.0005624659097901146], "edits": null}, {"task": "permanent2", "final": "permanent2-astra", "model": "astra", "from": 85690155, "to": 2875252, "saved": 82814903, "ranges": {"sharing": [46820990, 71536557], "automation": [8162583, 8163088], "counting": [3115258, 27831330], "restructure": [0, 0], "lemmas": [0, 0], "other": [0, 0]}, "math_share": [0.0, 0.0], "edits": 989}, {"task": "slt26", "final": "slt26-opus", "model": "opus", "from": 392854783, "to": 8647505, "saved": 384207278, "ranges": {"sharing": [384207245, 384207278], "automation": [0, 0], "counting": [0, 33], "restructure": [0, 0], "lemmas": [0, 0], "other": [0, 0]}, "math_share": [0.0, 0.0], "edits": 4}, {"task": "slt49", "final": "slt49-astra", "model": "astra", "from": 406689591, "to": 22493330, "saved": 384196261, "ranges": {"sharing": [384196261, 384196261], "automation": [0, 0], "counting": [0, 0], "restructure": [0, 0], "lemmas": [0, 0], "other": [0, 0]}, "math_share": [0.0, 0.0], "edits": 0}, {"task": "mathlib372", "final": "mathlib372-astra", "model": "astra", "from": 186421329, "to": 7846177, "saved": 178575152, "ranges": {"sharing": [178559934, 178559934], "automation": [15218, 15218], "counting": [0, 0], "restructure": [0, 0], "lemmas": [0, 0], "other": [0, 0]}, "math_share": [0.0, 0.0], "edits": 16}]}, "math_diffs": {"mathlib197": [{"kind": "restructure", "decls": [{"name": "CategoryTheory.Mat_.hasFiniteBiproducts", "before": "set_option backward.isDefEq.respectTransparency false in\nopen scoped Classical in\n/-- We now prove that `Mat_ C` has finite biproducts.\n\nBe warned, however, that `Mat_ C` is not necessarily Krull-Schmidt,\nand so the internal indexing of a biproduct may have nothing to do with the external indexing,\neven though the construction we give uses a sigma type.\nSee however `isoBiproductEmbedding`.\n-/\ninstance hasFiniteBiproducts : HasFiniteBiproducts (Mat_ C) where\n  out n :=\n    { has_biproduct := fun f =>\n        hasBiproduct_of_total\n          { pt := ⟨Σ j, (f j).ι, fun p => (f p.1).X p.2⟩\n            π := fun j x y => by\n              refine if h : x.1 = j then ?_ else 0\n              refine if h' : @Eq.ndrec (Fin n) x.1 (fun j => (f j).ι) x.2 _ h = y then ?_ else 0\n              apply eqToHom\n              subst h h'\n              rfl\n            -- Notice we were careful not to use `subst` until we had a goal in `Prop`.\n            ι := fun j x y => by\n              refine if h : y.1 = j then ?_ else 0\n              refine if h' : @Eq.ndrec _ y.1 (fun j => (f j).ι) y.2 _ h = x then ?_ else 0\n              apply eqToHom\n              subst h h'\n              rfl\n            ι_π := fun j j' => by\n              ext x y\n              dsimp\n              simp_rw [dite_comp, comp_dite]\n              simp only [ite_self, dite_eq_ite, Limits.comp_zero, Limits.zero_comp,\n                eqToHom_trans]\n              rw [← Finset.univ_sigma_univ, Finset.sum_sigma]\n              dsimp +instances\n              simp only [if_true, Finset.sum_dite_irrel, Finset.mem_univ,\n                Finset.sum_const_zero, Finset.sum_dite_eq']\n              split_ifs with h h'\n              · subst h h'\n                simp only [CategoryTheory.eqToHom_refl, CategoryTheory.Mat_.id_apply_self]\n              · subst h\n                rw [eqToHom_refl, id_apply_of_ne _ _ _ h']\n              · rfl }\n          (by\n            dsimp\n            ext1 ⟨i, j⟩\n            rintro ⟨i', j'⟩\n            rw [Finset.sum_apply, Finset.sum_apply]\n            dsimp\n            rw [Finset.sum_eq_single i]; rotate_left\n            · intro b _ hb\n              apply Finset.sum_eq_zero\n              intro x _\n              rw [dif_neg hb.symm, zero_comp]\n            · intro hi\n              simp at hi\n            rw [Finset.sum_eq_single j]; rotate_left\n            · intro b _ hb\n              rw [dif_pos rfl, dif_neg, zero_comp]\n              simp only\n              tauto\n            · intro hj\n              simp at hj\n            simp only [eqToHom_refl, dite_eq_ite, ite_true, Category.id_comp,\n              Sigma.mk.inj_iff, id_def]\n            by_cases h : i' = i\n            · subst h\n              rw [dif_pos rfl]\n              simp only [heq_eq_eq, true_and]\n              by_cases h : j' = j\n              · subst h\n                simp\n              · rw [dif_neg h, dif_neg (Ne.symm h)]\n            · rw [dif_neg h, dif_neg]\n              tauto) }", "after": "set_option maxHeartbeats 4000000 in\nset_option backward.isDefEq.respectTransparency false in\nopen scoped Classical in\n/-- We now prove that `Mat_ C` has finite biproducts.\n\nBe warned, however, that `Mat_ C` is not necessarily Krull-Schmidt,\nand so the internal indexing of a biproduct may have nothing to do with the external indexing,\neven though the construction we give uses a sigma type.\nSee however `isoBiproductEmbedding`.\n-/\ninstance hasFiniteBiproducts : HasFiniteBiproducts (Mat_ C) := by inline_lets M π ι =>\n  classical\n  refine ⟨fun n ↦ ⟨fun f ↦ ?_⟩⟩\n  let M : Mat_ C := ⟨Σ j, (f j).ι, fun p ↦ (f p.1).X p.2⟩\n  let π : ∀ j, M ⟶ f j := fun j x y ↦ (𝟙 M) x ⟨j, y⟩\n  let ι : ∀ j, f j ⟶ M := fun j x y ↦ (𝟙 M) ⟨j, x⟩ y\n  refine hasBiproduct_of_total { pt := M, π := π, ι := ι, ι_π := ?_ } ?_\n  · intro j k\n    ext x y\n    change ((𝟙 M ≫ 𝟙 M) ⟨j, x⟩ ⟨k, y⟩) = _\n    rw [Category.id_comp]\n    by_cases h : j = k\n    · subst k\n      simp [id_apply, M]\n    · simp [id_apply, M, h]\n      rfl\n  · dsimp\n    ext1 ⟨j, x⟩\n    rintro ⟨k, y⟩\n    rw [Finset.sum_apply, Finset.sum_apply]\n    change (∑ a, ∑ b, (𝟙 M) ⟨j, x⟩ ⟨a, b⟩ ≫ (𝟙 M) ⟨a, b⟩ ⟨k, y⟩) = _\n    exact (Fintype.sum_sigma (fun p : M.ι ↦ (𝟙 M) ⟨j, x⟩ p ≫\n      (𝟙 M) p ⟨k, y⟩)).symm.trans\n      (congr_fun (congr_fun (Category.id_comp (𝟙 M)) ⟨j, x⟩) ⟨k, y⟩)"}]}, {"kind": "lemmas", "decls": [{"name": "orderedFinpartition_sum_two", "before": null, "after": "set_option backward.isDefEq.respectTransparency false in\nprivate theorem orderedFinpartition_sum_two {E F : Type*} [AddCommMonoid F]\n    (g : (n : ℕ) → (Fin n → E) → F) (f : ℕ → E) :\n    (∑ c : OrderedFinpartition 2, g c.length (fun j ↦ f (c.partSize j))) =\n      g 2 (fun _ ↦ f 1) + g 1 (fun _ ↦ f 2) := by compact_cert_2 =>\n  simp only [← (OrderedFinpartition.extendEquiv 1).sum_comp, Fintype.sum_sigma, Fintype.sum_unique,\n    OrderedFinpartition.default_eq, Fintype.sum_option]\n  have : (Fin.cons 1 (fun _ ↦ 1) : Fin 2 → ℕ) = fun _ ↦ 1 :=\n    funext <| Fin.forall_fin_two.mpr ⟨rfl, rfl⟩\n  simp [OrderedFinpartition.extendEquiv, OrderedFinpartition.extend,\n    OrderedFinpartition.extendLeft, OrderedFinpartition.extendMiddle,\n    OrderedFinpartition.atomic, this]\n  congr 1\n  congr 1\n  funext j\n  fin_cases j\n  rfl"}, {"name": "orderedFinpartition_sum_three", "before": null, "after": "set_option backward.defeqAttrib.useBackward true in\nset_option backward.isDefEq.respectTransparency false in\nprivate theorem orderedFinpartition_sum_three {E F : Type*} [AddCommMonoid F]\n    (g : (n : ℕ) → (Fin n → E) → F) (f : ℕ → E) :\n    (∑ c : OrderedFinpartition 3, g c.length (fun j ↦ f (c.partSize j))) =\n      g 3 (fun _ ↦ f 1) + g 2 ![f 2, f 1] + 2 • g 2 ![f 1, f 2] +\n      g 1 (fun _ ↦ f 3) := by compact_cert_2 =>\n  simp only [← (OrderedFinpartition.extendEquiv 1).sum_comp,\n    ← (OrderedFinpartition.extendEquiv 2).sum_comp, Fintype.sum_sigma,\n    Fintype.sum_option, Nat.reduceAdd, OrderedFinpartition.extendEquiv_apply,\n    OrderedFinpartition.extend_none, OrderedFinpartition.extend_some,\n    OrderedFinpartition.extendMiddle_length, OrderedFinpartition.default_eq, Fintype.sum_unique,\n    OrderedFinpartition.atomic_length, OrderedFinpartition.extendLeft_length, Fin.sum_univ_two]\n  simp only [OrderedFinpartition.extendLeft_partSize, OrderedFinpartition.extendLeft_length,\n    OrderedFinpartition.atomic_length, Nat.reduceAdd, OrderedFinpartition.atomic_partSize,\n    Fin.isValue, OrderedFinpartition.extendMiddle_partSize, Fin.cons_zero, Fin.update_cons_zero,\n    Fin.cons_one, Fin.default_eq_zero, OrderedFinpartition.extendMiddle_length, Fin.cons_update,\n    Fin.succ_zero_eq_one, update_self, update_idem, add_assoc, two_smul]\n  have (j : _) : (Fin.cons 1 (Fin.cons 1 fun _ ↦ 1) : Fin 3 → ℕ) j = 1 := by compact_cert_2 =>\n    fin_cases j <;> rfl\n  congr <;> ext x <;> fin_cases x <;> simp [this]"}, {"name": "iteratedDerivWithin_vcomp_two", "before": "set_option backward.isDefEq.respectTransparency false in\ntheorem iteratedDerivWithin_vcomp_two\n    (hg : ContDiffWithinAt 𝕜 2 g t (f x)) (hf : ContDiffWithinAt 𝕜 2 f s x)\n    (ht : UniqueDiffOn 𝕜 t) (hs : UniqueDiffOn 𝕜 s) (hx : x ∈ s) (hst : MapsTo f s t) :\n    iteratedDerivWithin 2 (g ∘ f) s x =\n      iteratedFDerivWithin 𝕜 2 g t (f x) (fun _ ↦ derivWithin f s x) +\n      fderivWithin 𝕜 g t (f x) (iteratedDerivWithin 2 f s x) := by\n  rw [iteratedDerivWithin_vcomp_eq_sum_orderedFinpartition hg hf ht hs hx hst le_rfl]\n  simp only [← (OrderedFinpartition.extendEquiv 1).sum_comp, Fintype.sum_sigma, Fintype.sum_unique,\n    OrderedFinpartition.default_eq, Fintype.sum_option]\n  have : (Fin.cons 1 (fun _ ↦ 1) : Fin 2 → ℕ) = fun _ ↦ 1 :=\n    funext <| Fin.forall_fin_two.mpr ⟨rfl, rfl⟩\n  simp [OrderedFinpartition.extendEquiv, OrderedFinpartition.extend,\n    OrderedFinpartition.extendLeft, OrderedFinpartition.extendMiddle, ht _ (hst hx),\n    OrderedFinpartition.atomic, this]", "after": "set_option backward.isDefEq.respectTransparency false in\ntheorem iteratedDerivWithin_vcomp_two\n    (hg : ContDiffWithinAt 𝕜 2 g t (f x)) (hf : ContDiffWithinAt 𝕜 2 f s x)\n    (ht : UniqueDiffOn 𝕜 t) (hs : UniqueDiffOn 𝕜 s) (hx : x ∈ s) (hst : MapsTo f s t) :\n    iteratedDerivWithin 2 (g ∘ f) s x =\n      iteratedFDerivWithin 𝕜 2 g t (f x) (fun _ ↦ derivWithin f s x) +\n      fderivWithin 𝕜 g t (f x) (iteratedDerivWithin 2 f s x) := by compact_cert_2 =>\n  rw [iteratedDerivWithin_vcomp_eq_sum_orderedFinpartition hg hf ht hs hx hst le_rfl]\n  rw [orderedFinpartition_sum_two\n    (fun n v ↦ iteratedFDerivWithin 𝕜 n g t (f x) v)\n    (fun n ↦ iteratedDerivWithin n f s x)]\n  simp only [iteratedDerivWithin_one, iteratedFDerivWithin_one_apply (ht _ (hst hx))]"}, {"name": "iteratedDerivWithin_vcomp_three", "before": "set_option backward.defeqAttrib.useBackward true in\nset_option backward.isDefEq.respectTransparency false in\ntheorem iteratedDerivWithin_vcomp_three\n    (hg : ContDiffWithinAt 𝕜 3 g t (f x)) (hf : ContDiffWithinAt 𝕜 3 f s x)\n    (ht : UniqueDiffOn 𝕜 t) (hs : UniqueDiffOn 𝕜 s) (hx : x ∈ s) (hst : MapsTo f s t) :\n    iteratedDerivWithin 3 (g ∘ f) s x =\n      iteratedFDerivWithin 𝕜 3 g t (f x) (fun _ ↦ derivWithin f s x) +\n      iteratedFDerivWithin 𝕜 2 g t (f x) ![iteratedDerivWithin 2 f s x, derivWithin f s x] +\n      2 • iteratedFDerivWithin 𝕜 2 g t (f x) ![derivWithin f s x, iteratedDerivWithin 2 f s x] +\n      fderivWithin 𝕜 g t (f x) (iteratedDerivWithin 3 f s x) := by\n  rw [iteratedDerivWithin_vcomp_eq_sum_orderedFinpartition hg hf ht hs hx hst le_rfl]\n  simp only [← (OrderedFinpartition.extendEquiv 1).sum_comp,\n    ← (OrderedFinpartition.extendEquiv 2).sum_comp, Fintype.sum_sigma,\n    Fintype.sum_option, Nat.reduceAdd, OrderedFinpartition.extendEquiv_apply,\n    OrderedFinpartition.extend_none, OrderedFinpartition.extend_some,\n    OrderedFinpartition.extendMiddle_length, OrderedFinpartition.default_eq, Fintype.sum_unique,\n    OrderedFinpartition.atomic_length, OrderedFinpartition.extendLeft_length, Fin.sum_univ_two]\n  simp? [add_assoc, two_smul, iteratedFDerivWithin_one_apply (ht _ <| hst hx)] says\n    simp only [OrderedFinpartition.extendLeft_partSize, OrderedFinpartition.extendLeft_length,\n      OrderedFinpartition.atomic_length, Nat.reduceAdd, OrderedFinpartition.atomic_partSize,\n      Fin.isValue, OrderedFinpartition.extendMiddle_partSize, Fin.cons_zero, Fin.update_cons_zero,\n      Fin.cons_one, Fin.default_eq_zero, OrderedFinpartition.extendMiddle_length, Fin.cons_update,\n      Fin.succ_zero_eq_one, update_self, update_idem,\n      iteratedFDerivWithin_one_apply (ht _ <| hst hx), add_assoc, two_smul]\n  have (j : _) : (Fin.cons 1 (Fin.cons 1 fun _ ↦ 1) : Fin 3 → ℕ) j = 1 := by\n    fin_cases j <;> rfl\n  congr <;> ext x <;> fin_cases x <;> simp [this]", "after": "set_option backward.defeqAttrib.useBackward true in\nset_option backward.isDefEq.respectTransparency false in\ntheorem iteratedDerivWithin_vcomp_three\n    (hg : ContDiffWithinAt 𝕜 3 g t (f x)) (hf : ContDiffWithinAt 𝕜 3 f s x)\n    (ht : UniqueDiffOn 𝕜 t) (hs : UniqueDiffOn 𝕜 s) (hx : x ∈ s) (hst : MapsTo f s t) :\n    iteratedDerivWithin 3 (g ∘ f) s x =\n      iteratedFDerivWithin 𝕜 3 g t (f x) (fun _ ↦ derivWithin f s x) +\n      iteratedFDerivWithin 𝕜 2 g t (f x) ![iteratedDerivWithin 2 f s x, derivWithin f s x] +\n      2 • iteratedFDerivWithin 𝕜 2 g t (f x) ![derivWithin f s x, iteratedDerivWithin 2 f s x] +\n      fderivWithin 𝕜 g t (f x) (iteratedDerivWithin 3 f s x) := by compact_cert_2 =>\n  rw [iteratedDerivWithin_vcomp_eq_sum_orderedFinpartition hg hf ht hs hx hst le_rfl]\n  rw [orderedFinpartition_sum_three\n    (fun n v ↦ iteratedFDerivWithin 𝕜 n g t (f x) v)\n    (fun n ↦ iteratedDerivWithin n f s x)]\n  simp only [iteratedDerivWithin_one, iteratedFDerivWithin_one_apply (ht _ (hst hx))]"}]}, {"kind": "lemmas", "decls": [{"name": "Ring.DirectLimit.exists_image_of_freeCommRing", "before": null, "after": "private theorem exists_image_of_freeCommRing\n    [Nonempty ι] [IsDirectedOrder ι] {R : Type*} [CommRing R]\n    (q : FreeCommRing (Σ i, G i) →+* R) (φ : ∀ i, G i →+* R)\n    (hgen : ∀ i x, q (FreeCommRing.of ⟨i, x⟩) = φ i x)\n    (hcompat : ∀ i j h x, φ j (f i j h x) = φ i x) (z : FreeCommRing (Σ i, G i)) :\n    ∃ i x, φ i x = q z := by compact_ring =>\n  refine z.induction_on ⟨Classical.arbitrary ι, -1, by simp⟩\n    (fun ⟨i, x⟩ ↦ ⟨i, x, (hgen i x).symm⟩) ?_ ?_\n    <;> rintro a b ⟨i, x, hx⟩ ⟨j, y, hy⟩ <;> have ⟨k, hik, hjk⟩ := exists_ge_ge i j\n  · exact ⟨k, f i k hik x + f j k hjk y, by\n      rw [map_add, hcompat, hcompat, hx, hy, map_add]⟩\n  · exact ⟨k, f i k hik x * f j k hjk y, by\n      rw [map_mul, hcompat, hcompat, hx, hy, map_mul]⟩"}, {"name": "Ring.DirectLimit.exists_of", "before": "/-- Every element of the direct limit corresponds to some element in\nsome component of the directed system. -/\ntheorem exists_of [Nonempty ι] [IsDirectedOrder ι] (z : DirectLimit G f) :\n    ∃ i x, of G f i x = z := by\n  obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective z\n  refine z.induction_on ⟨Classical.arbitrary ι, -1, by simp; rfl⟩ (fun ⟨i, x⟩ ↦ ⟨i, x, rfl⟩) ?_ ?_\n    <;> rintro x' y' ⟨i, x, hx⟩ ⟨j, y, hy⟩ <;> have ⟨k, hik, hjk⟩ := exists_ge_ge i j\n  · exact ⟨k, f i k hik x + f j k hjk y, by rw [map_add, of_f, of_f, hx, hy]; rfl⟩\n  · exact ⟨k, f i k hik x * f j k hjk y, by rw [map_mul, of_f, of_f, hx, hy]; rfl⟩", "after": "/-- Every element of the direct limit corresponds to some element in\nsome component of the directed system. -/\ntheorem exists_of [Nonempty ι] [IsDirectedOrder ι] (z : DirectLimit G f) :\n    ∃ i x, of G f i x = z := by compact_ring =>\n  obtain ⟨z, rfl⟩ := Ideal.Quotient.mk_surjective z\n  exact exists_image_of_freeCommRing (f := f) (Ideal.Quotient.mk _) (of G f)\n    (fun _ _ ↦ rfl) (fun _ _ h x ↦ of_f h x) z"}]}], "ramsey96": [{"kind": "restructure", "decls": [{"name": "ErdosProblems.MulticolourTriangleRamsey.triangleRamseyNumber_log_eventually_bounds", "before": "theorem triangleRamseyNumber_log_eventually_bounds :\n    ∀ᶠ k : ℕ in atTop,\n      (1 / 6 : ℝ) * (k : ℝ) * Real.log (k : ℝ) ≤\n          Real.log (triangleRamseyNumber k : ℝ) ∧\n        Real.log (triangleRamseyNumber k : ℝ) ≤\n          2 * (k : ℝ) * Real.log (k : ℝ) := by\n  have hconstant : 0 < (1 / (6 * Real.exp 38) : ℝ) := by positivity\n  have hlogsmall :\n      ∀ᶠ k : ℕ in atTop,\n        ‖Real.log (k : ℝ)‖ ≤\n          (1 / (6 * Real.exp 38) : ℝ) *\n            ‖(k : ℝ) ^ ((1 : ℝ) / 6)‖ := by\n    simpa [Function.comp_def] using\n      ((isLittleO_log_rpow_atTop (by norm_num : (0 : ℝ) < 1 / 6)).comp_tendsto\n        (tendsto_natCast_atTop_atTop (R := ℝ))).bound hconstant\n  filter_upwards [hlogsmall, eventually_ge_atTop 4] with k hsmall hk\n  have hkpositive : 0 < (k : ℝ) := by exact_mod_cast (by omega : 0 < k)\n  have hlogpositive : 0 < Real.log (k : ℝ) :=\n    Real.log_pos (by exact_mod_cast (by omega : 1 < k))\n  have hrootpositive : 0 < (k : ℝ) ^ ((1 : ℝ) / 6) :=\n    Real.rpow_pos_of_pos hkpositive _\n  have hsmall' :\n      Real.log (k : ℝ) ≤\n        (1 / (6 * Real.exp 38) : ℝ) * (k : ℝ) ^ ((1 : ℝ) / 6) := by\n    rw [Real.norm_eq_abs, abs_of_pos hlogpositive,\n      Real.norm_eq_abs, abs_of_pos hrootpositive] at hsmall\n    exact hsmall\n  have hrootsquare :\n      (k : ℝ) ^ ((1 : ℝ) / 6) * (k : ℝ) ^ ((1 : ℝ) / 6) =\n        (k : ℝ) ^ ((1 : ℝ) / 3) := by\n    rw [← Real.rpow_add hkpositive]\n    norm_num\n  have hbase :\n      (k : ℝ) ^ ((1 : ℝ) / 6) ≤\n        ((1 : ℝ) / (6 * Real.exp 38)) *\n          (k : ℝ) ^ ((1 : ℝ) / 3) / Real.log (k : ℝ) := by\n    apply (le_div_iff₀ hlogpositive).mpr\n    calc\n      (k : ℝ) ^ ((1 : ℝ) / 6) * Real.log (k : ℝ) ≤\n          (k : ℝ) ^ ((1 : ℝ) / 6) *\n            ((1 / (6 * Real.exp 38) : ℝ) *\n              (k : ℝ) ^ ((1 : ℝ) / 6)) := by gcongr\n      _ = (1 / (6 * Real.exp 38) : ℝ) *\n            ((k : ℝ) ^ ((1 : ℝ) / 6) *\n              (k : ℝ) ^ ((1 : ℝ) / 6)) := by ring\n      _ = (1 / (6 * Real.exp 38) : ℝ) *\n            (k : ℝ) ^ ((1 : ℝ) / 3) := by rw [hrootsquare]\n  have hramsey :\n      ((k : ℝ) ^ ((1 : ℝ) / 6)) ^ k ≤\n        (triangleRamseyNumber k : ℝ) := by\n    calc\n      ((k : ℝ) ^ ((1 : ℝ) / 6)) ^ k ≤\n          (((1 : ℝ) / (6 * Real.exp 38)) *\n            (k : ℝ) ^ ((1 : ℝ) / 3) / Real.log (k : ℝ)) ^ k := by gcongr\n      _ ≤ (triangleRamseyNumber k : ℝ) :=\n        quantitativeLowerBound_explicit_all k (by omega)\n  have hramseypositive : 0 < (triangleRamseyNumber k : ℝ) :=\n    lt_of_lt_of_le (pow_pos hrootpositive k) hramsey\n  have hkpow : k ≤ k ^ k :=\n    le_self_pow (by omega : 1 ≤ k) (by omega : k ≠ 0)\n  have hfour : 4 ≤ k ^ k := by omega\n  have huppernat : triangleRamseyNumber k ≤ (k ^ k) ^ 2 := by\n    calc\n      triangleRamseyNumber k ≤ 4 * k.factorial :=\n        triangleRamseyNumber_factorial_upper k\n      _ ≤ 4 * k ^ k := Nat.mul_le_mul_left 4 (Nat.factorial_le_pow k)\n      _ ≤ (k ^ k) * (k ^ k) := Nat.mul_le_mul_right (k ^ k) hfour\n      _ = (k ^ k) ^ 2 := by ring\n  have hupperreal :\n      (triangleRamseyNumber k : ℝ) ≤ (((k : ℝ) ^ k) ^ 2) := by\n    exact_mod_cast huppernat\n  constructor\n  · calc\n      (1 / 6 : ℝ) * (k : ℝ) * Real.log (k : ℝ) =\n          Real.log (((k : ℝ) ^ ((1 : ℝ) / 6)) ^ k) := by\n            rw [Real.log_pow, Real.log_rpow hkpositive]\n            ring\n      _ ≤ Real.log (triangleRamseyNumber k : ℝ) :=\n        Real.log_le_log (pow_pos hrootpositive k) hramsey\n  · calc\n      Real.log (triangleRamseyNumber k : ℝ) ≤\n          Real.log (((k : ℝ) ^ k) ^ 2) :=\n        Real.log_le_log hramseypositive hupperreal\n      _ = 2 * (k : ℝ) * Real.log (k : ℝ) := by\n        rw [Real.log_pow, Real.log_pow]\n        ring", "after": "theorem triangleRamseyNumber_log_eventually_bounds :\n    ∀ᶠ k : ℕ in atTop,\n      (1 / 6 : ℝ) * (k : ℝ) * Real.log (k : ℝ) ≤\n          Real.log (triangleRamseyNumber k : ℝ) ∧\n        Real.log (triangleRamseyNumber k : ℝ) ≤\n          2 * (k : ℝ) * Real.log (k : ℝ) := by\n  filter_upwards [triangleRamseyNumber_log_sharp_coefficients (1 / 6) (by norm_num),\n    eventually_ge_atTop 1] with k h hk\n  have hscale : 0 ≤ (k : ℝ) * Real.log (k : ℝ) :=\n    mul_nonneg (Nat.cast_nonneg _) (Real.log_nonneg (by exact_mod_cast hk))\n  constructor\n  · convert h.1 using 1 <;> norm_num\n  · calc\n      Real.log (triangleRamseyNumber k : ℝ) ≤\n          (1 + 1 / 6) * (k : ℝ) * Real.log (k : ℝ) := h.2\n      _ ≤ 2 * (k : ℝ) * Real.log (k : ℝ) := by\n        simpa only [mul_assoc] using\n          mul_le_mul_of_nonneg_right (by norm_num : (1 + 1 / 6 : ℝ) ≤ 2) hscale"}]}], "compactness5": [{"kind": "mixed", "decls": [{"name": "CompactnessConjecture.cycle_map", "before": null, "after": "private lemma cycle_map {V : Type*} {n : ℕ} (G : SimpleGraph V) (f : Fin (n+2) → V)\n    (hs : ∀ i, G.Adj (f i) (f (i+1))) : ∀ {i j}, (cycleGraph (n+2)).Adj i j → G.Adj (f i) (f j) := by\n  intro i j hij\n  rcases cycleGraph_adj.mp hij with h | h\n  · have he : i = j + 1 := sub_eq_iff_eq_add'.mp h\n    subst i\n    exact (hs j).symm\n  · have he : j = i + 1 := sub_eq_iff_eq_add'.mp h\n    subst j\n    exact hs i"}, {"name": "CompactnessConjecture.common_neighbor_unique_of_four_cycle_free", "before": "theorem common_neighbor_unique_of_four_cycle_free\n    {V : Type*} {G : SimpleGraph V}\n    (hfree : (SimpleGraph.cycleGraph 4).Free G)\n    {u v x y : V} (huv : u ≠ v)\n    (hux : G.Adj u x) (hvx : G.Adj v x)\n    (huy : G.Adj u y) (hvy : G.Adj v y) : x = y := by\n  by_contra hxy\n  apply hfree\n  let f : Fin 4 → V := ![u, x, v, y]\n  refine ⟨⟨⟨f, ?_⟩, ?_⟩⟩\n  · intro i j hij\n    fin_cases i <;> fin_cases j <;>\n      simp_all [f, SimpleGraph.cycleGraph]\n    all_goals\n      first\n      | exact hux.symm\n      | exact hvx.symm\n      | exact huy.symm\n      | exact hvy.symm\n      | exact False.elim ((of_decide_eq_false rfl) hij)\n  · change Function.Injective ![u, x, v, y]\n    repeat' apply Fin.cons_injective_of_injective\n    all_goals first\n      | exact fun i => Fin.elim0 i\n      | simp [Matrix.range_cons, Matrix.range_empty, Fin.range_cons,\n      huv, huv.symm, hxy, Ne.symm hxy, hux.ne, hux.symm.ne,\n      hvx.ne, hvx.symm.ne, huy.ne, huy.symm.ne, hvy.ne, hvy.symm.ne]", "after": "theorem common_neighbor_unique_of_four_cycle_free\n    {V : Type*} {G : SimpleGraph V}\n    (hfree : (SimpleGraph.cycleGraph 4).Free G)\n    {u v x y : V} (huv : u ≠ v)\n    (hux : G.Adj u x) (hvx : G.Adj v x)\n    (huy : G.Adj u y) (hvy : G.Adj v y) : x = y := by\n  by_contra hxy\n  apply hfree\n  let f : Fin 4 → V := ![u, x, v, y]\n  refine ⟨⟨⟨f, ?_⟩, ?_⟩⟩\n  · apply cycle_map G f\n    intro i\n    split_fin i <;> first\n      | exact hux\n      | exact hvx.symm\n      | exact hvy\n      | exact huy.symm\n  · change Function.Injective ![u, x, v, y]\n    repeat' apply Fin.cons_injective_of_injective\n    all_goals first\n      | exact fun i => Fin.elim0 i\n      | simp [Matrix.range_cons, Matrix.range_empty, Fin.range_cons,\n      huv, huv.symm, hxy, Ne.symm hxy, hux.ne, hux.symm.ne,\n      hvx.ne, hvx.symm.ne, huy.ne, huy.symm.ne, hvy.ne, hvy.symm.ne]"}, {"name": "CompactnessConjecture.subdivisionRelation_color_ne", "before": null, "after": "private lemma subdivisionRelation_color_ne {k : ℕ} {u v : SubdivisionVertex k}\n    (h : subdivisionRelation k u v) : subdivisionColor k u ≠ subdivisionColor k v := by\n  rcases u with (u | u) | u <;> rcases v with (v | v) | v <;>\n    simp_all [subdivisionRelation, subdivisionColor]"}, {"name": "CompactnessConjecture.kTemplateRelation_color_ne", "before": null, "after": "private lemma kTemplateRelation_color_ne {u v : KVertex}\n    (h : kTemplateRelation u v) : kColor u ≠ kColor v := by\n  rcases h with ⟨hc, h⟩ | ⟨hu, hv, huc, hvc⟩\n  · have hn := subdivisionRelation_color_ne h\n    unfold kColor\n    rw [hc]\n    split_ifs <;> simpa using hn\n  · simp [kColor, hu, hv, huc, hvc, kSpecifiedCenter, subdivisionColor]"}, {"name": "CompactnessConjecture.kTemplate_adj_color_ne", "before": "lemma kTemplate_adj_color_ne\n    {u v : KVertex} (h : kTemplate.Adj u v) :\n    kColor u ≠ kColor v := by\n  rcases u with ⟨u, (u | u) | u⟩ <;>\n    rcases v with ⟨v, (v | v) | v⟩ <;>\n    fin_cases u <;> fin_cases v <;>\n    simp_all [kTemplate, SimpleGraph.fromRel_adj,\n      kTemplateRelation, kColor, subdivisionColor,\n      subdivisionRelation, kSpecifiedCenter]\n  all_goals aesop", "after": "lemma kTemplate_adj_color_ne\n    {u v : KVertex} (h : kTemplate.Adj u v) : kColor u ≠ kColor v := by\n  rcases h.2 with h | h\n  · exact kTemplateRelation_color_ne h\n  · exact (kTemplateRelation_color_ne h).symm"}, {"name": "TwoDegenerateGraphs.retained_indicator_mul", "before": null, "after": "private lemma retained_indicator_mul (a b c d e f : Prop)\n    [Decidable a] [Decidable b] [Decidable c] [Decidable d] [Decidable e] [Decidable f] : (if a then if b ∧ c then (1 : ℝ) else 0 else 0) *\n      (if d then if e ∧ f then (1 : ℝ) else 0 else 0) =\n      if a ∧ d then if b ∧ c ∧ e ∧ f then (1 : ℝ) else 0 else 0 := by\n  by_cases ha : a <;> by_cases hd : d <;>\n    simp [ha, hd, mul_ite, ← ite_and, and_assoc, and_left_comm, and_comm]"}, {"name": "TwoDegenerateGraphs.hammingRetainedEdgeCount_sq", "before": "open Classical in\ntheorem hammingRetainedEdgeCount_sq\n    (dimension radius : ℕ)\n    (retained : Set (Bool × HammingWord dimension)) :\n    hammingRetainedEdgeCount dimension radius retained ^ 2 =\n      ∑ firstLeft : HammingWord dimension,\n        ∑ firstRight : HammingWord dimension,\n          ∑ secondLeft : HammingWord dimension,\n            ∑ secondRight : HammingWord dimension,\n              if hammingDist firstLeft firstRight ≤ radius ∧\n                  hammingDist secondLeft secondRight ≤ radius then\n                if (false, firstLeft) ∈ retained ∧\n                    (true, firstRight) ∈ retained ∧\n                    (false, secondLeft) ∈ retained ∧\n                    (true, secondRight) ∈ retained\n                then (1 : ℝ) else 0\n              else 0 := by\n  classical\n  unfold hammingRetainedEdgeCount\n  rw [pow_two, Finset.sum_mul_sum]\n  simp_rw [Finset.sum_mul_sum]\n  apply Finset.sum_congr rfl\n  intro firstLeft _\n  rw [Finset.sum_comm]\n  apply Finset.sum_congr rfl\n  intro firstRight _\n  apply Finset.sum_congr rfl\n  intro secondLeft _\n  apply Finset.sum_congr rfl\n  intro secondRight _\n  by_cases hfirst_edge : hammingDist firstLeft firstRight ≤ radius <;>\n    by_cases hsecond_edge : hammingDist secondLeft secondRight ≤ radius <;>\n    by_cases hfirst_left : (false, firstLeft) ∈ retained <;>\n    by_cases hfirst_right : (true, firstRight) ∈ retained <;>\n    by_cases hsecond_left : (false, secondLeft) ∈ retained <;>\n    by_cases hsecond_right : (true, secondRight) ∈ retained <;>\n    simp [hfirst_edge, hsecond_edge, hfirst_left, hfirst_right,\n      hsecond_left, hsecond_right]", "after": "open Classical in\ntheorem hammingRetainedEdgeCount_sq\n    (dimension radius : ℕ)\n    (retained : Set (Bool × HammingWord dimension)) : hammingRetainedEdgeCount dimension radius retained ^ 2 =\n      ∑ firstLeft : HammingWord dimension,\n        ∑ firstRight : HammingWord dimension,\n          ∑ secondLeft : HammingWord dimension,\n            ∑ secondRight : HammingWord dimension,\n              if hammingDist firstLeft firstRight ≤ radius ∧\n                  hammingDist secondLeft secondRight ≤ radius then\n                if (false, firstLeft) ∈ retained ∧\n                    (true, firstRight) ∈ retained ∧\n                    (false, secondLeft) ∈ retained ∧\n                    (true, secondRight) ∈ retained\n                then (1 : ℝ) else 0\n              else 0 := by\n  classical\n  unfold hammingRetainedEdgeCount\n  rw [pow_two, Finset.sum_mul_sum]\n  simp_rw [Finset.sum_mul_sum]\n  apply Finset.sum_congr rfl\n  intro firstLeft _\n  rw [Finset.sum_comm]\n  apply Finset.sum_congr rfl\n  intro firstRight _\n  apply Finset.sum_congr rfl\n  intro secondLeft _\n  apply Finset.sum_congr rfl\n  intro secondRight _\n  simpa only [← ite_and] using retained_indicator_mul\n    (hammingDist firstLeft firstRight ≤ radius)\n    ((false, firstLeft) ∈ retained) ((true, firstRight) ∈ retained)\n    (hammingDist secondLeft secondRight ≤ radius)\n    ((false, secondLeft) ∈ retained) ((true, secondRight) ∈ retained)"}]}]}, "permanent_case": {"from": 85690155, "to": 4967346, "routes": [{"what": "Totalized division with 4 free coefficients gives one parameter bound for both targets; the division-free theorem is derived through Formula.toRational", "from": 5983337, "to": 4967346, "before": "def ScalarSkeleton.Bounded {K E L : Type*} [Field K] [Field E] [Field L]\n    [Algebra K L] (φ : E →+* L)\n    (H : Finset E → IntermediateField K L) (r : ℕ) (x : L) : Prop :=\n  ∃ (s : Finset E) (a b c d : E) (u : L),\n    u ∈ H s ∧ φ c * u + φ d ≠ 0 ∧\n      x = (φ a * u + φ b) / (φ c * u + φ d) ∧ s.card ≤ 6*r-6\n-- ...\ntheorem ScalarSkeleton.affine {K E L : Type*} [Field K] [Field E] [Field L]\n    [Algebra K L] {φ : E →+* L} {H : Finset E → IntermediateField K L}\n    {r : ℕ} {x : L} (h : ScalarSkeleton.Bounded φ H r x) (a b : E) :\n    ScalarSkeleton.Bounded φ H r (φ a*x+φ b) := by\n  obtain ⟨s,e,f,g,k,u,hu,hd,hx,hs⟩ := h\n  refine ⟨s,a*e+b*g,a*f+b*k,g,k,u,hu,hd,?_,hs⟩\n  have hn := ScalarSkeleton.affine_row φ a b e f g k u\n  exact (congrArg (fun z => φ a*z+φ b) hx).trans\n    ((ScalarSkeleton.affine_fraction _ _ _ _ hd).symm.trans\n      (congrArg (fun z => z/(φ g*u+φ k)) hn.symm))\n\ntheorem ScalarSkeleton.inverse {K E L : Type*} [Field K] [Field E] [Field L]\n    [Algebra K L] {φ : E →+* L} {H : Finset E → IntermediateField K L}\n    {r : ℕ} {x : L} (h : ScalarSkeleton.Bounded φ H r x) (hne : x ≠ 0) :\n    ScalarSkeleton.Bounded φ H r x⁻¹ := by\n  obtain ⟨s,a,b,c,d,u,hu,hd,hx,hs⟩ := h\n  have hn : φ a*u+φ b ≠ 0 := (div_ne_zero_iff.mp (hx ▸ hne)).1\n  exact ⟨s,c,d,a,b,u,hu,hn,(congrArg Inv.inv hx).trans (inv_div _ _),hs⟩\n-- ...\ntheorem permanent_divisionFree_formula_fourth_power_lower_bound\n    {n : ℕ} (hn : 32 ≤ n)\n    (f : Formula (Fin n × Fin n) ℂ)\n    (hf : Formula.eval f = permanentPolynomial n) :\n    n ^ 4 ≤ 32 * (2 * Nat.clog 2 n) * Formula.variableLeaves f := by\n  obtain ⟨hk, hkn, hhalf, hm, hcertificate⟩ := permanent_matching_parameters hn\n  exact Formula.cyclicMatchingBlock_fourth_power_bound_of_jacobian\n    hm hk hkn hhalf f hf hcertificate", "after": "def ScalarTotal.Related {E L : Type*} [NonAssocSemiring E] [Field L]\n    (φ : E →+* L) (x u : L) : Prop :=\n  ∃ M : ScalarTotal.Coefficients E, x = (φ M.a*u+φ M.b)/(φ M.c*u+φ M.d)\n-- ...\ntheorem ScalarTotal.Related.affine {E L : Type*} [NonAssocSemiring E] [Field L]\n    {φ : E →+* L} {x u : L} (h : ScalarTotal.Related φ x u) (a b : E) :\n    ScalarTotal.Related φ (φ a*x+φ b) u := by\n  obtain ⟨M,hx⟩ := h\n  by_cases hd : φ M.c*u+φ M.d = 0\n  · rw [hd, div_zero] at hx\n    refine ⟨⟨0,b,0,1⟩,?_⟩\n    change φ a*x+φ b = (φ 0*u+φ b)/(φ 0*u+φ 1)\n    simp only [hx, map_zero, zero_mul, zero_add, map_one, div_one, mul_zero]\n  · refine ⟨⟨a*M.a+b*M.c,a*M.b+b*M.d,M.c,M.d⟩,?_⟩\n    have hn := ScalarSkeleton.affine_row φ a b M.a M.b M.c M.d u\n    exact (congrArg (fun z => φ a*z+φ b) hx).trans\n      ((ScalarSkeleton.affine_fraction _ _ _ _ hd).symm.trans\n        (congrArg (fun z => z/(φ M.c*u+φ M.d)) hn.symm))\n\ntheorem ScalarTotal.Related.inverse {E L : Type*} [NonAssocSemiring E] [Field L]\n    {φ : E →+* L} {x u : L} (h : ScalarTotal.Related φ x u) :\n    ScalarTotal.Related φ x⁻¹ u := by\n  obtain ⟨M,hx⟩ := h\n  exact ⟨⟨M.c,M.d,M.a,M.b⟩,(congrArg Inv.inv hx).trans (inv_div _ _)⟩\n\ndef ScalarTotal.Bounded {E L : Type*} [NonAssocSemiring E] [Field L]\n    (φ : E →+* L)\n    (H : Finset E → Subfield L) (r : ℕ) (x : L) : Prop :=\n  ∃ (s : Finset E) (u : L), u ∈ H s ∧ ScalarTotal.Related φ x u ∧ s.card ≤ 8*r-8\n-- ...\ntheorem permanent_divisionFree_formula_fourth_power_lower_bound\n    {n : ℕ} (hn : 32 ≤ n)\n    (f : Formula (Fin n × Fin n) ℂ)\n    (hf : Formula.eval f = permanentPolynomial n) :\n    n ^ 4 ≤ 32 * (2 * Nat.clog 2 n) * Formula.variableLeaves f := by\n  have h := permanent_rational_formula_strong_fourth_power_lower_bound hn\n    (Formula.toRational f)\n    ((Formula.toRational_eval f).trans\n      (congrArg (algebraMap (MvPolynomial (Fin n × Fin n) ℂ)\n        (FractionRing (MvPolynomial (Fin n × Fin n) ℂ))) hf))\n  simpa only [Formula.toRational_variableLeaves] using h"}, {"what": "Algebraic independence plus an algebraic-matroid bound replaced by a derivation/linear-algebra dimension bound", "from": 9676483, "to": 8377697, "before": "theorem independent_card_le_adjoin_finset {F E I : Type}\n    [Field F] [Field E] [Algebra F E] [Fintype I]\n    (s : Finset E) (g : I → E) (hg : AlgebraicIndependent F g)\n    (hmem : ∀ i, g i ∈ IntermediateField.adjoin F (s : Set E)) :\n    (Fintype.card I : Cardinal.{0}) ≤ (s.card : Cardinal.{0}) := by\n  classical\n  let M := AlgebraicIndependent.matroid F E\n  have hi : M.Indep (Set.range g) := hg.to_subtype_range\n  have hs : Set.range g ⊆ M.closure (s : Set E) := by\n    rintro _ ⟨i, rfl⟩\n    rw [AlgebraicIndependent.matroid_closure_eq]\n    change IsAlgebraic (Algebra.adjoin F (s : Set E)) (g i)\n    exact IsAlgebraic.algHom\n      (IsScalarTower.toAlgHom (Algebra.adjoin F (s : Set E))\n        (IntermediateField.adjoin F (s : Set E)) E)\n      (Algebra.IsAlgebraic.isAlgebraic (⟨g i, hmem i⟩ : IntermediateField.adjoin F (s : Set E)))\n  calc\n    (Fintype.card I : Cardinal.{0}) = Cardinal.mk (Set.range g) := by\n      rw [Cardinal.mk_range_eq g hg.injective, Cardinal.mk_fintype]\n    _ ≤ M.cRk (M.closure (s : Set E)) := hi.cardinalMk_le_cRk_of_subset hs\n    _ = M.cRk (s : Set E) := M.cRk_closure _\n    _ ≤ Cardinal.mk (s : Set E) := M.cRk_le_cardinalMk _\n    _ = (s.card : Cardinal.{0}) := Cardinal.mk_coe_finset", "after": "def derivationSubmoduleField {F E M : Type*}\n    [Field F] [Field E] [Algebra F E] [AddCommGroup M]\n    [Module E M] [Module F M] [IsScalarTower F E M]\n    (D : Derivation F E M) (V : Submodule E M) : IntermediateField F E where\n  carrier := {x | D x ∈ V}\n  add_mem' hx hy := by\n    change D (_+_) ∈ V\n    rw [map_add]\n    exact V.add_mem hx hy\n-- ...\ntheorem derivation_card_le_parameters {F E M I : Type*}\n    [Field F] [Field E] [Algebra F E] [AddCommGroup M]\n    [Module E M] [Module F M] [IsScalarTower F E M] [Fintype I]\n    (D : Derivation F E M) (s : Finset E) (g : I → E)\n    (hg : LinearIndependent E (fun i => D (g i)))\n    (hmem : ∀ i, g i ∈ IntermediateField.adjoin F (s : Set E)) :\n    Fintype.card I ≤ s.card := by\n  classical\n  let t := s.image D\n  let V := Submodule.span E (t : Set M)\n  let K := derivationSubmoduleField D V\n  have hs : IntermediateField.adjoin F (s : Set E) ≤ K := by\n    apply IntermediateField.adjoin_le_iff.mpr\n    intro x hx\n    exact Submodule.subset_span (Finset.mem_image.mpr ⟨x,hx,rfl⟩)\n  have hV (i : I) : D (g i) ∈ V := hs (hmem i)\n  let v : I → V := fun i => ⟨D (g i), hV i⟩\n  have hi : LinearIndependent E v := LinearIndependent.of_comp V.subtype hg\n  letI : Module.Finite E V := Module.Finite.span_of_finite E t.finite_toSet\n  exact hi.fintype_card_le_finrank.trans\n    ((finrank_span_finset_le_card (R := E) t).trans (Finset.card_image_le))"}], "steps": [{"label": "Original", "run": "full-target-12h-001", "nodes": 85690155, "kept": true}, {"label": "12h·seed", "run": "full-target-12h-001", "nodes": 18947371, "kept": true}, {"label": "12h·1", "run": "full-target-12h-001", "nodes": 15274820, "kept": true}, {"label": "12h·2", "run": "full-target-12h-001", "nodes": 14838791, "kept": true}, {"label": "12h·3", "run": "full-target-12h-001", "nodes": null, "kept": false}, {"label": "12h·4", "run": "full-target-12h-001", "nodes": null, "kept": false}, {"label": "12h·5", "run": "full-target-12h-001", "nodes": 13041319, "kept": true}, {"label": "12h·6", "run": "full-target-12h-001", "nodes": 11191359, "kept": true}, {"label": "12h·7", "run": "full-target-12h-001", "nodes": 12421842, "kept": false}, {"label": "12h·8", "run": "full-target-12h-001", "nodes": 10493950, "kept": true}, {"label": "12h·9", "run": "full-target-12h-001", "nodes": 10702283, "kept": false}, {"label": "12h·10", "run": "full-target-12h-001", "nodes": 11016046, "kept": false}, {"label": "12h·11", "run": "full-target-12h-001", "nodes": 9676483, "kept": true}, {"label": "12h·12", "run": "full-target-12h-001", "nodes": 9921002, "kept": false}, {"label": "12h·13", "run": "full-target-12h-001", "nodes": 10436679, "kept": false}, {"label": "12h·14", "run": "full-target-12h-001", "nodes": 8377697, "kept": true}, {"label": "12h·15", "run": "full-target-12h-001", "nodes": 9491779, "kept": false}, {"label": "12h·16", "run": "full-target-12h-001", "nodes": 7652858, "kept": true}, {"label": "12h·17", "run": "full-target-12h-001", "nodes": 8010908, "kept": false}, {"label": "+6h·1", "run": "full-target-additional-6h-001", "nodes": 7387351, "kept": true}, {"label": "+6h·2", "run": "full-target-additional-6h-001", "nodes": 7149208, "kept": true}, {"label": "+6h·3", "run": "full-target-additional-6h-001", "nodes": 7648322, "kept": false}, {"label": "+6h·4", "run": "full-target-additional-6h-001", "nodes": 6931399, "kept": true}, {"label": "+6h·5", "run": "full-target-additional-6h-001", "nodes": 7109463, "kept": false}, {"label": "+6h·6", "run": "full-target-additional-6h-001", "nodes": 6702725, "kept": true}, {"label": "+6h·7", "run": "full-target-additional-6h-001", "nodes": 6559693, "kept": true}, {"label": "+12h·1", "run": "full-target-additional-12h-001", "nodes": 6276734, "kept": true}, {"label": "+12h·2", "run": "full-target-additional-12h-001", "nodes": 6327500, "kept": false}, {"label": "+12h·3", "run": "full-target-additional-12h-001", "nodes": 6498489, "kept": false}, {"label": "+12h·4", "run": "full-target-additional-12h-001", "nodes": 5983337, "kept": true}, {"label": "+12h·5", "run": "full-target-additional-12h-001", "nodes": 6027738, "kept": false}, {"label": "+12h·6", "run": "full-target-additional-12h-001", "nodes": 6126124, "kept": false}, {"label": "+12h·7", "run": "full-target-additional-12h-001", "nodes": 5583731, "kept": true}, {"label": "+12h·8", "run": "full-target-additional-12h-001", "nodes": 5291371, "kept": true}, {"label": "+12h·9", "run": "full-target-additional-12h-001", "nodes": null, "kept": false}, {"label": "+12h·10", "run": "full-target-additional-12h-001", "nodes": 5084671, "kept": true}, {"label": "+12h·11", "run": "full-target-additional-12h-001", "nodes": 4996919, "kept": true}, {"label": "+12h·12", "run": "full-target-additional-12h-001", "nodes": 4967346, "kept": true}], "flow": {"id": "permanent", "from": 85690155, "to": 4967346, "split": true, "unchanged": 0, "measured": [{"name": "Mechanical first", "saved": 80722809, "added": 0, "mixed": []}, {"name": "Mathematical first", "saved": 80722809, "added": 0, "mixed": []}], "rows": [{"category": "automation", "group": "mechanical", "nodes": [32558331, 11054748], "mid": 21806539.5, "share": [0.13694701828327108, 0.4033349607544009]}, {"category": "counting", "group": "mechanical", "nodes": [31466834, 12561617], "mid": 22014225.5, "share": [0.15561422051108256, 0.3898134169240815]}, {"category": "restructure", "group": "mathematical", "nodes": [14014845, 56803053], "mid": 35408949.0, "share": [0.1736169141487631, 0.7036803315404944]}, {"category": "lemmas", "group": "mathematical", "nodes": [2682799, 303391], "mid": 1493095.0, "share": [0.0037584296651520144, 0.03323470817275449]}], "inflow": [], "saved": 80722809.0, "added": 0}}, "page": "examples"};
+const SITE = null;
+const CARDS = [];
+</script>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const codeify = s => esc(s).replace(/``(.+?)``|`([^`]+)`/g, (m, dbl, one) => `<code>${dbl ?? one}</code>`);
+const fmt = n => n == null ? "—" : Number(n).toLocaleString("en-US");
+const pct = (a, b) => a ? (100 * (1 - b / a)).toFixed(1) + "%" : "—";
+const pc = (v, d = 2) => v == null ? "—" : (v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const avg = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+const fx = f => { if (f == null) return "—"; if (f === 1) return "1×"; let d = f >= 100 ? 0 : f >= 10 ? 1 : 2, t = f.toFixed(d);
+  while (Number(t) === 1 && d < 4) t = f.toFixed(++d); return Number(t) === 1 ? "≈1×" : f >= 1000 ? fmt(Number(t)) + "×" : t + "×"; };
+const nodeChange = (before, after) => after === before ? ", unchanged" : after > before ? ", larger" : "";
+const remText = r => { if (r == null) return "—"; const p = 100 * r; if (p === 100) return "100%";
+  if (p >= 99.5 && p < 100.5) { const t = p.toFixed(2); return Number(t) !== 100 ? t + "%" : p < 100 ? ">99.99%" : ">100%"; }
+  return (p >= 10 ? p.toFixed(1) : p >= 1 ? p.toFixed(2) : p.toPrecision(2)) + "%"; };
+const geo = v => v.length ? Math.exp(avg(v.map(Math.log))) : null;
+const med = v => { if (!v.length) return null; const w = v.slice().sort((p, q) => p - q), h = w.length >> 1; return w.length % 2 ? w[h] : (w[h - 1] + w[h]) / 2; };
+const removedText = (r, unit = "") => r == null ? "" : r < 0 ? `grew by ${fmt(-r)}${unit}` : `${fmt(r)}${unit} removed`;
+const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many}`;
+const declarationsChanged = d => !d.top.length && !d.owners_changed && !d.owners_added && !d.owners_removed
+  ? "No declaration's node count changed."
+  : `${fmt(d.owners_changed)} ${d.owners_changed === 1 ? "declaration" : "declarations"} changed, ${fmt(d.owners_added)} added, ${fmt(d.owners_removed)} removed.`;
+const numWord = n => ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] ?? String(n);
+const listText = xs => xs.length <= 1 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs.at(-1);
+function packagesText() {
+  const P = DATA.participation, L = DATA.task_sets["lcbench-v1"], O = DATA.task_sets["oai-v1"];
+  const release = (name, url) => `release <span class="setname"><a href="${esc(url)}">${esc(name)}</a></span>`;
+  const forms = T => "each with its original proofs" + (T.without_target_proofs ? " and also without its target proofs" : "");
+  const set = T => `<span class="setname">${esc(T.set)}</span>`;
+  return `Task packages to download: the toy task (${release(P.toy_release, P.toy_release_url)}); ` +
+    `the task set ${set(L)}, the study's ${numWord(L.tasks)} tasks, ${forms(L)} (${release(P.packages_release, P.packages_release_url)}); ` +
+    `the task set ${set(O)}, ${fmt(O.tasks)} tasks made from published math challenges, ${forms(O)} ` +
+    `(${release(P.oai_release, P.oai_release_url)}, <a href="difficulty.html#oai-tasks">about these tasks</a>).`;
+}
+const negZero = (v, d) => v != null && v < 0 && Math.abs(v) < 0.5 * 10 ** -d;
+const tip = $("#tip");
+let tipOwner = null;
+function placeTip(x, y, html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.max(4, Math.min(x + 12, innerWidth - 330)) + "px";
+  tip.style.top = Math.min(y + 14, innerHeight - tip.offsetHeight - 6) + "px"; }
+function hideTip() { tip.hidden = true; tipOwner = null; }
+function tipAtElement(el) { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, el.dataset.tip); tipOwner = el; }
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.addEventListener("mousemove", e => { placeTip(e.clientX, e.clientY, el.dataset.tip); tipOwner = el; });
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => tipAtElement(el));
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.stopPropagation(); tipOwner === el && !tip.hidden ? hideTip() : tipAtElement(el); });
+  });
+}
+document.addEventListener("click", hideTip);
+addEventListener("scroll", () => { if (tipOwner && document.activeElement !== tipOwner) hideTip(); }, {passive: true});
+
+DATA.models = DATA.models || []; DATA.tasks = DATA.tasks || []; DATA.order = DATA.order || [];
+DATA.models.sort((p, q) => DATA.order.indexOf(p.id) - DATA.order.indexOf(q.id));
+const TASK = Object.fromEntries(DATA.tasks.map(t => [t.id, t]));
+const MODEL = Object.fromEntries(DATA.models.map(m => [m.id, m]));
+const TASK_IDX = Object.fromEntries(DATA.tasks.map((t, i) => [t.id, i]));
+const MODEL_IDX = Object.fromEntries(DATA.models.map((m, i) => [m.id, i]));
+const REP_IDX = Object.fromEntries((DATA.repeats || []).map((r, i) => [r, i]));
+const agentColor = id => `var(--ag${DATA.order.indexOf(id) + 1})`;
+const STATUS_ORDER = Object.keys(DATA.status || {});
+const RECHECK_ICON = `<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.8 1.8v3.6h-3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON = {VALID: "✓", VALID_REPAIRED_VERIFIER: RECHECK_ICON, RAW_FAILURE: "×", UNCONFIRMED: "?",
+  VERIFIED: "✓", VERIFIED_PENDING_FIX: "✓*", REJECTED: "×", NO_SOURCE: "–"};
+const SHORT_STATUS = {};
+const statusLabel = s => ((DATA.status || {})[s] || (DATA.study_status || {})[s])[0];
+const stPill = (s, short = false) => short && SHORT_STATUS[s]
+  ? `<span class="st st-${s}" title="${esc(statusLabel(s))}"><i aria-hidden="true">${ICON[s]}</i>${esc(SHORT_STATUS[s])}</span>`
+  : `<span class="st st-${s}"><i aria-hidden="true">${ICON[s]}</i>${esc(statusLabel(s))}</span>`;
+const REP_LABELS = {};
+const repLabel = r => REP_LABELS[r] || r.replace(/^r(\d+)$/, "run $1");
+const SCORED_FILE = {study: "the run's final",
+  time_limit: "the files as they stood at the time limit (the study counted the run failed or unconfirmed)",
+  no_files: "no scored file: the run left no files", none: "none: the run left several candidate files and no single final"};
+const scoredText = s => SCORED_FILE[s.scored];
+const scoredLine = s => s.scored === "no_files" ? SCORED_FILE.no_files[0].toUpperCase() + SCORED_FILE.no_files.slice(1)
+  : s.scored && s.scored !== "study" ? `Scored file: ${scoredText(s)}` : "";
+const scorerWords = v => String(v).replace(/^(\d+\.\d+\.\d+)-rc\.(\d+)$/, "$1, release candidate $2");
+const shortN = (v, p = 2) => v >= 1e9 ? `${+(v / 1e9).toPrecision(p)}B` : v >= 1e6 ? `${+(v / 1e6).toPrecision(p)}M` : v >= 1e3 ? `${+(v / 1e3).toPrecision(p)}K` : String(v);
+const harnessName = h => h.replace(/\s+\d[\w.-]*/g, "").trim();
+const VALID_STATUS = new Set(["VERIFIED", "VERIFIED_PENDING_FIX", "VALID", "VALID_REPAIRED_VERIFIER"]);
+const isValid = s => VALID_STATUS.has(s.status);
+const isUnchanged = s => isValid(s) && s.a1 != null && s.a1 === s.a0;
+const S = DATA.slots || [];
+const count = f => S.filter(f).length;
+const MP = DATA.metaprog || {available: false, flags: {}};
+function mpOf(s) {
+  if (!MP.available) return {k: "pending", t: "check pending"};
+  const f = MP.flags[s.id];
+  if (!f) return {k: "none", t: "not checked"};
+  return f.m ? {k: "yes", t: f.c ? "yes (copy)" : "yes", e: f.e} : {k: "no", t: f.c ? "no (copy)" : "no", e: f.e};
+}
+const flagCount = k => count(s => s.flags.includes(k));
+const flagLabel = k => `“${DATA.flags[k][0]}”`;
+const MARK_ORDER = Object.keys(DATA.marks || {});
+const markSym = k => DATA.marks[k][0];
+const MARK_SHORT = {statement_differs: "run whose target statement is only definitionally equal to the original",
+  released_verifier_rejected: "run rejected by MathCompressionBench's verifier"};
+const marksOf = runs => MARK_ORDER.filter(k => runs.some(s => s.marks.includes(k)));
+const markHtml = keys => keys.map(k => `<span class="mark" title="${esc(DATA.marks[k][1])}">${esc(markSym(k))}</span>`).join("");
+const TASK_NOTE = DATA.task_notes || {};
+const taskMark = id => TASK_NOTE[id] ? `<span class="mark" title="${esc(TASK_NOTE[id].short)}">${esc(TASK_NOTE[id].mark)}</span>` : "";
+const runLabel = s => `${TASK[s.task].name}, ${MODEL[s.model].name}, ${s.budget} min, ${repLabel(s.repeat)}`;
+const linkCards = html => html.replace(/the (\w+) case study/g, (m, n) => CARDS.some(c => c.key === n.toLowerCase()) ? `the <a href="#card-${n.toLowerCase()}">${n} case study</a>` : m);
+
+const plainLabel = h => h.replace(/<[^>]*>/g, "");
+function labelCells(table) {
+  table.classList.add("stack");
+  const heads = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.dataset.label = heads[i]; }));
+}
+const sortLabel = l => l.replace(/(\S+)$/, `<span class="nw">$1<span class="arr" aria-hidden="true"></span></span>`);
+function cellHtml(c, r) {
+  let h = c.cell(r).replace(/^<td(?: class="([^"]*)")?/, (m, cls) => `<td data-label="${esc(plainLabel(c.label))}"${cls || c.k ? ` class="${[cls, c.k && "k"].filter(Boolean).join(" ")}"` : ""}`);
+  return h.replace(/^(<td[^>]*>)([\s\S]+)(<\/td>)$/, `$1<span class="cv">$2</span>$3`);
+}
+function sortableTable(el, cols, rows, st, groupBy, opts = {}) {
+  const sorted = rows.slice();
+  if (st.key) {
+    const c = cols.find(c => c.key === st.key), dir = st.dir;
+    sorted.sort((p, q) => { const a = c.sort(p), b = c.sort(q);
+      if (a == null && b == null) return 0; if (a == null) return 1; if (b == null) return -1;
+      return (a < b ? -1 : a > b ? 1 : 0) * dir; });
+  }
+  let html = "<thead><tr>" + cols.map(c => `<th class="${c.num ? "num " : ""}${c.sort ? "sort" : ""}" ${c.sort ? `tabindex="0" data-k="${c.key}" aria-sort="${st.key === c.key ? (st.dir > 0 ? "ascending" : "descending") : "none"}"` : ""} ${c.title ? `title="${esc(c.title)}"` : ""}>${c.sort ? sortLabel(c.label) : c.label}</th>`).join("") + "</tr></thead><tbody>";
+  let last = null;
+  for (const r of sorted) {
+    if (groupBy && !st.key) { const g = groupBy(r); if (g !== last) { html += `<tr class="group"><td colspan="${cols.length}">${esc(g)}</td></tr>`; last = g; } }
+    html += "<tr>" + cols.map(c => cellHtml(c, r)).join("") + (opts.extra ? opts.extra(r) : "") +
+      (opts.title ? `<td class="ptitle">${opts.title(r)}</td>` : "") + "</tr>";
+  }
+  el.innerHTML = html + "</tbody>";
+  el.querySelectorAll("th.sort").forEach(th => {
+    const go = () => { const k = th.dataset.k; if (st.key === k) { st.dir === 1 ? st.dir = -1 : (st.key = null); } else { st.key = k; st.dir = cols.find(c => c.key === k).num ? -1 : 1; } st.render(); };
+    th.onclick = go; th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  bindTips(el);
+}
+function fillSelect(sel, opts) { sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join(""); }
+
+function logTicks([l0, l1], px) {
+  const all = [];
+  for (let e = Math.floor(l0); e <= Math.ceil(l1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (Math.log10(v) >= l0 - 1e-9 && Math.log10(v) <= l1 + 1e-9) all.push(+v.toPrecision(3)); }
+  const perDecade = px / Math.max(0.3, l1 - l0);
+  return perDecade < 110 ? all.filter(v => Number.isInteger(Math.round(Math.log10(v) * 1e6) / 1e6)) : all;
+}
+const tickText = v => `${v >= 1 ? fmt(v) : Number(v.toPrecision(1))}×`;
+function lineDiff(a, b) {
+  const A = a.split("\n"), B = b.split("\n"), n = A.length, m = B.length;
+  if (n * m > 4e6) return [...A.map(t => ["del", t]), ...B.map(t => ["add", t])];
+  const L = Array.from({length: n + 1}, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n && j < m) { if (A[i] === B[j]) { out.push(["same", A[i]]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) out.push(["del", A[i++]]); else out.push(["add", B[j++]]); }
+  while (i < n) out.push(["del", A[i++]]); while (j < m) out.push(["add", B[j++]]);
+  return out;
+}
+const renderDiff = rows => rows.map(([k, t]) => `<div class="${k === "same" ? "" : k}">${esc(t) || " "}</div>`).join("");
+function partBar(parts, mx, names) {
+  return `<div class="bar" role="img" aria-label="${esc(Object.keys(names).map(k => `${names[k]} ${fmt(parts[k])}`).join(", "))}">` +
+    Object.keys(names).filter(k => parts[k] > 0).map(k => `<span class="seg-${k}" style="width:${(100 * parts[k] / mx).toFixed(2)}%" data-tip="${esc(names[k] + ": " + fmt(parts[k]) + " nodes")}"></span>`).join("") + "</div>";
+}
+function labelRows(items) {
+  const ends = [];
+  return items.map(it => {
+    let r = ends.findIndex(e => it.x >= e + 4);
+    if (r < 0) { r = ends.length; ends.push(0); }
+    ends[r] = it.x + it.w;
+    return r;
+  });
+}
+function lineChart(el, pts, opts) {
+  const cw = el.clientWidth || 760, W = Math.max(300, Math.min(760, Math.round(cw))), H = W < 560 ? 300 : 250, P = {l: 64, r: 14, t: 16, b: 34};
+  const valid = pts.filter(p => p.valid && p.y != null);
+  if (!valid.length) { el.innerHTML = "<p>No attempts yet.</p>"; return; }
+  const ys = valid.map(p => p.y), ymax = Math.max(...ys, opts.baseline || 0), ymin = Math.min(...ys);
+  const log = ymax / Math.max(ymin, 1) > 6;
+  const fy = log ? (v => Math.log10(v)) : (v => v);
+  const y0 = log ? Math.floor(fy(ymin) * 4) / 4 : 0, y1 = fy(ymax) * (log ? 1.02 : 1.05);
+  const xmin = Math.min(...pts.map(p => p.x)), xmax = Math.max(...pts.map(p => p.x), xmin + 1);
+  let ticks = [];
+  if (log) { for (let e = Math.floor(y0); e <= Math.ceil(y1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (fy(v) >= y0 && fy(v) <= y1) ticks.push(v); } }
+  else { const step = 10 ** Math.floor(Math.log10(ymax / 4)); const s = [1, 2, 5].map(k => k * step).find(k => ymax / k <= 6) || step * 10; for (let v = 0; v <= y1; v += s) ticks.push(v); }
+  P.l = 34 + 6.6 * Math.max(...ticks.map(t => fmt(t).length));
+  const hasBounds = (opts.bounds || []).length > 0, hasRej = pts.some(p => p.y == null || !p.valid);
+  const bx = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin);
+  const bl = (opts.bounds || []).map(b => { const text = W < 560 && b.short != null ? b.short : b.label; return {x: bx(b.x) + 3, w: 6.2 * text.length, at: b.x, text}; });
+  const named = bl.filter(b => b.text), namedRows = labelRows(named), rows = bl.map(b => b.text ? namedRows[named.indexOf(b)] : 0);
+  const nRows = named.length ? Math.max(...namedRows) + 1 : 0;
+  P.t = 16 + (hasBounds ? 14 + 12 * nRows : 0) + (hasRej ? 22 : 0);
+  if (!(opts.xticks || []).length) P.b = 22;
+  const labY = 18, rejY = P.t - 12;
+  const X = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin), Y = v => H - P.b - (H - P.t - P.b) * (fy(v) - y0) / (y1 - y0);
+  let low = opts.baseline ?? Infinity, stepPath = opts.baseline ? `M${X(xmin)},${Y(opts.baseline)}` : "";
+  for (const p of pts) if (p.valid && p.y < low) { stepPath += (stepPath ? `L${X(p.x)},${Y(low)}` : `M${X(p.x)},${Y(p.y)}`) + `L${X(p.x)},${Y(p.y)}`; low = p.y; }
+  if (stepPath) stepPath += `L${X(xmax)},${Y(low)}`;
+  const svg = [`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">`];
+  for (const t of ticks) svg.push(`<line class="grid" x1="${P.l}" x2="${W - P.r}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${P.l - 6}" y="${Y(t) + 4}" text-anchor="end">${fmt(t)}</text>`);
+  svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${H - P.b}" y2="${H - P.b}"/>`);
+  for (const x of opts.xticks || []) svg.push(`<line class="axis" x1="${X(x)}" x2="${X(x)}" y1="${H - P.b}" y2="${H - P.b + 4}"/><text x="${X(x)}" y="${H - P.b + 15}" text-anchor="middle">${x}</text>`);
+  const below = labY + 12 * Math.max(0, nRows - 1) + 4;
+  bl.forEach((b, i) => svg.push(`<line class="bound" x1="${X(b.at)}" x2="${X(b.at)}" y1="${b.text ? labY + 12 * rows[i] - 8 : below}" y2="${H - P.b}"/>`));
+  bl.forEach((b, i) => { if (b.text) svg.push(`<text class="blab" x="${b.x}" y="${labY + 12 * rows[i]}">${esc(b.text)}</text>`); });
+  if (hasRej) svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${P.t - 3}" y2="${P.t - 3}" style="stroke-width:.6"/><text x="${P.l - 6}" y="${rejY + 4}" text-anchor="end">rejected</text>`);
+  svg.push(`<text x="${(W + P.l) / 2}" y="${(opts.xticks || []).length ? H - 4 : H - P.b + 16}" text-anchor="middle">${esc(opts.xlabel)}</text>`);
+  svg.push(`<text x="14" y="${(H - P.b + P.t) / 2}" text-anchor="middle" transform="rotate(-90 14 ${(H - P.b + P.t) / 2})">${esc(opts.ylabel)}${log && W >= 560 ? " (log scale)" : ""}</text>`);
+  if (stepPath) svg.push(`<path d="${stepPath}" fill="none" stroke="var(--accent)" stroke-width="2"/>`);
+  pts.forEach(p => {
+    if (p.y == null || !p.valid) { svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "rejected attempt")}"><text x="${X(p.x)}" y="${rejY + 4}" text-anchor="middle" style="fill:var(--del-ink)">×</text><rect x="${X(p.x) - 6}" y="${rejY - 8}" width="12" height="16" fill="transparent"/></g>`); return; }
+    svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "")}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="10" fill="transparent"/></g>`);
+  });
+  if (opts.endLabel) { const p = pts.at(-1); svg.push(`<text class="endlab" x="${X(p.x)}" y="${Math.min(Y(p.y) + 17, H - P.b - 3)}" text-anchor="end">${esc(opts.endLabel)}</text>`); }
+  if (opts.startLabel) { const p = pts[0]; svg.push(`<text class="endlab" x="${X(p.x) + 6}" y="${Y(p.y) - 9}">${esc(opts.startLabel)}</text>`); }
+  svg.push("</svg>");
+  el.innerHTML = svg.join("") + (opts.caption ? `<p class="caption">${opts.caption}${log ? " The vertical scale is logarithmic." : ""}</p>` : "");
+  bindTips(el);
+}
+
+function studyRuns() {
+  const A = DATA.about;
+  return `The study's runs: ${A.tasks} tasks × ${A.agents} agents × (${A.runs60} runs at 60 min + ${A.runs120} at 120 min) = ${A.runs} runs.`;
+}
+const CHECK_WORDS = {confirmed: "confirmed", corrected: "corrected", unverifiable: "could not be verified", refuted: "refuted"};
+function renderCard(c, chart = "", extra = "") {
+  const val = v => v.split("; ").length > 2 ? `<ul class="v">${v.split("; ").map(x => `<li>${codeify(x)}</li>`).join("")}</ul>` : `<div class="v">${codeify(v)}</div>`;
+  const lab = n => n.label.toLowerCase().includes(n.metric.toLowerCase()) ? codeify(n.label) : `${codeify(n.label)} · ${codeify(n.metric)}`;
+  const nums = list => list.map(n => `<div>${val(n.value)}<div class="l">${lab(n)}</div></div>`).join("");
+  const mechs = c.mechanisms.map(m => `<div class="mech"><h4>${codeify(m.name)}</h4><p>${codeify(m.explanation)}</p>
+     <div class="side"><div><h5>Before</h5><pre>${esc(m.before)}</pre></div><div><h5>After</h5><pre>${esc(m.after)}</pre></div></div>
+     <p style="font-size:13px"><b>Effect:</b> ${codeify(m.effect)}</p></div>`).join("");
+  const chk = Object.entries(c.checks).map(([k, v]) => `${v} ${CHECK_WORDS[k] || k}`).join(", ");
+  return `<article class="card" id="card-${esc(c.key)}"><p class="kicker">${esc(c.name)}</p><h3>${codeify(c.headline)}</h3>
+    <p>${codeify(c.summary)}</p>${chart}<p class="small">${codeify(c.task)}</p>
+    <div class="numbers">${nums(c.numbers.slice(0, 4))}</div>${extra}
+    ${c.numbers.length > 4 ? `<details><summary>More numbers (${c.numbers.length - 4})</summary><div class="numbers">${nums(c.numbers.slice(4))}</div></details>` : ""}
+    ${c.nl ? `<details><summary>In words</summary><p class="nltext">${codeify(c.nl)}</p></details>` : ""}
+    <details><summary>Mechanisms, with before and after code (${c.mechanisms.length})</summary>${mechs}</details>
+    ${c.caveats.length ? `<details><summary>Caveats (${c.caveats.length})</summary><ul class="caveats">${c.caveats.map(x => `<li>${codeify(x)}</li>`).join("")}</ul></details>` : ""}
+    ${chk ? `<p class="small">Independent review of this card's claims: ${esc(chk)}.</p>` : ""}</article>`;
+}
+function markOverflow() {
+  document.querySelectorAll(".tablewrap").forEach(w => {
+    const upd = () => { w.classList.toggle("overflows", w.scrollWidth > w.clientWidth + 2); w.classList.toggle("at-end", w.scrollLeft + w.clientWidth >= w.scrollWidth - 2); };
+    if (!w.dataset.ov) { w.addEventListener("scroll", upd, {passive: true}); w.dataset.ov = "1"; }
+    upd();
+  });
+}
+function padForHeader() { document.documentElement.style.scrollPaddingTop = ($("header.top").offsetHeight + 12) + "px"; }
+const onResize = [];
+let lastWidth = innerWidth, resizeTimer = null;
+addEventListener("resize", () => { if (innerWidth === lastWidth) return; lastWidth = innerWidth; clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { onResize.forEach(f => f()); markOverflow(); padForHeader(); }, 150); });
+function openPanel(id, scroll = true) {
+  const d = document.getElementById(id);
+  if (!d) return false;
+  for (let p = d; p; p = p.parentElement && p.parentElement.closest("details")) if (p.tagName === "DETAILS") p.open = true;
+  d.classList.add("flash"); setTimeout(() => d.classList.remove("flash"), 1200);
+  if (scroll) d.scrollIntoView({block: "nearest", behavior: "smooth"});
+  try { history.replaceState(null, "", "#" + id); } catch (e) { /* the address stays as it was */ }
+  return true;
+}
+const openFromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) openPanel(id); };
+addEventListener("hashchange", openFromHash);
+function bindPanels(root, summary) {
+  root.querySelectorAll("[data-panel]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    const html = () => summary(el.dataset.panel) + "<br><i>Tap or click for details.</i>";
+    el.addEventListener("mousemove", e => placeTip(e.clientX, e.clientY, html()));
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, html()); });
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); hideTip(); openPanel(el.dataset.panel); });
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPanel(el.dataset.panel); } });
+  });
+}
+function initChrome() {
+  document.querySelectorAll("#nav a").forEach(a => { if (a.dataset.p === document.body.dataset.page) a.setAttribute("aria-current", "page"); });
+  $("#snap").textContent = `Preview · ${DATA.measured ? `measured ${DATA.measured}` : `results snapshot ${DATA.snapshot}`}`;
+  $("#foot-snap").textContent = DATA.snapshot;
+  if (DATA.measured) $("#foot-lead").textContent = `task sizes measured ${DATA.measured}, after the results snapshot of ${DATA.snapshot}`;
+  $("#foot-dates").innerHTML = DATA.dates;
+  document.querySelectorAll("[data-v]").forEach(el => { el.textContent = DATA.values[el.dataset.v]; });
+  markOverflow(); padForHeader();
+  setTimeout(openFromHash, 0);
+}
+</script>
+<style>
+.role { font-size: 11px; padding: 0 6px; border-radius: 0; color: var(--ink); white-space: nowrap; border: 1px solid; }
+.role.target { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+.role.helper { border-color: var(--helper); background: color-mix(in srgb, var(--helper) 18%, var(--surface)); }
+.role.floor { border-color: var(--floor); background: color-mix(in srgb, var(--floor) 18%, var(--surface)); }
+.delta-neg { color: var(--add-ink); } .delta-pos { color: var(--del-ink); }
+.ledgerwrap { max-height: 420px; overflow: auto; }
+/* the whole target, every line in view */
+/* long Lean lines wrap inside their pane instead of running past its edge */
+.wrapcode { white-space: pre-wrap; overflow-wrap: anywhere; }
+/* a best run's changed declarations: long Lean names wrap inside their cell, so the numbers stay in view on a phone */
+.deep td.mono { white-space: normal; overflow-wrap: anywhere; min-width: 9em; }
+/* where the saved nodes came from: one Sankey per example and, under it, each kind's numbers in every measured order */
+.flow { margin: 14px 0 0; }
+.flow h3.flow-h { font-size: 16px; margin: 18px 0 4px; }
+.flow .caption { margin: 0 0 6px; }
+.flowwrap { max-width: 820px; }
+.flowtab th, .flowtab td { white-space: normal; vertical-align: top; }
+.flowtab .sw { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+/* on a phone each row is a card titled by its kind of change */
+@media (max-width: 700px) { table.stack.compact.flowtab td.kt { order: -2; grid-column: 1 / -1; font-size: 14px; font-weight: 600; } table.stack.compact.flowtab td.kt::before { content: none; } }
+/* why together saves nodes: the table's caption says it, above the numbers */
+.reuse caption { caption-side: top; text-align: left; font-size: 13px; color: var(--muted); padding: 0 0 8px; line-height: 1.5; }
+/* a mathematical change in plain words, and its declarations' Lean source before and after */
+.what { margin: 10px 0 0; }
+.math-diffs h4, #perm-routes h4 { font-size: 14px; margin: 16px 0 2px; }
+.math-diffs h5, #perm-routes h5 { margin: 12px 0 4px; overflow-wrap: anywhere; }
+.math-diffs .diff, #perm-routes .diff { max-height: 520px; overflow: auto; }
+/* every task at a glance: the task names its row (on a phone, its card); a range wraps after its dash */
+#kinds-glance th, #kinds-glance td { white-space: normal; vertical-align: top; }
+#kinds-glance td.num { font-size: 12px; }
+#kinds-glance td.say { min-width: 13em; }
+@media (max-width: 700px) { table.stack.compact#kinds-glance td.tk { order: -2; grid-column: 1 / -1; font-size: 14px; font-weight: 600; }
+  table.stack.compact#kinds-glance td.tk::before { content: none; }
+  table.stack.compact#kinds-glance td.say { grid-column: 1 / -1; } }
+</style>
+<main class="wrap" id="top">
+  <h1>Worked examples</h1>
+  <p class="summary-line" id="kinds-intro"></p>
+
+    <p class="small" id="toy"><span id="target-example"></span><span id="tgt-src"></span><span id="tgt-nodes"></span><span id="wf-add_comm-0"></span><span id="flow-add_comm"></span><span id="src-h-final"></span><span id="src-final"></span><span id="toy-decls"></span><span id="term-h-original"></span><span id="term-original"></span><a href="index.html#example">The a + b = b + a example is on the home page →</a></p>
+
+  <h2 id="mathlib197">Mathlib197: a new construction and three general lemmas</h2>
+  <div class="deep" data-deep="mathlib197"></div>
+  <p class="what">The matrix biproduct is rebuilt from identity-matrix entries, with no case splits or index transport.
+    Three general lemmas: ordered-partition sums for two and three, for the Faà di Bruno cases, and induction on the free
+    commutative ring, for <code>Ring.DirectLimit.exists_of</code>.</p>
+  <p class="small" data-math-line="mathlib197"></p>
+  <span id="wf-mathlib197-0"></span><div class="flow" id="flow-mathlib197" data-flow="mathlib197"></div>
+  <details class="more"><summary>These changes in Lean, before and after</summary><div class="math-diffs" data-math="mathlib197"></div></details>
+  <details class="more"><summary>The run, and the declarations that changed most</summary><div class="deep-decls" data-deep-decls="mathlib197"></div></details>
+
+  <h2 id="permanent-search">Permanent: a new route from a longer search</h2>
+  <p class="fta-line" id="perm-headline"></p>
+  <p class="what">A multi-step compression, for demonstration only, not ranked. Its new
+    route: one parameter bound for all rational formulas (division by zero is zero) covers division-free ones
+    too; derivations bound the dimension.</p>
+  <p class="small" id="perm-nodes"></p>
+  <span id="perm-bar"></span><div class="flow" id="flow-permanent" data-flow="permanent"></div>
+  <div class="flow" id="perm-steps"></div>
+  <details class="more"><summary>The route changes in Lean, before and after</summary><div id="perm-routes"></div></details>
+
+  <h2 id="ramsey96">Ramsey96: bounds re-derived from a sharper theorem</h2>
+  <div class="deep" data-deep="ramsey96"></div>
+  <p class="what">Its <i>k</i> log <i>k</i> bounds on the triangle Ramsey number follow in a few lines from a sharper
+    theorem already in the file.</p>
+  <p class="small" data-math-line="ramsey96"></p>
+  <span id="wf-ramsey96-0"></span><div class="flow" id="flow-ramsey96" data-flow="ramsey96"></div>
+  <details class="more"><summary>This change in Lean, before and after</summary><div class="math-diffs" data-math="ramsey96"></div></details>
+  <details class="more"><summary>The run, and the declarations that changed most</summary><div class="deep-decls" data-deep-decls="ramsey96"></div></details>
+
+  <h2 id="compactness">Compactness: small lemmas</h2>
+  <div class="deep" data-deep="compactness5"></div>
+  <p class="what">Three brute-force case analyses became short arguments through small new lemmas,
+    <code>cycle_map</code>, <code>kTemplateRelation_color_ne</code> and <code>retained_indicator_mul</code>, measured
+    only together with other edits.</p>
+  <p class="small" data-math-line="compactness5"></p>
+  <span id="wf-compactness5-0"></span><div class="flow" id="flow-compactness5" data-flow="compactness5"></div>
+  <details class="more"><summary>These changes in Lean, before and after</summary><div class="math-diffs" data-math="compactness5"></div></details>
+  <details class="more"><summary>The run, and the declarations that changed most</summary><div class="deep-decls" data-deep-decls="compactness5"></div></details>
+
+  <h2 id="at-a-glance">All seven tasks at a glance</h2>
+  <p class="small">A range spans the two measured orders.</p>
+  <div class="tablewrap"><table id="kinds-glance"></table></div>
+
+  <h2 id="toy-joint">Toy targets one at a time or together</h2>
+  <div class="tablewrap"><table id="toy-joint-table"></table></div>
+  <p class="small" id="toy-joint-note"></p>
+  <div class="tablewrap"><table class="reuse" id="toy-reuse-table"></table></div>
+  <pre class="src wrapcode" id="toy-reuse-src"></pre>
+
+  <h2 id="fta">The fundamental theorem of arithmetic</h2>
+  <p class="fta-line" id="fta-headline"></p>
+  <p class="what" id="fta-outside">A multi-step compression, for demonstration only, not ranked.</p>
+  <span id="wf-fta-0"></span><div class="flow" id="flow-fta" data-flow="fta"></div>
+  <details class="more" id="fta-runs"><summary>The agent's runs and checks</summary>
+    <p id="fta-agent-line"></p>
+    <div id="fta-curve"></div>
+    <p class="small" id="fta-legend"></p>
+  </details>
+  <details class="more"><summary>The agent's final: its terms and its Lean source</summary>
+    <div class="side">
+      <div><h5 id="fta-term-h"></h5><pre class="src wrapcode" id="fta-term"></pre></div>
+      <div><h5 id="fta-agent-h"></h5><pre class="src wrapcode" id="fta-agent-src"></pre></div>
+    </div></details>
+  <details class="more"><summary>The natural original's largest auto-generated terms</summary><div id="fta-natural-terms"></div></details>
+  <details class="more"><summary>The statements (the same in every version)</summary><pre class="statement" id="fta-statement"></pre></details>
+  <details class="more"><summary>Every declaration: natural original and agent final</summary>
+    <div class="side">
+      <div><h5 id="fta-t-original"></h5><div class="tablewrap ledgerwrap"><table id="fta-decl-original"></table></div></div>
+      <div><h5 id="fta-t-compressed"></h5><div class="tablewrap ledgerwrap"><table id="fta-decl-compressed"></table></div></div>
+    </div></details>
+  <details class="more"><summary>The hand compression: the version written long on purpose and its compressed form</summary>
+    <p class="small" id="fta-summary"></p>
+    <p class="small">It is long on purpose, with repeated re-derivations and automation instead of library lemmas. <span id="fta-why"></span></p>
+    <div class="side">
+      <div><h5 id="fta-h-original"></h5><pre class="src" id="fta-original"></pre></div>
+      <div><h5 id="fta-h-compressed"></h5><pre class="src" id="fta-compressed"></pre></div>
+    </div>
+    <details class="more"><summary>Whole file difference</summary><div class="diff" id="fta-diff"></div></details>
+  </details>
+
+</main>
+<script>
+const noHeader = src => src.split("\n").filter(l => !l.startsWith("-- ABOUTME: ")).join("\n");
+const ftaDeclTable = V => `<thead><tr><th>Declaration</th><th>Role</th><th class="num">Nodes</th></tr></thead><tbody>` +
+  V.declarations.map(d => `<tr><td class="mono">${esc(d.name)}</td><td><span class="role ${d.part}">${d.part === "floor" ? "target definition" : d.new ? "helper (new)" : d.part}</span></td><td class="num">${fmt(d.nodes)}</td></tr>`).join("") + "</tbody>";
+function ftaCurveDetail() {
+  const C = DATA.fta.curve; if (!C) return;
+  const pts = [], bounds = []; let k = 0;
+  const nc = C.runs.filter(r => r.label.startsWith("continuation")).length;
+  C.runs.forEach(r => { const lab = r.label.replace("independent run ", "run ").replace("continuation ", "+");
+    bounds.push({x: k + 1, label: lab, short: !lab.startsWith("+") ? lab : lab === "+1" ? `+1…+${nc}` : ""});
+    r.checks.forEach(c => { k++; pts.push({x: k, y: c.total, valid: c.valid, aria: `${r.label}: ${c.valid ? fmt(c.total) + " nodes" : "rejected"}`,
+      label: `${esc(r.label)}<br>${c.valid ? fmt(c.total) + " nodes" : "rejected check"}`}); }); });
+  lineChart($("#fta-curve"), pts, {baseline: C.baseline, aria: "Node count at each check across the agent's runs", xlabel: "check, in order across runs", ylabel: "node count",
+    bounds, caption: `Each point is one check by the agent, in time order within each run. Line: best so far; dashed: a new run.`});
+}
+function ftaLegendDetail() {
+  const C = DATA.fta.curve, ind = C.runs.filter(r => !r.label.startsWith("continuation")).length, F = C.finals;
+  const below = F.find((f, i) => i + 1 < F.length && f.final < f.best_check);
+  const short = l => l.replace("independent run ", "run ").replace("continuation ", "+"), k = below ? F.indexOf(below) : -1;
+  return `run 1–${ind}: independent runs from the natural original. +1 … +${F.length}: continuations, runs that start from a ` +
+    `final instead of the original: +1 from ${esc(short(C.first_from))}'s final, each later one from the one before.` +
+    (below ? ` A final is measured after its run, so it can be below that run's checks: ${esc(short(below.label))}'s checks reached ${fmt(below.best_check)}, its final ${fmt(below.final)}, where +${k + 2} starts.` : "") +
+    ` Stopped by the rule: ${esc(C.plateau_rule)}.`;
+}
+function initFta() {
+  const F = DATA.fta, V = F.versions, N = V.natural, A = V.agent, O = V.original, H = V.compressed, C = F.curve;
+  $("#fta-headline").innerHTML = `<b>${fmt(N.nodes)} → ${fmt(A.nodes)} nodes</b>${nodeChange(N.nodes, A.nodes)}`;
+  const AG = F.agent;
+  initFtaRunsDetail(AG, C);
+  initFtaSourceDetail(A, F.terms);
+  initFtaTables(F, N, A);
+  initFtaHandDetail(O, H);
+}
+function initFtaRunsDetail(AG, C) {
+  $("#fta-agent-line").innerHTML = `A natural tactic proof, compressed by the <a href="results.html#agents">${esc(AG.name)}</a> agent's model <code>${esc(AG.model_id)}</code> (effort ${esc(AG.effort)})${C.plateau ? " until a plateau" : ""}. Its final uses its own term-rewriting metaprogram (compact), which the rules allow.`;
+  $("#fta-legend").innerHTML = ftaLegendDetail();
+  ftaCurveDetail(); onResize.push(ftaCurveDetail);
+  $("#fta-runs").addEventListener("toggle", ftaCurveDetail);
+}
+function initFtaTables(F, N, A) {
+  const T = F.terms;
+  $("#fta-natural-terms").innerHTML = T.natural.map(t => `<h5>${esc(t.name)} · ${fmt(t.nodes)} nodes (excerpt)</h5><pre class="src">${esc(t.excerpt)}</pre>`).join("");
+  $("#fta-statement").textContent = F.statement;
+  $("#fta-t-original").textContent = `Natural original · ${fmt(N.nodes)} nodes`;
+  $("#fta-t-compressed").textContent = `Agent final · ${fmt(A.nodes)} nodes`;
+  $("#fta-decl-original").innerHTML = ftaDeclTable(N);
+  $("#fta-decl-compressed").innerHTML = ftaDeclTable(A);
+}
+function initFtaSourceDetail(A, T) {
+  $("#fta-term-h").textContent = `Agent's terms: ${T.agent.map(t => `${t.name} ${fmt(t.nodes)}`).join(" + ")} + ${fmt(A.parts.floor + A.parts.helper)} in the other declarations (listed below) = ${fmt(A.nodes)}`;
+  $("#fta-term").textContent = T.agent.map(t => `-- ${t.name}\n${t.term}`).join("\n\n");
+  $("#fta-agent-h").textContent = `Agent's Lean source, ${A.lines} lines`;
+  $("#fta-agent-src").textContent = noHeader(A.source);
+}
+function initFtaHandDetail(O, H) {
+  $("#fta-summary").textContent = `By hand with an AI assistant, from a version written long on purpose: ${fmt(O.nodes)} → ${fmt(H.nodes)} nodes${nodeChange(O.nodes, H.nodes)}.`;
+  $("#fta-why").textContent = `${remText(O.auto.nodes / O.nodes)} of it: ${O.auto.count} automation-generated lemmas (${fmt(O.auto.nodes)} nodes).`;
+  $("#fta-h-original").textContent = `Written long on purpose · ${O.lines} lines · ${fmt(O.nodes)} nodes`;
+  $("#fta-h-compressed").textContent = `Compressed by hand with an AI assistant · ${H.lines} lines · ${fmt(H.nodes)} nodes`;
+  $("#fta-original").textContent = O.source;
+  $("#fta-compressed").textContent = H.source;
+  $("#fta-diff").innerHTML = renderDiff(lineDiff(O.source, H.source));
+}
+const declName = n => n.replace(/^_private\.[\w.']+?\.0\./, "");
+const signed = v => `${v > 0 ? "+" : v < 0 ? "−" : ""}${fmt(Math.abs(v))}`;
+const ownersNote = "Each includes its Lean-generated parts.";
+function deepFinalDetail(F) {
+  const d = F.decls, row = x => `<tr><td class="mono">${esc(declName(x.owner))}</td>` +
+    `<td class="num">${fmt(x.before)}</td><td class="num">${fmt(x.after)}</td><td class="num">${signed(x.delta)}</td></tr>`;
+  const link = `<p class="small"><a href="results.html#final-${esc(F.panel)}">Its panel on All results</a></p>`;
+  if (!d.top.length) return `<p class="small">${esc(F.label)}${F.verified ? ", verified" : ""}. ${declarationsChanged(d)} ${ownersNote}</p>${link}`;
+  return `<p class="small">${esc(F.label)}${F.verified ? ", verified" : ""}. ${declarationsChanged(d)} ${ownersNote} ` +
+    `Largest changes:</p>` +
+    `<div class="tablewrap"><table><thead><tr><th>Declaration</th><th class="num">Original</th><th class="num">Final</th><th class="num">Change</th></tr></thead>` +
+    `<tbody>${d.top.map(row).join("")}<tr><td>All others</td><td></td><td></td><td class="num">${signed(d.rest_delta)}</td></tr></tbody></table></div>` + link;
+}
+function initDeep() {
+  const D = DATA.deep;
+  for (const x of D.shown) {
+    const el = document.querySelector(`.deep[data-deep="${x.id}"]`);
+    if (!el) continue;
+    const a = x.after, b = x.before, row = DATA.kinds.rows.find(r => r.task === x.id);
+    const part = a.proof_part != null ? `; the part that can change: ${fmt(a.proof_part_before)} → ${fmt(a.proof_part)} nodes${nodeChange(a.proof_part_before, a.proof_part)}` : "";
+    const by = row ? `, ${esc(agentName(row.model))}'s best final` : "";
+    el.innerHTML = `<p class="fta-line"><b>${fmt(b.nodes)} → ${fmt(a.nodes)} nodes</b>${nodeChange(b.nodes, a.nodes)}${by}${part}.</p>`;
+    const more = document.querySelector(`.deep-decls[data-deep-decls="${x.id}"]`);
+    if (!more) continue;
+    more.innerHTML = x.final ? deepFinalDetail(x.final) : x.meaning ? `<p>${esc(x.meaning)}</p>` : "";
+    more.querySelectorAll("table").forEach(labelCells);
+  }
+}
+const agentName = id => DATA.models.find(m => m.id === id).name;
+const taskName = id => DATA.tasks.find(t => t.id === id).name;
+const kindLabel = key => DATA.flows.groups.flatMap(g => g.categories).find(c => c.key === key).label;
+const nodeRange = v => v[0] === v[1] ? fmt(v[0]) : `${fmt(v[0])}–${fmt(v[1])}`;
+const shareRange = v => { const t = f => f === 0 ? "0%" : remText(f); return v[0] === v[1] ? t(v[0]) : `${t(v[0])}–${t(v[1])}`; };
+const GLANCE = ["sharing", "automation", "counting", "restructure", "lemmas", "other"];
+function kindsIntro() {
+  return "The examples below split the saved nodes of some tasks' best finals by kind of change: mechanical, such as " +
+    "sharing, or mathematical, such as new lemmas. " +
+    "Each task's example shows its best verified final, except the two marked as demonstrations.";
+}
+function mathLine(task) {
+  const r = DATA.kinds.rows.find(x => x.task === task), R = r.ranges;
+  const parts = ["restructure", "lemmas"].filter(k => R[k][1]).map(k => `${kindLabel(k).toLowerCase()} ${nodeRange(R[k])}`);
+  if (!parts.length) return "";
+  const other = R.other[1] ? ` Mixed with other kinds: ${nodeRange(R.other)} nodes.` : "";
+  return `Saved, depending on the order: ${parts.join(" and ")} nodes, ${shareRange(r.math_share)} of all saved.${other}`;
+}
+function glanceTakeaway(r) {
+  const R = r.ranges, saving = k => R[k][1] > 0, low = k => kindLabel(k).toLowerCase();
+  if (r.edits === 0 && GLANCE.filter(saving).join() === "sharing") return "No proof edits; all sharing.";
+  const math = ["restructure", "lemmas"].filter(saving);
+  if (math.length) return `Mathematical changes: ${math.map(low).join(" and ")}, ${shareRange(r.math_share)} of the saved nodes.`;
+  return `Only mechanical changes: ${["sharing", "automation", "counting"].filter(saving).sort((a, b) => R[b][1] - R[a][1]).map(low).join(", ")}.`;
+}
+function glanceTable() {
+  const heads = ["Task", "Best final", "Saved nodes", ...GLANCE.map(k => k === "other" ? "Other" : kindLabel(k)), "In short"];
+  return `<thead><tr>${heads.map((h, i) => `<th${i > 1 && i < heads.length - 1 ? ' class="num"' : ""}>${esc(h)}</th>`).join("")}</tr></thead><tbody>` +
+    DATA.kinds.rows.map(r => `<tr><td class="tk">${esc(taskName(r.task))}</td>` +
+      `<td><a href="results.html#final-${esc(r.final)}">${esc(agentName(r.model))}</a></td><td class="num">${fmt(r.saved)}</td>` +
+      GLANCE.map(k => `<td class="num">${r.ranges[k][0] ? nodeRange(r.ranges[k]).replace("–", "–<wbr>") : nodeRange(r.ranges[k])}</td>`).join("") +
+      `<td class="say">${esc(glanceTakeaway(r))}</td></tr>`).join("") + "</tbody>";
+}
+function initKinds() {
+  $("#kinds-intro").textContent = kindsIntro();
+  document.querySelectorAll("[data-math-line]").forEach(el => { el.textContent = mathLine(el.dataset.mathLine); });
+  document.querySelectorAll(".math-diffs[data-math]").forEach(el => { el.innerHTML = mathDiffDetail(el.dataset.math); });
+  const table = $("#kinds-glance");
+  table.innerHTML = glanceTable();
+  table.classList.add("compact");
+  labelCells(table);
+}
+const declDiff = d => `<div class="diff">${renderDiff(d.before == null ? d.after.split("\n").map(t => ["add", t]) : lineDiff(d.before, d.after))}</div>`;
+function mathDiffDetail(eid) {
+  const C = DATA.math_diffs[eid], meta = C.some(c => c.decls.some(d => /compact_|inline_lets/.test(d.after)));
+  return (meta ? `<p class="small">Some tactic calls in these files run the agent's own metaprograms, which share or ` +
+    `write out terms; they leave the mathematics as it is.</p>` : "") + C.map(c => `<h4>${esc(kindLabel(c.kind))}</h4>` + c.decls.map(d =>
+    `<h5><code>${esc(declName(d.name))}</code>${d.before == null ? " (new)" : ""}</h5>${declDiff(d)}`).join("")).join("");
+}
+function permRoutesDetail() {
+  return DATA.permanent_case.routes.map(r => `<h5>${esc(r.what)}</h5><p class="small">Measured in a revision that also ` +
+    `made other edits: ${fmt(r.from)} → ${fmt(r.to)} nodes.</p>${declDiff(r)}`).join("");
+}
+function permLine() {
+  const F = DATA.permanent_case.flow, math = ["restructure", "lemmas"];
+  const per = F.measured.map((m, i) => F.rows.filter(r => math.includes(r.category)).reduce((a, r) => a + r.nodes[i], 0));
+  const first = F.measured.findIndex(m => /^mathematical/i.test(m.name)), last = 1 - first;
+  return `Mathematical changes save ${fmt(per[first])} nodes applied first, ${fmt(per[last])} applied last.`;
+}
+const PERM_RUN = {"full-target-12h-001": "search 1", "full-target-additional-6h-001": "search 2", "full-target-additional-12h-001": "search 3"};
+function permBounds(S) {
+  const search = s => /^\+?\d+h·\d+$/.test(s.label) ? PERM_RUN[s.run] : null, bounds = [];
+  S.forEach((s, i) => {
+    if (s.label === "12h·seed") bounds.push({x: i, label: "merged start", short: "merged"});
+    else if (search(s) && (i === 0 || search(S[i - 1]) !== search(s))) bounds.push({x: i, label: search(s)}); });
+  return bounds;
+}
+function permStepsChart() {
+  const S = DATA.permanent_case.steps, el = $("#perm-steps"), bounds = permBounds(S);
+  const name = s => s.label === "Original" ? "original" : s.label === "12h·seed" ? "merged start" :
+    `${PERM_RUN[s.run]}, version ${s.label.split("·")[1]}`;
+  const pts = S.map((s, i) => ({x: i, y: s.nodes, valid: s.nodes != null,
+    aria: `${name(s)}: ${s.nodes != null ? fmt(s.nodes) + " nodes" : "rejected"}`,
+    label: `${esc(name(s))}<br>${s.nodes != null ? fmt(s.nodes) + " nodes" : "rejected by the search"}`}));
+  lineChart(el, pts, {aria: "Node count of every version the longer Permanent search saved", xlabel: "each saved version",
+    ylabel: "node count", bounds, startLabel: `original: ${fmt(S[0].nodes)}`, endLabel: `final: ${fmt(S.at(-1).nodes)}`,
+    caption: "Each point is one check, in time order; line: lowest so far."});
+}
+function initPermanent() {
+  const P = DATA.permanent_case;
+  $("#perm-headline").innerHTML = `<b>${fmt(P.from)} → ${fmt(P.to)} nodes</b>`;
+  $("#perm-nodes").textContent = permLine();
+  const draw = () => { drawFlow(P.flow); permStepsChart(); };
+  draw(); onResize.push(draw);
+  $("#perm-routes").innerHTML = permRoutesDetail();
+}
+function toyJoint() {
+  const J = DATA.toy_joint, label = {a: `<td>Whole files, summed over the ${J.targets} single-target bests</td>`,
+    b: `<td>Proof parts summed over the ${J.targets} bests, plus the target's definitions once</td>`,
+    c: `<td>Proof parts only, summed over the ${J.targets} bests</td>`};
+  $("#toy-joint-table").innerHTML = `<thead><tr><th>Compared</th><th class="num">One at a time</th><th class="num">Together</th><th class="num">Nodes saved together</th></tr></thead><tbody>` +
+    J.rows.map(r => `<tr>${label[r.key]}<td class="num">${fmt(r.separate)}</td><td class="num">${fmt(r.joint)}</td><td class="num">${fmt(r.separate - r.joint)}</td></tr>`).join("") + "</tbody>";
+  labelCells($("#toy-joint-table"));
+  $("#toy-joint-note").textContent = `The second row is the fair comparison: whole files charge the definitions per file, ${fmt(J.definitions_each)} nodes against ${fmt(J.definitions_once)} once, overstating the gain.`;
+}
+function toyReuse() {
+  const R = DATA.toy_reuse, x = R.rows[0], times = n => n === 1 ? "once" : n === 2 ? "twice" : `${n} times`;
+  const calls = Object.entries(R.calls).map(([t, n]) => `<code>${esc(t)}</code> ${times(n)}`).join(" and ");
+  $("#toy-reuse-table").innerHTML = `<caption>Why together saves nodes: <code>${esc(x.target)}</code>, ${esc(R.statement)}. One at a time,
+    its file has no associativity or commutativity lemma, so its proof does that work itself. Together, it calls the targets ${calls},
+    which the file proves anyway; its proof there is below.</caption><thead><tr><th>Target</th><th class="num">One at a time, whole file</th>
+    <th class="num">One at a time, proof</th><th class="num">Together, own proof</th><th class="num">Together, with what it reaches</th></tr></thead><tbody>` +
+    R.rows.map(r => `<tr><td class="mono">${esc(r.target)}</td><td class="num">${fmt(r.single_best)}</td><td class="num">${fmt(r.single_proof)}</td>` +
+      `<td class="num">${fmt(r.joint_own_proof)}</td><td class="num">${fmt(r.joint_with_reached)}</td></tr>`).join("") + "</tbody>";
+  labelCells($("#toy-reuse-table"));
+  $("#toy-reuse-src").textContent = (R.helpers ? R.helpers + "\n\n" : "") + R.proof;
+}
+const FL = DATA.flows;
+const KIND_TITLE = "Where the saved nodes came from";
+const KIND_CAPTION = `Analysis of the final diff, not of the agent's process: split <a href="rules.html#change-kinds">by kind of change</a>, one kind at a time, compiled and counted.`;
+const KIND_CAT = Object.fromEntries(FL.groups.flatMap(g => g.categories.map(c => [c.key, {...c, group: g.label}])));
+const kindColor = key => `var(--cat-${key})`;
+const shareText = f => f === 0 ? "0%" : remText(f);
+const rangeText = s => { const lo = shareText(s[0]), hi = shareText(s[1]); return lo === hi ? lo : `${lo}–${hi}`; };
+const nodesText = v => { const lo = Math.min(...v), hi = Math.max(...v); return lo === hi ? fmt(lo) : `${fmt(lo)}–${fmt(hi)}`; };
+function kindFlow(ex) {
+  const groups = FL.groups.map(g => ({key: g.key, lines: [g.label], rows: ex.rows.filter(r => r.group === g.key)
+    .map(r => ({key: r.category, value: r.mid, lines: [KIND_CAT[r.category].label, rangeText(r.share)]}))})).filter(g => g.rows.length);
+  return {from: ex.from, added: ex.added,
+    fromLines: [`original · ${fmt(ex.from)} nodes`, ...ex.inflow.map(r => `+${nodesText(r.nodes)} added · ${KIND_CAT[r.category].label}`)],
+    addedLines: [],
+    addedKey: ex.inflow.length === 1 ? ex.inflow[0].category : null,
+    groups, remaining: {value: ex.to, lines: ["final (kept)", `${fmt(ex.to)} nodes`]}};
+}
+function kindTable(ex) {
+  const M = ex.measured, mixed = KIND_CAT.mixed.label, unsplit = ex.rows.find(r => r.category === "other");
+  const name = c => `<i class="sw" style="background:${kindColor(c)}"></i><a href="rules.html#kind-${esc(c)}">${esc(KIND_CAT[c].label)}</a>`;
+  const cell = (r, n, m) => `<td class="num">${fmt(n)} · ${shareText(n / m.saved)}` +
+    (!n && m.mixed.includes(r.category) ? `<span class="sub">in ${esc(mixed)}</span>` : "") +
+    (!n && !m.mixed.includes(r.category) && r.category !== "other" && unsplit && unsplit.nodes[M.indexOf(m)] ? `<span class="sub">not measured apart</span>` : "") +
+    (n && r.category === "mixed" && m.mixed.length ? `<span class="sub">${m.mixed.map(k => esc(KIND_CAT[k].label)).join(" + ")}</span>` : "") + "</td>";
+  let prev = null;
+  const rows = ex.rows.map(r => { const first = r.group !== prev; prev = r.group;
+    return `<tr data-k="${esc(r.category)}"><td class="k">${first ? esc(KIND_CAT[r.category].group) : ""}</td><td class="kt">${name(r.category)}</td>` +
+      r.nodes.map((n, i) => cell(r, n, M[i])).join("") + "</tr>"; });
+  for (const r of ex.inflow)
+    rows.push(`<tr data-k="added-${esc(r.category)}"><td class="k"></td><td class="kt">Added: ${name(r.category)}</td>${r.nodes.map(n => `<td class="num">+${fmt(n)}</td>`).join("")}</tr>`);
+  rows.push(`<tr data-k="saved"><td class="k"></td><td class="kt"><b>Total saved</b></td>${M.map(m => `<td class="num"><b>${fmt(m.saved)}</b></td>`).join("")}</tr>`);
+  rows.push(`<tr data-k="total"><td class="k"></td><td class="kt">Original − saved + added = final</td>` +
+    M.map(m => `<td class="num">${fmt(ex.from)} − ${fmt(m.saved)} + ${fmt(m.added)} = ${fmt(ex.to)}</td>`).join("") + "</tr>");
+  const heads = M.length > 1 ? M.map(m => esc(m.name)) : ["One measured order"];
+  return `<thead><tr><th>Group</th><th>Kind of change</th>${heads.map(h => `<th class="num">${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody>`;
+}
+const BAND_WIDTH = "Each band's width is the nodes its kind saved";
+const measuredApart = (ex, r) => { const unsplit = ex.rows.find(x => x.category === "other");
+  return ex.measured.every((m, i) => r.nodes[i] || (!m.mixed.includes(r.category) && !(unsplit && unsplit.nodes[i]))); };
+function kindNote(ex) {
+  if (!ex.split) return "Not split by kind yet.";
+  const defs = ex.unchanged ? ` The target's definitions (${fmt(ex.unchanged)} nodes) did not change.` : "";
+  if (ex.measured.length < 2) return `${BAND_WIDTH}; one measured order.${defs}`;
+  const spread = r => r.share[1] - r.share[0], wide = ex.rows.filter(r => r.group !== "other" && measuredApart(ex, r)).reduce((a, r) => spread(r) > spread(a) ? r : a);
+  return `${BAND_WIDTH}, averaged over the two measured orders. When two kinds could save the same nodes, the kind applied first gets them: a share such as ${rangeText(wide.share)} (${esc(KIND_CAT[wide.category].label)}) depends on the order.${defs}`;
+}
+const flowSvg = (W, H, aria, marks) => `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}">${marks}</svg>`;
+function plainBar(ex, W) {
+  const w = W - 2, h = 12, bar = (y, v) => `<rect x="0" y="${y}" width="${Math.max(2, w * v / ex.from)}" height="${h}" style="fill:var(--ink-2)"/>`;
+  const text = (y, t) => `<text x="0" y="${y}" style="font-size:11px;fill:var(--ink)">${esc(t)}</text>`;
+  return flowSvg(W, 62, `${fmt(ex.from)} → ${fmt(ex.to)} nodes`,
+    text(11, `original · ${fmt(ex.from)} nodes`) + bar(15, ex.from) + text(42, `final · ${fmt(ex.to)} nodes`) + bar(46, ex.to));
+}
+function sankeyLayout(F, W) {
+  const size = 11, lh = 14, nodeW = 10, gap = 4, groupGap = 8, textW = t => t.length * size * 0.62;
+  const labels = [...F.groups.flatMap(g => [...g.lines, ...g.rows.flatMap(r => r.lines)]), ...F.remaining.lines];
+  const labelW = Math.min(W * 0.6, Math.max(...labels.map(textW)) + 6);
+  const xR = W - labelW - nodeW - 6, x0 = nodeW, top = 6 + lh * F.fromLines.length + 4, k = (W < 560 ? 180 : 220) / (F.from + F.added);
+  const texts = [], rects = [], ribbons = [];
+  F.fromLines.forEach((t, i) => texts.push({x: 0, y: 6 + lh * (i + 1) - 2, anchor: "start", size, text: t, kind: "from"}));
+  let y = top, ly = top;
+  const node = (key, value, lines) => {
+    const h = Math.max(1.5, value * k), slot = Math.max(h, lh * lines.length + 2);
+    rects.push({x: xR, y, w: nodeW, h, key, kind: "node"});
+    lines.forEach((t, i) => texts.push({x: xR + nodeW + 6, y: y + lh * (i + 1) - 3, anchor: "start", size, text: t, key, kind: i ? "value" : "label"}));
+    ribbons.push({key, value, x0, y0: ly, x1: xR, y1: y, h});
+    ly += h; y += slot + gap;
+  };
+  F.groups.forEach(g => {
+    g.lines.forEach(t => { texts.push({x: xR + nodeW + 6, y: y + lh - 3, anchor: "start", size, text: t, key: g.key, kind: "group"}); y += lh + 2; });
+    g.rows.forEach(r => node(r.key, r.value, r.lines));
+    y += groupGap;
+  });
+  const seps = [{x1: xR, x2: W - 2, y: y + groupGap / 2}];
+  y += 2 * groupGap;
+  node("remaining", F.remaining.value, F.remaining.lines);
+  const addedH = F.added ? Math.max(1.5, F.added * k) : 0;
+  rects.push({x: 0, y: top, w: nodeW, h: ly - top - addedH, key: "from", kind: "from"});
+  if (F.added) rects.push({x: 0, y: ly - addedH, w: nodeW, h: addedH, key: "added", kind: "added"});
+  F.addedLines.forEach((t, i) => texts.push({x: 0, y: ly + lh * (i + 1), anchor: "start", size, text: t, key: "added", kind: "added"}));
+  const H = Math.max(y - gap, ly + lh * F.addedLines.length + 4) + 4;
+  return {W, H, texts, rects, ribbons, seps};
+}
+function drawFlow(ex) {
+  const el = document.querySelector(`.flow[data-flow="${ex.id}"]`);
+  if (!el) return;
+  const open = el.querySelector("details.more[open]") ? " open" : "";
+  el.innerHTML = `<h3 class="flow-h">${KIND_TITLE}</h3>` + (ex.split ? `<p class="caption">${KIND_CAPTION}</p>` : "") +
+    `<div class="sk"></div><p class="caption">${kindNote(ex)}</p>` +
+    (ex.split ? `<details class="more"${open}><summary>Its numbers by kind of change</summary><div class="tablewrap flowwrap"><table class="flowtab"></table></div></details>` : "");
+  const sk = el.querySelector(".sk");
+  if (!ex.split) { sk.innerHTML = plainBar(ex, Math.max(300, Math.min(900, Math.round(sk.clientWidth || 760)))); return; }
+  drawSankey(sk, ex);
+  const table = el.querySelector(".flowtab");
+  table.innerHTML = kindTable(ex);
+  table.classList.add("compact");
+  labelCells(table);
+}
+function drawSankey(el, ex) {
+  const W = Math.max(300, Math.min(900, Math.round(el.clientWidth || 760))), F = kindFlow(ex), L = sankeyLayout(F, W);
+  const colorOf = key => key === "remaining" ? "var(--ink-2)" : kindColor(key);
+  const o = [];
+  for (const f of L.ribbons) {
+    const xm = (f.x0 + f.x1) / 2, rem = f.key === "remaining";
+    const d = ["M", f.x0, f.y0, "C", xm, f.y0, xm, f.y1, f.x1, f.y1, "L", f.x1, f.y1 + f.h,
+      "C", xm, f.y1 + f.h, xm, f.y0 + f.h, f.x0, f.y0 + f.h, "Z"].join(" ");
+    o.push(`<path d="${d}" style="${rem ? "fill:var(--ink-2);fill-opacity:.08;stroke:var(--ink-2);stroke-dasharray:3 3;stroke-width:1" : `fill:${colorOf(f.key)};opacity:.5`}"><title>${esc(flowTip(ex, f.key))}</title></path>`);
+  }
+  for (const s of L.seps) o.push(`<line x1="${s.x1}" x2="${s.x2}" y1="${s.y}" y2="${s.y}" style="stroke:var(--rule);stroke-dasharray:3 3"/>`);
+  for (const r of L.rects) {
+    const fill = r.kind === "node" ? colorOf(r.key) : r.kind === "from" ? "var(--ink-2)" : F.addedKey ? kindColor(F.addedKey) : "var(--muted)";
+    o.push(`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" style="fill:${fill}"/>`);
+  }
+  const ink = t => t.kind === "from" && t.text.startsWith("+") && F.addedKey ? kindColor(F.addedKey) : "var(--ink)";
+  for (const t of L.texts) o.push(`<text x="${t.x}" y="${t.y}" text-anchor="${t.anchor}" style="font-size:${t.size}px;fill:${ink(t)}${t.kind === "group" || t.kind === "from" ? ";font-weight:600" : ""}">${esc(t.text)}</text>`);
+  el.innerHTML = flowSvg(L.W, L.H, `${KIND_TITLE}: ${fmt(ex.from)} → ${fmt(ex.to)} nodes`, o.join(""));
+}
+function flowTip(ex, key) {
+  if (key === "remaining") return `final (kept): ${fmt(ex.to)} nodes`;
+  return `${KIND_CAT[key].label}: ${rangeText(ex.rows.find(r => r.category === key).share)} of the saved nodes`;
+}
+function initFlows() {
+  const draw = () => FL.examples.forEach(drawFlow);
+  draw(); onResize.push(draw);
+}
+initDeep(); initKinds(); initPermanent(); initFta(); toyJoint(); toyReuse(); initFlows();
+</script>
+
+<footer class="wrap">MathCompressionBench · <span id="foot-lead">results snapshot <span id="foot-snap"></span>, the date of the newest run shown</span>. Run dates: <span id="foot-dates"></span>. Preview; results may change.</footer>
+<script>initChrome();</script>
+</body>
+</html>

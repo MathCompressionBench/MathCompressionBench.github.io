@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MathCompressionBench Rules and Scoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #FAFCFD; --surface: #FFFFFF; --surface-2: #EAF0F3; --ink: #20313F; --ink-2: #425563; --muted: #586C79;
+  --rule: #C8D3DB; --accent: #245E70; --helper: #84651F; --floor: #71818C;
+  --add-bg: #E3EEE8; --add-ink: #285D46; --del-bg: #F5E7EC; --del-ink: #8A3855;
+  --note-bg: #EEF2F5; --note-rule: #A8BAC6; --code-bg: #EEF3F6;
+  --s60: #245E70; --s120: #906724; --good: #28654E; --warn: #84651F; --crit: #9B3E56;
+  --ag1: #2a78d6; --ag2: #eb6834; --ag3: #1baf7a; --ag4: #eda100; --ag5: #e87ba4; --ag6: #008300;
+  --cat-automation: #2a78d6; --cat-library: #eb6834; --cat-sharing: #1baf7a; --cat-restructure: #eda100;
+  --cat-counting: #e87ba4; --cat-lemmas: #008300; --cat-other: #8A9398; --cat-mixed: #7d3c98;
+  --c-target: #84651F; --c-proof: #245E70;
+  --display: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+  --prose: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+    --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+    --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+    --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+    --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+    --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+    --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+    --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+    --c-target: #D9BD78; --c-proof: #96C6CE;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1B2832; --surface: #22323E; --surface-2: #2C3D49; --ink: #E7EEF2; --ink-2: #C3D0D8; --muted: #A5B7C3;
+  --rule: #465C6A; --accent: #96C6CE; --helper: #D9BD78; --floor: #95A6B2;
+  --add-bg: #263F37; --add-ink: #ACD4BB; --del-bg: #472F3A; --del-ink: #E7B2C2;
+  --note-bg: #2C3D49; --note-rule: #617C8D; --code-bg: #22323E;
+  --s60: #96C6CE; --s120: #D9BD78; --good: #ACD4BB; --warn: #D9BD78; --crit: #E7A5B8;
+  --ag1: #3987e5; --ag2: #d95926; --ag3: #199e70; --ag4: #c98500; --ag5: #d55181; --ag6: #008300;
+  --cat-automation: #3987e5; --cat-library: #d95926; --cat-sharing: #199e70; --cat-restructure: #c98500;
+  --cat-counting: #d55181; --cat-lemmas: #008300; --cat-other: #7C878D; --cat-mixed: #a066c0;
+  --c-target: #D9BD78; --c-proof: #96C6CE;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 24px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 36px; }
+main.wrap { padding-block: 0 48px; }
+header.top { background: var(--bg); border-top: 4px solid var(--ink); border-bottom: 1px solid var(--rule); }
+header.top .wrap { display: flex; gap: 8px 32px; align-items: baseline; flex-wrap: wrap; padding-block: 20px 16px; }
+header.top .brand { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: -.06em; color: var(--ink); text-decoration: none; }
+header.top nav { display: flex; gap: 6px 20px; flex-wrap: wrap; align-items: baseline; font-size: 14px; }
+header.top nav a { color: var(--ink-2); text-decoration: none; border-bottom: 1px solid transparent; padding-bottom: 5px; white-space: nowrap; }
+header.top nav a:hover, header.top nav a:focus-visible, header.top nav a[aria-current="page"] { color: var(--accent); border-bottom-color: var(--accent); }
+.snap { font-family: var(--mono); font-size: 10px; letter-spacing: .02em; text-transform: uppercase; color: var(--muted); margin-left: auto; white-space: nowrap; }
+.tag { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--helper); border: 1px solid var(--helper); padding: 2px 7px; border-radius: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; }
+h1 { font-size: clamp(34px, 4.5vw, 52px); line-height: 1.05; letter-spacing: -.035em; margin: 52px 0 18px; max-width: 28ch; }
+h2 { font-size: 27px; line-height: 1.2; letter-spacing: -.02em; margin: 48px 0 16px; padding-top: 16px; border-top: 1px solid var(--ink); }
+h3 { font-size: 20px; line-height: 1.3; margin: 28px 0 10px; }
+p, li { max-width: 72ch; }
+.lede { font-family: var(--prose); font-size: 20px; line-height: 1.55; color: var(--ink-2); max-width: 64ch; margin-top: 0; }
+.summary-line { font-family: var(--prose); font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 70ch; margin: 0 0 8px; }
+.kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.small { font-size: 13px; color: var(--muted); }
+a { color: var(--accent); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+code, pre, .mono, .diff { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 4px; border-radius: 0; overflow-wrap: anywhere; }
+pre { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule);
+  border-radius: 0; padding: 10px 12px; overflow-x: auto; margin: 0; white-space: pre; max-width: 100%; }
+pre.src { max-height: 460px; overflow: auto; }
+.statement { white-space: pre-wrap; overflow-wrap: anywhere; }
+.note { background: var(--note-bg); border: 1px solid var(--note-rule); border-radius: 0; padding: 10px 14px; margin: 14px 0; max-width: 90ch; }
+.note > b:first-child { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.note ul { margin: 6px 0 0; padding-left: 20px; } .note li { margin: 4px 0; }
+details > summary { cursor: pointer; }
+details.more { margin: 10px 0; }
+details.flash { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+details.more > summary { font-weight: 500; color: var(--ink-2); }
+.formula { font-family: var(--prose); font-size: 21px; background: transparent; border-block: 1px solid var(--rule);
+  padding: 20px 0; overflow-x: auto; }
+.formula sub { font-size: 13px; }
+dl.terms { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 12px 0; font-size: 14px; max-width: 90ch; }
+dl.terms dt { font-weight: 600; } dl.terms dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 640px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 0; } dl.terms dd { margin-bottom: 8px; } }
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+td.nw { white-space: nowrap; }
+/* a task set's or a release's name kept on one line (never broken at its hyphen) */
+.setname { white-space: nowrap; }
+th .sub { display: block; font-weight: 400; }
+td .sub { display: block; font-family: var(--body); font-size: 11px; color: var(--muted); white-space: normal; }
+td .sub.nw { white-space: nowrap; }
+td.none, span.none { color: var(--muted); }
+tbody tr:last-child td { border-bottom: 0; }
+.tablewrap { overflow-x: auto; max-width: 100%; border-top: 1px solid var(--ink-2); border-bottom: 1px solid var(--rule); background: transparent; margin: 16px 0 10px; }
+.tablewrap.tall { max-height: 640px; overflow-y: auto; }
+.tablewrap.tall thead th { position: sticky; top: 0; z-index: 1; box-shadow: 0 1px 0 var(--rule); }
+table.pin th:first-child, table.pin td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); box-shadow: 1px 0 0 var(--rule); }
+th.sort { cursor: pointer; user-select: none; } th.sort:hover { color: var(--ink); }
+th .nw { white-space: nowrap; }
+th.sort[aria-sort="none"] .arr::after { content: " ↕"; font-size: 10px; opacity: .45; }
+th.sort[aria-sort="ascending"] .arr::after { content: " ▲"; font-size: 9px; } th.sort[aria-sort="descending"] .arr::after { content: " ▼"; font-size: 9px; }
+tr.group td { background: var(--surface-2); font-weight: 600; font-size: 12.5px; }
+tr.sub td:first-child { padding-left: 1.6em; color: var(--ink-2); }
+td.ptitle, td.ponly { display: none; }
+td.notes { min-width: 210px; max-width: 280px; font-size: 12.5px; color: var(--ink-2); }
+.mark { color: var(--ink-2); font-weight: 700; margin-left: 2px; } a.mark { text-decoration: none; }
+.flag { display: inline-block; font-size: 11px; color: var(--ink-2); background: var(--surface-2); border-radius: 0; padding: 0 5px; margin: 0 3px 2px 0; }
+.mp-yes { color: var(--ink); font-weight: 700; } .mp-yes::before { content: "◆ "; font-size: 10px; vertical-align: 1px; } .mp-no { color: var(--ink-2); } .mp-pending { color: var(--muted); font-style: italic; }
+.res { font-size: 11.5px; padding: 0 6px; border-radius: 0; border: 1px solid var(--rule); white-space: nowrap; }
+.res.pass::before { content: "✓ "; color: var(--good); } .res.fail::before { content: "× "; color: var(--crit); }
+.st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12.5px; }
+.st i { font-style: normal; font-weight: 700; width: 14px; text-align: center; display: inline-flex; justify-content: center; }
+.st i svg { display: block; }
+.st-VALID i { color: var(--good); } .st-VALID_REPAIRED_VERIFIER i { color: var(--warn); }
+.st-RAW_FAILURE i { color: var(--crit); } .st-UNCONFIRMED i { color: var(--muted); }
+.st-VERIFIED i { color: var(--good); } .st-VERIFIED_PENDING_FIX i { color: var(--warn); }
+.st-REJECTED i { color: var(--crit); } .st-NO_SOURCE i { color: var(--muted); }
+.swipehint { display: none; font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+.tablewrap.overflows { -webkit-mask-image: linear-gradient(to right, #000 90%, transparent); mask-image: linear-gradient(to right, #000 90%, transparent); }
+.tablewrap.overflows.at-end { -webkit-mask-image: none; mask-image: none; }
+.tablewrap.overflows + .swipehint { display: block; }
+/* stacked rows on narrow screens */
+@media (max-width: 700px) {
+  table.stack thead { display: none; }
+  table.stack tr { display: block; border-bottom: 1px solid var(--rule); padding: 6px 0; }
+  table.stack tr.group { padding: 0; }
+  table.stack td { display: flex; gap: 10px; justify-content: space-between; border: 0; padding: 2px 10px; text-align: right; white-space: normal; }
+  table.stack td::before { content: attr(data-label); color: var(--muted); font-family: var(--body); font-size: 12px; text-align: left; }
+  table.stack td:not(.num) { text-align: left; }
+  table.stack td.num { flex-wrap: wrap; }
+  table.stack td.notes { display: block; text-align: left; min-width: 0; max-width: none; }
+  table.stack td.notes::before { display: block; }
+  table.stack tr.group td { display: block; text-align: left; } table.stack tr.group td::before { content: none; }
+  table.stack td:empty { display: none; }
+  table.stack td.mono { display: block; text-align: left; } table.stack td.mono::before { display: block; }
+  table.stack .cv .sub { display: inline; margin-left: 0; } table.stack .cv .sub::before { content: " · "; }
+  table.stack.compact tr:not(.group) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 14px; padding: 10px; }
+  table.stack.compact td { display: block; padding: 0; text-align: left; font-size: 13px; }
+  table.stack.compact td::before { display: block; font-size: 11px; line-height: 1.3; font-weight: 400; }
+  table.stack.compact td.k { display: none; }
+  table.stack.compact td:empty { display: none; }
+  table.stack.compact td.ptitle { display: block; order: -2; grid-column: 1 / -1; font-size: 14px; font-weight: 600; }
+  table.stack.compact td.ptitle::before { content: none; }
+  table.stack.compact td.ponly { display: block; order: -1; grid-column: 1 / -1; }
+  table.stack.compact td.notes { grid-column: 1 / -1; }
+  table.stack.compact td .sub, table.stack.compact td .sub.nw { white-space: normal; overflow-wrap: anywhere; }
+  .tablewrap.tall { max-height: none; overflow-y: visible; }
+}
+/* controls */
+.panel { border-block: 1px solid var(--rule); padding: 20px 0; }
+.controls { display: flex; gap: 10px 12px; flex-wrap: wrap; align-items: end; margin-bottom: 10px; }
+.controls label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+.controls .count { font-size: 12.5px; color: var(--muted); margin-left: auto; align-self: center; }
+select, button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--surface-2); border: 1px solid var(--rule); border-radius: 0; padding: 5px 8px; }
+button { cursor: pointer; } button[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+select:focus-visible, button:focus-visible, a:focus-visible, tr:focus-visible, th:focus-visible, [data-tip]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 0; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; border-radius: 0; }
+/* charts */
+.legend { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 8px; align-items: center; }
+.legend svg { vertical-align: -2px; margin-right: 5px; }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; vertical-align: -1px; margin-right: 5px; }
+.chart { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font-family: var(--body); font-size: 11px; font-variant-numeric: tabular-nums; }
+.chart text.lab { fill: var(--ink-2); font-size: 12px; }
+.chart text.tlab { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.chart text.endlab { fill: var(--ink); font-size: 11.5px; font-weight: 600; }
+.chart text.markglyph { fill: var(--ink); font-size: 12px; font-weight: 700; }
+.chart .grid { stroke: var(--rule); stroke-width: 1; }
+.chart .axis { stroke: var(--ink-2); stroke-width: 1; }
+.chart .bound { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart text.blab { paint-order: stroke; stroke: var(--bg); stroke-width: 3px; stroke-linejoin: round; }
+.chart .gutter { fill: var(--surface-2); }
+.chart .band { fill: var(--surface-2); opacity: .55; }
+.chart g[data-tip] { cursor: pointer; } .chart g[data-tip]:focus { outline: none; }
+.caption { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; max-width: 90ch; }
+.tooltip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 9px; border-radius: 0;
+  z-index: 50; max-width: 320px; line-height: 1.45; }
+/* number rows, part bars, code side by side */
+.figures { display: flex; gap: 10px 26px; flex-wrap: wrap; margin: 8px 0 12px; }
+.figures > div { min-width: 0; }
+.figures .v { font-family: var(--mono); font-size: 17px; font-variant-numeric: tabular-nums; }
+.figures .l { font-size: 12px; color: var(--muted); max-width: 30ch; }
+.bars { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 12.5px; margin: 8px 0 4px; }
+.bar { display: flex; height: 18px; gap: 2px; }
+.bar span { display: block; height: 100%; min-width: 2px; }
+.bar span:first-child { border-radius: 0; } .bar span:last-child { border-radius: 0; }
+.seg-target { background: var(--accent); } .seg-helper { background: var(--helper); }
+.seg-floor { background: repeating-linear-gradient(45deg, var(--floor) 0 3px, color-mix(in srgb, var(--floor) 55%, var(--surface)) 3px 6px); }
+.side { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+@media (max-width: 640px) { .side { grid-template-columns: minmax(0, 1fr); } .bars { grid-template-columns: 96px minmax(0, 1fr); } }
+.side > div { min-width: 0; }
+.side h5 { margin: 0 0 4px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+.diff { font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--rule); border-radius: 0;
+  overflow: auto; max-height: 460px; }
+.diff div { white-space: pre; padding: 0 10px 0 22px; position: relative; }
+.diff div::before { position: absolute; left: 7px; color: var(--muted); }
+.diff .add { background: var(--add-bg); color: var(--add-ink); } .diff .add::before { content: "+"; color: var(--add-ink); }
+.diff .del { background: var(--del-bg); color: var(--del-ink); } .diff .del::before { content: "−"; color: var(--del-ink); }
+.chip { display: inline-block; font-weight: 500; font-size: 11px; padding: 1px 7px; border-radius: 0; border: 1px solid var(--rule); color: var(--ink-2); white-space: nowrap; }
+/* case study cards */
+.card { border-top: 1px solid var(--rule); padding: 20px 0; margin: 24px 0; }
+.card h3 { margin-top: 2px; font-size: 20px; line-height: 1.3; max-width: 60ch; }
+.card .numbers { display: flex; gap: 14px 24px; flex-wrap: wrap; margin: 8px 0 12px; }
+.card .numbers > div { min-width: 0; overflow-wrap: anywhere; }
+.card .numbers .v { font-family: var(--mono); font-size: 14.5px; }
+.card .numbers .l { font-size: 11.5px; color: var(--muted); max-width: 34ch; }
+.card .numbers ul.v { margin: 0; padding-left: 16px; }
+.card p, .card li { overflow-wrap: anywhere; }
+.card .nltext { white-space: pre-line; }
+.card details > summary { font-size: 14px; margin-top: 10px; }
+.mech { border-top: 1px dashed var(--rule); padding-top: 12px; margin-top: 12px; }
+.mech h4 { margin: 0 0 4px; font-size: 15px; } .mech p { white-space: pre-line; }
+.caveats li { margin: 4px 0; font-size: 13.5px; }
+/* appendix links */
+.appendix { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 12px 0; padding: 0; list-style: none; }
+.appendix a { display: block; height: 100%; border-top: 1px solid var(--rule); padding: 14px 0; text-decoration: none; color: var(--ink-2); font-size: 13.5px; }
+.appendix a b { display: block; font-family: var(--display); font-size: 17px; color: var(--accent); margin-bottom: 2px; }
+.appendix a:hover { border-color: var(--accent); }
+footer { margin-top: 40px; padding-block: 20px 40px; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--rule); }
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  h2 { font-size: 23px; }
+  header.top .wrap { gap: 10px 16px; padding-block: 16px; }
+  .snap { display: none; }
+}
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* A report's hierarchy: open sections, inset instruments, and a quiet running index. */
+main.wrap > p, main.wrap > ul, main.wrap > ol { overflow-wrap: anywhere; }
+main.wrap > .summary-line { max-width: 76ch; }
+main .toc { border-block: 1px solid var(--rule); padding-block: 12px; margin-block: 24px 32px; }
+.toc a { text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+pre code { font-size: inherit; }
+tbody tr:hover td { background-color: color-mix(in srgb, var(--accent) 5%, var(--bg)); }
+.controls { padding-block: 12px; border-bottom: 1px solid var(--rule); }
+.controls label { min-width: 0; max-width: 100%; }
+select { max-width: 100%; }
+select, button { min-height: 34px; border-color: var(--muted); border-radius: 2px; }
+figcaption, .caption { line-height: 1.5; }
+footer p { max-width: none; }
+@media (max-width: 800px) {
+  header.top .wrap { gap: 10px 24px; }
+  header.top nav { order: 3; flex-basis: 100%; }
+}
+@media (max-width: 640px) {
+  h1 { margin-top: 32px; }
+  h2 { margin-top: 36px; }
+  .summary-line, .lede { font-size: 18px; }
+  header.top nav { gap: 8px 18px; font-size: 13px; }
+  .controls .count { flex-basis: 100%; margin-left: 0; }
+  .formula { font-size: 17px; }
+}
+</style>
+</head>
+<body data-page="rules">
+<header class="top"><div class="wrap">
+
+  <a class="brand" href="index.html">MathCompressionBench</a>
+  <nav aria-label="Pages" id="nav"><a href="index.html" data-p="home">Home</a><a href="difficulty.html" data-p="difficulty">Task difficulty</a><a href="rules.html" data-p="rules">Rules and scoring</a><a href="results.html" data-p="results">All results</a><a href="examples.html" data-p="examples">Worked examples</a><a href="index.html#submit" data-p="submit">Submit</a></nav>
+
+
+  <span class="snap" id="snap"></span>
+</div></header>
+<div class="tooltip" id="tip" hidden></div>
+<script>
+const DATA = {"snapshot": "2026-10-01", "dates": "the study's runs, up to 2026-10-01; the fundamental theorem of arithmetic example, 2026-10-01", "tasks": [{"id": "ramsey96", "name": "Ramsey96", "domain": "Multicolour triangle Ramsey numbers", "targets": 96, "baseline_nodes": 11338478, "desc": "Targets cover multicolour triangle Ramsey numbers, including palette constructions, saturated-matrix counting, and the library's theorem that log R(k) = Θ(k·log k) (`triangleRamseyNumber_log_isTheta`), where R(k) is the library's `triangleRamseyNumber k`. All 96 statements are targets, not only the final bound.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt26", "name": "SLT26", "domain": "Statistical learning theory", "targets": 26, "baseline_nodes": 392854783, "desc": "Targets cover statistical learning theory (SLT) with supporting probability and matrix results. They are in 15 of the library's 65 modules and include Dudley bounds, Hanson–Wright concentration, spectral perturbation, random-matrix bounds, Gaussian concentration and least-squares error bounds.", "background": "Mathlib and its dependencies", "source": "the published SLT library, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "slt49", "name": "SLT49", "domain": "Statistical learning theory, more targets", "targets": 49, "baseline_nodes": 406689591, "desc": "The same library as SLT26 with more targets, in 29 of its 65 modules, also covering covering numbers, Efron–Stein, entropy, and Gaussian Poincaré and log-Sobolev inequalities.", "background": "Mathlib and its dependencies", "source": "the published SLT library, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "permanent2", "name": "Permanent", "domain": "Formula lower bounds for the permanent", "targets": 2, "baseline_nodes": 85690155, "desc": "Lower bounds for arithmetic formulas computing the permanent: the division-free and the rational-formula conclusions.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "compactness5", "name": "Compactness", "domain": "Counterexamples to compactness and degeneracy conjectures", "targets": 5, "baseline_nodes": 1307221424, "desc": "Five theorems from a formalization of the compactness and degeneracy conjectures: quantitative and asymptotic compactness counterexamples, the theorems the library calls `not_erdos_180` and `not_erdos_146`, and a two-degenerate extremal counterexample.", "background": "Mathlib and its dependencies", "source": "the published ten-proofs collection, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib197", "name": "Mathlib197", "domain": "Mathlib: algebra, calculus, category theory, manifolds, measure theory", "targets": 197, "baseline_nodes": 114567106, "desc": "Targets are theorems from 10 Mathlib modules in algebra, calculus, category theory, manifolds and measure theory. No other Mathlib module imports these modules.", "background": "Lean core and the 3,328 Mathlib modules the editable files import", "source": "Mathlib, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}, {"id": "mathlib372", "name": "Mathlib372", "domain": "Mathlib, the same areas: a larger collection", "targets": 372, "baseline_nodes": 186421329, "desc": "A larger collection from 20 Mathlib modules in the same five areas. No other Mathlib module imports these modules.", "background": "Lean core and the 3,718 Mathlib modules the editable files import", "source": "Mathlib, fixed version", "limits": {"kernel_heartbeats": 10000000000}, "toolchain": "leanprover/lean4:v4.32.0"}], "models": [{"id": "deepseek", "name": "DeepSeek", "effort": "high", "note": "DSH SDK: the harness used for DeepSeek, a software development kit for running the model as an agent.", "model_id": "deepseek-v4-pro", "harness": "DSH SDK", "harness_version": null}, {"id": "glm-flash", "name": "GLM-Flash", "effort": "low", "model_id": "glm-5.3-flash", "harness": "mini-swe-agent 2.4.6 + LiteLLM", "note": "", "harness_version": "2.4.6"}, {"id": "muse", "name": "Muse", "effort": "medium", "note": "", "model_id": "muse-spark-1.3-contributor", "harness": "Muse CLI", "harness_version": "1.4.0", "model_name": "Muse Spark 1.3"}, {"id": "fable", "name": "Fable", "effort": "high", "model_id": "claude-fable-5-1", "harness": "Claude Code CLI", "note": "", "harness_version": null}, {"id": "astra", "name": "Astra", "effort": "high", "model_id": "gpt-6-astra", "harness": "Codex CLI", "note": "", "harness_version": null}, {"id": "opus", "name": "Opus 5.5", "effort": "high", "model_id": "claude-opus-5-5", "harness": "Claude Code CLI 2.1.280", "note": "", "harness_version": "2.1.280"}], "status": {"VERIFIED": ["Verified", "MathCompressionBench's verifier accepted the final in its sandbox. The node count it measured is the score."], "REJECTED": ["Rejected", "MathCompressionBench's verifier rejected the final, so it has no score."], "NO_SOURCE": ["No final source", "There is no single final to check, so there is no score."]}, "marks": {"statement_differs": ["‡", "The combination includes a run whose target statement is only definitionally equal to the original, not identical (see its note)."], "released_verifier_rejected": ["§", "The combination includes a run that MathCompressionBench's verifier rejected (see its note)."]}, "task_notes": {"mathlib372": {"mark": "¶", "short": "proofs inside the target's definitions rewritten", "text": "Of the Mathlib372 finals checked for this, 15 from runs the study counted as valid rewrote the proofs of isLocal_isLocal_toSucc, torsionAux_tensorial₁ or torsionAux_tensorial₂; the target's definitions use these lemmas inside them. MathCompressionBench's rule for the target's definitions allows this, because it never compares proofs, so Mathlib372 counts like the other tasks. Every status on these pages is MathCompressionBench's verifier's, and the verifier applies this rule."}}, "flags": {"early_exit": ["exited early", "The agent process ended before its time limit."], "no_single_final": ["no single final", "The run has no single final file, so it has no node count."]}, "slots": [{"id": "ramsey96-astra-60-r1", "task": "ramsey96", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 794376, "a": 92.99398032081554, "af": 14.273439781665106, "ar": 10544102, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-astra-60-r2", "task": "ramsey96", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 441840, "a": 96.10318069144729, "af": 25.66195455368459, "ar": 10896638, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-astra-60-r3", "task": "ramsey96", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 451194, "a": 96.02068284649845, "af": 25.12993967118357, "ar": 10887284, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-astra-60-r4", "task": "ramsey96", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 581557, "a": 94.8709429960529, "af": 19.496761280493573, "ar": 10756921, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-astra-120-r1", "task": "ramsey96", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 545837, "a": 95.1859764599799, "af": 20.77264458070816, "ar": 10792641, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-astra-120-r2", "task": "ramsey96", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 11338478, "a1": 690888, "a": 93.90669541361724, "af": 16.41145598128785, "ar": 10647590, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-60-r1", "task": "ramsey96", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 4419846, "a": 61.01905388007103, "af": 2.5653558970154164, "ar": 6918632, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-60-r2", "task": "ramsey96", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 9208160, "a": 18.7883947034161, "af": 1.2313511059755695, "ar": 2130318, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-60-r3", "task": "ramsey96", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 4087526, "a": 63.949958715799426, "af": 2.7739219273467617, "ar": 7250952, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-60-r4", "task": "ramsey96", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 1702121, "a": 84.98809981374926, "af": 6.661381887656636, "ar": 9636357, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-120-r1", "task": "ramsey96", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 1280761, "a": 88.70429523257002, "af": 8.852922598361443, "ar": 10057717, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-fable-120-r2", "task": "ramsey96", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 873305, "a": 92.29786396375246, "af": 12.983411293877856, "ar": 10465173, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-60-r1", "task": "ramsey96", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 10111373, "a": 10.822484287573698, "af": 1.12135888963843, "ar": 1227105, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-60-r2", "task": "ramsey96", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 4811923, "a": 57.561120637178995, "af": 2.356329891396849, "ar": 6526555, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-60-r3", "task": "ramsey96", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 2875845, "a": 74.63641063641874, "af": 3.9426596356896844, "ar": 8462633, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-60-r4", "task": "ramsey96", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 4593764, "a": 59.48517958053983, "af": 2.4682325866108923, "ar": 6744714, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-120-r1", "task": "ramsey96", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-opus-120-r2", "task": "ramsey96", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 548681, "a": 95.16089372841752, "af": 20.664972907755143, "ar": 10789797, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-60-r1", "task": "ramsey96", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 10043162, "a": 11.42407296640695, "af": 1.1289749184569562, "ar": 1295316, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-60-r2", "task": "ramsey96", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 10655373, "a": 6.024662216569099, "af": 1.0641089711265856, "ar": 683105, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-60-r3", "task": "ramsey96", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 10418800, "a": 8.111123909223094, "af": 1.088271010097132, "ar": 919678, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-60-r4", "task": "ramsey96", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 8999669, "a": 20.627186470706206, "af": 1.2598772243734742, "ar": 2338809, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-120-r1", "task": "ramsey96", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 8856976, "a": 21.885671075077273, "af": 1.2801748587779846, "ar": 2481502, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-deepseek-120-r2", "task": "ramsey96", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-60-r1", "task": "ramsey96", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": ["early_exit"], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-60-r2", "task": "ramsey96", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-60-r3", "task": "ramsey96", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11340358, "a": -0.016580708627733642, "af": 0.9998342204011549, "ar": -1880, "flags": ["no_single_final", "early_exit"], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-60-r4", "task": "ramsey96", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": ["early_exit"], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-120-r1", "task": "ramsey96", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11254133, "a": 0.7438829091523602, "af": 1.0074945799911907, "ar": 84345, "flags": ["early_exit"], "marks": [], "note": ""}, {"id": "ramsey96-glm-flash-120-r2", "task": "ramsey96", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-60-r1", "task": "ramsey96", "model": "muse", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 9601629, "a": 15.318184680518854, "af": 1.180891075878895, "ar": 1736849, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-60-r2", "task": "ramsey96", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-60-r3", "task": "ramsey96", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-60-r4", "task": "ramsey96", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-120-r1", "task": "ramsey96", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 11338478, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "ramsey96-muse-120-r2", "task": "ramsey96", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 11338478, "a1": 7692024, "a": 32.15999537151283, "af": 1.4740565032038382, "ar": 3646454, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-60-r1", "task": "slt26", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 19551861, "a": 95.02313275895638, "af": 20.092961125286234, "ar": 373302922, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-60-r2", "task": "slt26", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 21630480, "a": 94.49402656248174, "af": 18.16209270436902, "ar": 371224303, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-60-r3", "task": "slt26", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 18640838, "a": 95.25503091558389, "af": 21.074952907160075, "ar": 374213945, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-60-r4", "task": "slt26", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 87276145, "a": 77.78412055123178, "af": 4.501284778332041, "ar": 305578638, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-120-r1", "task": "slt26", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 10184228, "a": 97.40763548244746, "af": 38.574822068005545, "ar": 382670555, "flags": [], "marks": [], "note": ""}, {"id": "slt26-astra-120-r2", "task": "slt26", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 16309711, "a": 95.84841226178987, "af": 24.087170091487213, "ar": 376545072, "flags": [], "marks": [], "note": ""}, {"id": "slt26-fable-60-r1", "task": "slt26", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 298846543, "a": 23.929513924232914, "af": 1.3145702776290773, "ar": 94008240, "flags": [], "marks": [], "note": ""}, {"id": "slt26-fable-60-r2", "task": "slt26", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 358250479, "a": 8.808421202294491, "af": 1.096592484946824, "ar": 34604304, "flags": [], "marks": [], "note": ""}, {"id": "slt26-fable-60-r3", "task": "slt26", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 330562313, "a": 15.856360338624153, "af": 1.1884439561021585, "ar": 62292470, "flags": [], "marks": [], "note": ""}, {"id": "slt26-fable-60-r4", "task": "slt26", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 296965954, "a": 24.408212181548006, "af": 1.3228950245252693, "ar": 95888829, "flags": [], "marks": [], "note": ""}, {"id": "slt26-fable-120-r1", "task": "slt26", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": "The agent ended its run after 172 s."}, {"id": "slt26-fable-120-r2", "task": "slt26", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 278033701, "a": 29.22736007518585, "af": 1.4129754112074349, "ar": 114821082, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-60-r1", "task": "slt26", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 211690835, "a": 46.11473649793899, "af": 1.855794952105508, "ar": 181163948, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-60-r2", "task": "slt26", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 287356281, "a": 26.85432545694626, "af": 1.3671348391372034, "ar": 105498502, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-60-r3", "task": "slt26", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 290273501, "a": 26.111755905489385, "af": 1.3533952691051878, "ar": 102581282, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-60-r4", "task": "slt26", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 285703587, "a": 27.275013729437013, "af": 1.3750432296812571, "ar": 107151196, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-120-r1", "task": "slt26", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 140092401, "a": 64.33990190212346, "af": 2.8042547646820615, "ar": 252762382, "flags": [], "marks": [], "note": ""}, {"id": "slt26-opus-120-r2", "task": "slt26", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 8647505, "a": 97.79880368670476, "af": 45.42984167109473, "ar": 384207278, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-60-r1", "task": "slt26", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-60-r2", "task": "slt26", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 392854783, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-60-r3", "task": "slt26", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 378537670, "a": 3.644377927810538, "af": 1.03782216179436, "ar": 14317113, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-60-r4", "task": "slt26", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392057247, "a": 0.2030103831012764, "af": 1.002034233536308, "ar": 797536, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-120-r1", "task": "slt26", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-deepseek-120-r2", "task": "slt26", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 392854783, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-60-r1", "task": "slt26", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-60-r2", "task": "slt26", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-60-r3", "task": "slt26", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-60-r4", "task": "slt26", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-120-r1", "task": "slt26", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-glm-flash-120-r2", "task": "slt26", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392854783, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-60-r1", "task": "slt26", "model": "muse", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392641586, "a": 0.054268653259592625, "af": 1.0005429812011812, "ar": 213197, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-60-r2", "task": "slt26", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392303159, "a": 0.1404142252736662, "af": 1.001406116640524, "ar": 551624, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-60-r3", "task": "slt26", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392575522, "a": 0.07108504518321679, "af": 1.0007113561196512, "ar": 279261, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-60-r4", "task": "slt26", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392762836, "a": 0.023404831499784784, "af": 1.0002341031064355, "ar": 91947, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-120-r1", "task": "slt26", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392688190, "a": 0.042405745636553416, "af": 1.0004242373573802, "ar": 166593, "flags": [], "marks": [], "note": ""}, {"id": "slt26-muse-120-r2", "task": "slt26", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 392854783, "a1": 392851313, "a": 0.0008832780330481071, "af": 1.0000088328583492, "ar": 3470, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-60-r1", "task": "slt49", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 55996111, "a": 86.23124067121748, "af": 7.262818501806313, "ar": 350693480, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-60-r2", "task": "slt49", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 22493330, "a": 94.4691650591077, "af": 18.080452783113927, "ar": 384196261, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-60-r3", "task": "slt49", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 26655504, "a": 93.44573734123429, "af": 15.257246345820361, "ar": 380034087, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-60-r4", "task": "slt49", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 34792328, "a": 91.4449917652306, "af": 11.689059467363034, "ar": 371897263, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-120-r1", "task": "slt49", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 33054955, "a": 91.87219055232717, "af": 12.303438047336625, "ar": 373634636, "flags": [], "marks": [], "note": ""}, {"id": "slt49-astra-120-r2", "task": "slt49", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 27804003, "a": 93.16333547371268, "af": 14.62701579337335, "ar": 378885588, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-60-r1", "task": "slt49", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 367587621, "a": 9.614696531537248, "af": 1.106374556068089, "ar": 39101970, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-60-r2", "task": "slt49", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 311467000, "a": 23.414071347599354, "af": 1.305722888781155, "ar": 95222591, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-60-r3", "task": "slt49", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 298405921, "a": 26.62563104547222, "af": 1.3628737313158072, "ar": 108283670, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-60-r4", "task": "slt49", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 312687587, "a": 23.11394392191365, "af": 1.3006259535336144, "ar": 94002004, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-120-r1", "task": "slt49", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-fable-120-r2", "task": "slt49", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 285256951, "a": 29.85880206607009, "af": 1.4256956388768245, "ar": 121432640, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-60-r1", "task": "slt49", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 312274169, "a": 23.215598355454347, "af": 1.3023478448516823, "ar": 94415422, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-60-r2", "task": "slt49", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-60-r3", "task": "slt49", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 233598566, "a": 42.560967585718224, "af": 1.7409764022267158, "ar": 173091025, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-60-r4", "task": "slt49", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 280228963, "a": 31.095122864848534, "af": 1.4512760802672635, "ar": 126460628, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-120-r1", "task": "slt49", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 123465308, "a": 69.64138971533205, "af": 3.293958421097528, "ar": 283224283, "flags": [], "marks": [], "note": ""}, {"id": "slt49-opus-120-r2", "task": "slt49", "model": "opus", "budget": 120, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 406689591, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-60-r1", "task": "slt49", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 294453245, "a": 27.597545765561527, "af": 1.381168650391338, "ar": 112236346, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-60-r2", "task": "slt49", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 310854757, "a": 23.564614418666054, "af": 1.3082945711524048, "ar": 95834834, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-60-r3", "task": "slt49", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 311593990, "a": 23.382846058629514, "af": 1.3051907419652093, "ar": 95095601, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-60-r4", "task": "slt49", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 367238072, "a": 9.700646358563924, "af": 1.1074276389295499, "ar": 39451519, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-120-r1", "task": "slt49", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689005, "a": 0.00014409023809669463, "af": 1.0000014409044573, "ar": 586, "flags": [], "marks": [], "note": ""}, {"id": "slt49-deepseek-120-r2", "task": "slt49", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 346249879, "a": 14.86138650644737, "af": 1.174555185909538, "ar": 60439712, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-60-r1", "task": "slt49", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-60-r2", "task": "slt49", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "REJECTED", "why": "imports a module it may not import", "scored": "time_limit", "a0": 406689591, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-60-r3", "task": "slt49", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-60-r4", "task": "slt49", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-120-r1", "task": "slt49", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-glm-flash-120-r2", "task": "slt49", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-60-r1", "task": "slt49", "model": "muse", "budget": 60, "repeat": "r1", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 406689591, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-60-r2", "task": "slt49", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-60-r3", "task": "slt49", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406689591, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-60-r4", "task": "slt49", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 406852437, "a": -0.040041841149562885, "af": 0.9995997418592334, "ar": -162846, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-120-r1", "task": "slt49", "model": "muse", "budget": 120, "repeat": "r1", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 406689591, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "slt49-muse-120-r2", "task": "slt49", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 406689591, "a1": 300489614, "a": 26.113276402985196, "af": 1.353423120307912, "ar": 106199977, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-60-r1", "task": "permanent2", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 29948410, "a": 65.05034913287297, "af": 2.8612589115749385, "ar": 55741745, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-60-r2", "task": "permanent2", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 3839704, "a": 95.51908384341235, "af": 22.31686478957753, "ar": 81850451, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-60-r3", "task": "permanent2", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 3527354, "a": 95.88359479569152, "af": 24.293040902614255, "ar": 82162801, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-60-r4", "task": "permanent2", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 13580515, "a": 84.15160411368143, "af": 6.309786852707721, "ar": 72109640, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-120-r1", "task": "permanent2", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 3145739, "a": 96.32893767084445, "af": 27.240071410883104, "ar": 82544416, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-astra-120-r2", "task": "permanent2", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 2875252, "a": 96.64459470285706, "af": 29.802659036494887, "ar": 82814903, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-60-r1", "task": "permanent2", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 51309650, "a": 40.12188448019496, "af": 1.6700592383693906, "ar": 34380505, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-60-r2", "task": "permanent2", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 74646376, "a": 12.888037137988606, "af": 1.1479479593222315, "ar": 11043779, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-60-r3", "task": "permanent2", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 6130899, "a": 92.84527026471127, "af": 13.976768333648948, "ar": 79559256, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-60-r4", "task": "permanent2", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 54013408, "a": 36.96661185873686, "af": 1.5864608098789101, "ar": 31676747, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-120-r1", "task": "permanent2", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 23835860, "a": 72.1836656731453, "af": 3.5950099975415193, "ar": 61854295, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-fable-120-r2", "task": "permanent2", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 63767556, "a": 25.583567913956973, "af": 1.3437892303728873, "ar": 21922599, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-60-r1", "task": "permanent2", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 53915560, "a": 37.08080000555489, "af": 1.5893399790338818, "ar": 31774595, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-60-r2", "task": "permanent2", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 67808529, "a": 20.867771799455838, "af": 1.263707622974685, "ar": 17881626, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-60-r3", "task": "permanent2", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-60-r4", "task": "permanent2", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-120-r1", "task": "permanent2", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 85690155, "a1": 15416487, "a": 82.00903359318232, "af": 5.558345101578589, "ar": 70273668, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-opus-120-r2", "task": "permanent2", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 12686433, "a": 85.19499352055088, "af": 6.754471883467954, "ar": 73003722, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-60-r1", "task": "permanent2", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 64200248, "a": 25.07861842471869, "af": 1.3347324608465687, "ar": 21489907, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-60-r2", "task": "permanent2", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 85690155, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-60-r3", "task": "permanent2", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 69284519, "a": 19.14529854684006, "af": 1.236786460190335, "ar": 16405636, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-60-r4", "task": "permanent2", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 85690155, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-120-r1", "task": "permanent2", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 76337936, "a": 10.913994729032762, "af": 1.1225107658137365, "ar": 9352219, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-deepseek-120-r2", "task": "permanent2", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 53986135, "a": 36.9984393189626, "af": 1.5872622665060205, "ar": 31704020, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-60-r1", "task": "permanent2", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-60-r2", "task": "permanent2", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85648045, "a": 0.04914216808220573, "af": 1.0004916632948249, "ar": 42110, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-60-r3", "task": "permanent2", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-60-r4", "task": "permanent2", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-120-r1", "task": "permanent2", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-glm-flash-120-r2", "task": "permanent2", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 65082172, "a": 24.04941734555154, "af": 1.3166455938194563, "ar": 20607983, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-60-r1", "task": "permanent2", "model": "muse", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-60-r2", "task": "permanent2", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-60-r3", "task": "permanent2", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85608301, "a": 0.0955232255093974, "af": 1.000956145596208, "ar": 81854, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-60-r4", "task": "permanent2", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 85690155, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-120-r1", "task": "permanent2", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 77093781, "a": 10.031927238315763, "af": 1.1115054144250625, "ar": 8596374, "flags": [], "marks": [], "note": ""}, {"id": "permanent2-muse-120-r2", "task": "permanent2", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 85690155, "a1": 75871136, "a": 11.458748090722903, "af": 1.1294170552553742, "ar": 9819019, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-60-r1", "task": "compactness5", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 83728354, "a": 93.59493713438405, "af": 15.612649258577328, "ar": 1223493070, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-60-r2", "task": "compactness5", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 35602409, "a": 97.27648213635764, "af": 36.717218320816436, "ar": 1271619015, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-60-r3", "task": "compactness5", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 13555339, "a": 98.96304185724544, "af": 96.43590794741466, "ar": 1293666085, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-60-r4", "task": "compactness5", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 15612386, "a": 98.80568159966143, "af": 83.72976584104441, "ar": 1291609038, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-120-r1", "task": "compactness5", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 10294824, "a": 99.21246517147044, "af": 126.9785111430754, "ar": 1296926600, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-astra-120-r2", "task": "compactness5", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 159155219, "a": 87.82492268884357, "af": 8.213500205733121, "ar": 1148066205, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-60-r1", "task": "compactness5", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 755464449, "a": 42.208379152145845, "af": 1.7303546523338784, "ar": 551756975, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-60-r2", "task": "compactness5", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 163991406, "a": 87.4549634064137, "af": 7.971280055980494, "ar": 1143230018, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-60-r3", "task": "compactness5", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 725234925, "a": 44.52088133769754, "af": 1.8024799674395162, "ar": 581986499, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-60-r4", "task": "compactness5", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-120-r1", "task": "compactness5", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 161765952, "a": 87.62520648529396, "af": 8.080942916838273, "ar": 1145455472, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-fable-120-r2", "task": "compactness5", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 144311989, "a": 88.96040209022767, "af": 9.058300928829967, "ar": 1162909435, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-60-r1", "task": "compactness5", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 416115327, "a": 68.16795384773314, "af": 3.141488282646219, "ar": 891106097, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-60-r2", "task": "compactness5", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 755305069, "a": 42.22057142478411, "af": 1.730719781519168, "ar": 551916355, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-60-r3", "task": "compactness5", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 435935213, "a": 66.65176954749788, "af": 2.99865985820237, "ar": 871286211, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-60-r4", "task": "compactness5", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 860251099, "a": 34.192395931846356, "af": 1.519581231014504, "ar": 446970325, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-120-r1", "task": "compactness5", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 60815970, "a": 95.34769176182046, "af": 21.494706472658414, "ar": 1246405454, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-opus-120-r2", "task": "compactness5", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 257381889, "a": 80.31076569932348, "af": 5.0789176700774, "ar": 1049839535, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-60-r1", "task": "compactness5", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1165185140, "a": 10.865510723147388, "af": 1.1219001848925056, "ar": 142036284, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-60-r2", "task": "compactness5", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 382048019, "a": 70.77403934897566, "af": 3.421615501165575, "ar": 925173405, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-60-r3", "task": "compactness5", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 467943081, "a": 64.20322736387466, "af": 2.793547927253144, "ar": 839278343, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-60-r4", "task": "compactness5", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 390538245, "a": 70.12455290053448, "af": 3.3472302411765074, "ar": 916683179, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-120-r1", "task": "compactness5", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 763349938, "a": 41.60515395592231, "af": 1.7124798980464448, "ar": 543871486, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-deepseek-120-r2", "task": "compactness5", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 536521006, "a": 58.957144049989196, "af": 2.436477620412126, "ar": 770700418, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-60-r1", "task": "compactness5", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221373, "a": 3.90140484363144e-06, "af": 1.00000003901405, "ar": 51, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-60-r2", "task": "compactness5", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-60-r3", "task": "compactness5", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-60-r4", "task": "compactness5", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-120-r1", "task": "compactness5", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-glm-flash-120-r2", "task": "compactness5", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-60-r1", "task": "compactness5", "model": "muse", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307221424, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-60-r2", "task": "compactness5", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 917638786, "a": 29.802344946880243, "af": 1.42454900985408, "ar": 389582638, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-60-r3", "task": "compactness5", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 830176471, "a": 36.49304886239379, "af": 1.5746307799176351, "ar": 477044953, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-60-r4", "task": "compactness5", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1306444486, "a": 0.05943430743527989, "af": 1.0005946965281156, "ar": 776938, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-120-r1", "task": "compactness5", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 799449884, "a": 38.8435754400549, "af": 1.6351511835356023, "ar": 507771540, "flags": [], "marks": [], "note": ""}, {"id": "compactness5-muse-120-r2", "task": "compactness5", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 1307221424, "a1": 1307189803, "a": 0.0024189475034130936, "af": 1.000024190060179, "ar": 31621, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-60-r1", "task": "mathlib197", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 4018976, "a": 96.49203323683501, "af": 28.506541467279227, "ar": 110548130, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-60-r2", "task": "mathlib197", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 88122894, "a": 23.081853878721525, "af": 1.3000833358922597, "ar": 26444212, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-60-r3", "task": "mathlib197", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 12567773, "a": 89.03020819955076, "af": 9.115943294010801, "ar": 101999333, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-60-r4", "task": "mathlib197", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 90387655, "a": 21.105055232869375, "af": 1.2675083339644113, "ar": 24179451, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-120-r1", "task": "mathlib197", "model": "astra", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 2336839, "a": 97.96028800797325, "af": 49.02652942714496, "ar": 112230267, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-astra-120-r2", "task": "mathlib197", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 88797180, "a": 22.493302746077916, "af": 1.2902110855322206, "ar": 25769926, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-60-r1", "task": "mathlib197", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 102651916, "a": 10.400184150588565, "af": 1.1160737223842954, "ar": 11915190, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-60-r2", "task": "mathlib197", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 113869214, "a": 0.6091556506629403, "af": 1.0061288909924329, "ar": 697892, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-60-r3", "task": "mathlib197", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 114567106, "a1": 95851010, "a": 16.336360979564233, "af": 1.1952623764736543, "ar": 18716096, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-60-r4", "task": "mathlib197", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-120-r1", "task": "mathlib197", "model": "fable", "budget": 120, "repeat": "r1", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 114567106, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-fable-120-r2", "task": "mathlib197", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 34844311, "a": 69.58611226506848, "af": 3.28797162899849, "ar": 79722795, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-60-r1", "task": "mathlib197", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114391596, "a": 0.1531940590347114, "af": 1.001534291033058, "ar": 175510, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-60-r2", "task": "mathlib197", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 112990830, "a": 1.3758539034755768, "af": 1.0139504772201426, "ar": 1576276, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-60-r3", "task": "mathlib197", "model": "opus", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 99816342, "a": 12.875217429337882, "af": 1.1477790480440568, "ar": 14750764, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-60-r4", "task": "mathlib197", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 107456992, "a": 6.206069305791839, "af": 1.0661670670997379, "ar": 7110114, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-120-r1", "task": "mathlib197", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 99443289, "a": 13.200837070982663, "af": 1.1520848430505954, "ar": 15123817, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-opus-120-r2", "task": "mathlib197", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 97292049, "a": 15.078548811383962, "af": 1.1775587746127127, "ar": 17275057, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-60-r1", "task": "mathlib197", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 113976553, "a": 0.5154647093904896, "af": 1.0051813551511775, "ar": 590553, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-60-r2", "task": "mathlib197", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 110253330, "a": 3.7652832044129614, "af": 1.0391260381885972, "ar": 4313776, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-60-r3", "task": "mathlib197", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114387646, "a": 0.1566418200351527, "af": 1.0015688757158268, "ar": 179460, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-60-r4", "task": "mathlib197", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114382816, "a": 0.16085768981543014, "af": 1.001611168586722, "ar": 184290, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-120-r1", "task": "mathlib197", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 100864359, "a": 11.960454862148652, "af": 1.1358532105478407, "ar": 13702747, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-deepseek-120-r2", "task": "mathlib197", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 114567106, "a1": 105957230, "a": 7.5151378965616855, "af": 1.081258032132399, "ar": 8609876, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-60-r1", "task": "mathlib197", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-60-r2", "task": "mathlib197", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-60-r3", "task": "mathlib197", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114564138, "a": 0.002590621430198503, "af": 1.0000259068854513, "ar": 2968, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-60-r4", "task": "mathlib197", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-120-r1", "task": "mathlib197", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114565849, "a": 0.0010971735639353497, "af": 1.0000109718560197, "ar": 1257, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-glm-flash-120-r2", "task": "mathlib197", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-60-r1", "task": "mathlib197", "model": "muse", "budget": 60, "repeat": "r1", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 114567106, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-60-r2", "task": "mathlib197", "model": "muse", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114110469, "a": 0.39857601011584753, "af": 1.0040017099570417, "ar": 456637, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-60-r3", "task": "mathlib197", "model": "muse", "budget": 60, "repeat": "r3", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 114567106, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-60-r4", "task": "mathlib197", "model": "muse", "budget": 60, "repeat": "r4", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 114567106, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-120-r1", "task": "mathlib197", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 111153435, "a": 2.9796257575014584, "af": 1.0307113405896993, "ar": 3413671, "flags": [], "marks": [], "note": ""}, {"id": "mathlib197-muse-120-r2", "task": "mathlib197", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 114567106, "a1": 114567106, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-60-r1", "task": "mathlib372", "model": "astra", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 17026351, "a": 90.86673660608866, "af": 10.94898895247725, "ar": 169394978, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-60-r2", "task": "mathlib372", "model": "astra", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 100333595, "a": 46.17912256166782, "af": 1.8580150447115944, "ar": 86087734, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-60-r3", "task": "mathlib372", "model": "astra", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 16847798, "a": 90.96251588250398, "af": 11.065026361308464, "ar": 169573531, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-60-r4", "task": "mathlib372", "model": "astra", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 9911194, "a": 94.68344418894257, "af": 18.809169611653246, "ar": 176510135, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-120-r1", "task": "mathlib372", "model": "astra", "budget": 120, "repeat": "r1", "status": "REJECTED", "why": "a target statement was changed", "scored": "study", "a0": 186421329, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-astra-120-r2", "task": "mathlib372", "model": "astra", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 7846177, "a": 95.79115917578294, "af": 23.759511033207637, "ar": 178575152, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-60-r1", "task": "mathlib372", "model": "fable", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421329, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-60-r2", "task": "mathlib372", "model": "fable", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 168667781, "a": 9.523345904266133, "af": 1.1052574943165938, "ar": 17753548, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-60-r3", "task": "mathlib372", "model": "fable", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 25583839, "a": 86.27633482861825, "af": 7.286683167448013, "ar": 160837490, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-60-r4", "task": "mathlib372", "model": "fable", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421329, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-120-r1", "task": "mathlib372", "model": "fable", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 100907556, "a": 45.87123880014824, "af": 1.8474466768375601, "ar": 85513773, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-fable-120-r2", "task": "mathlib372", "model": "fable", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 85416754, "a": 54.1808040645392, "af": 2.1824913763405247, "ar": 101004575, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-60-r1", "task": "mathlib372", "model": "opus", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 52890871, "a": 71.62831566338635, "af": 3.5246409347276586, "ar": 133530458, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-60-r2", "task": "mathlib372", "model": "opus", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 165849440, "a": 11.035158428679582, "af": 1.124039544541121, "ar": 20571889, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-60-r3", "task": "mathlib372", "model": "opus", "budget": 60, "repeat": "r3", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 186421329, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-60-r4", "task": "mathlib372", "model": "opus", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 29510287, "a": 84.17011231584986, "af": 6.317164214634714, "ar": 156911042, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-120-r1", "task": "mathlib372", "model": "opus", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 104763416, "a": 43.80288105337989, "af": 1.7794506528882181, "ar": 81657913, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-opus-120-r2", "task": "mathlib372", "model": "opus", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 186421329, "a1": 48340520, "a": 74.06921179067444, "af": 3.856419604091971, "ar": 138080809, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-60-r1", "task": "mathlib372", "model": "deepseek", "budget": 60, "repeat": "r1", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 186421329, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-60-r2", "task": "mathlib372", "model": "deepseek", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186401005, "a": 0.01090218598323034, "af": 1.0001090337468943, "ar": 20324, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-60-r3", "task": "mathlib372", "model": "deepseek", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 185113128, "a": 0.7017442730493539, "af": 1.007067035245604, "ar": 1308201, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-60-r4", "task": "mathlib372", "model": "deepseek", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "time_limit", "a0": 186421329, "a1": 186133447, "a": 0.15442546276450697, "af": 1.0015466430383144, "ar": 287882, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-120-r1", "task": "mathlib372", "model": "deepseek", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186206602, "a": 0.1151837084049534, "af": 1.0011531653426553, "ar": 214727, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-deepseek-120-r2", "task": "mathlib372", "model": "deepseek", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 167753015, "a": 10.014044047502747, "af": 1.1112845214734293, "ar": 18668314, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-60-r1", "task": "mathlib372", "model": "glm-flash", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421329, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-60-r2", "task": "mathlib372", "model": "glm-flash", "budget": 60, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421329, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-60-r3", "task": "mathlib372", "model": "glm-flash", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421432, "a": -5.525118855764788e-05, "af": 0.9999994474884196, "ar": -103, "flags": ["early_exit"], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-60-r4", "task": "mathlib372", "model": "glm-flash", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186421329, "a": 0.0, "af": 1.0, "ar": 0, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-120-r1", "task": "mathlib372", "model": "glm-flash", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186785367, "a": -0.19527701146255794, "af": 0.998051035764488, "ar": -364038, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-glm-flash-120-r2", "task": "mathlib372", "model": "glm-flash", "budget": 120, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "time_limit", "a0": 186421329, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-60-r1", "task": "mathlib372", "model": "muse", "budget": 60, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 185730039, "a": 0.370821302319968, "af": 1.0037220150478727, "ar": 691290, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-60-r2", "task": "mathlib372", "model": "muse", "budget": 60, "repeat": "r2", "status": "REJECTED", "why": "does not compile", "scored": "study", "a0": 186421329, "a1": null, "a": null, "af": null, "ar": null, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-60-r3", "task": "mathlib372", "model": "muse", "budget": 60, "repeat": "r3", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186640286, "a": -0.11745276207102417, "af": 0.9988268502760438, "ar": -218957, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-60-r4", "task": "mathlib372", "model": "muse", "budget": 60, "repeat": "r4", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186265838, "a": 0.08340837437115223, "af": 1.000834780020156, "ar": 155491, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-120-r1", "task": "mathlib372", "model": "muse", "budget": 120, "repeat": "r1", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 186662189, "a": -0.12920195413905766, "af": 0.9987096476191009, "ar": -240860, "flags": [], "marks": [], "note": ""}, {"id": "mathlib372-muse-120-r2", "task": "mathlib372", "model": "muse", "budget": 120, "repeat": "r2", "status": "VERIFIED", "why": "", "scored": "study", "a0": 186421329, "a1": 167716574, "a": 10.033591703447197, "af": 1.1115259783448712, "ar": 18704755, "flags": [], "marks": [], "note": ""}], "values": {"run_example": "Ramsey96, Astra, 60 min, run 2: from 11,338,478 to 441,840 nodes"}, "participant": {"live": true, "html": "<div class='tablewrap'><table><thead><tr><th>Task<\/th><th>What was submitted<\/th><th>Verdict<\/th><th class='num'>Node count<\/th><th class='num'>Original node count<\/th><th>Submission ID (sha256 of the submitted archive)<\/th><th>Receipt hash<\/th><th>Verifier (code hash)<\/th><\/tr><\/thead><tbody><tr><td>Ramsey96<span class='sub'>all 96 targets<\/span><\/td><td>The unmodified original, submitted to test the verifier<\/td><td><span class='res pass'>ACCEPT<\/span><\/td><td class='num'>11,338,478<\/td><td class='num'>11,338,478<\/td><td><code class='nw'>d0df7c8a87d5f180<\/code><\/td><td><code class='nw'>1972687a96a2f38d<\/code><\/td><td><code class='nw'>a891571ca685<\/code><\/td><\/tr><tr><td>Toy task<span class='sub'>all 12 targets<\/span><\/td><td>A hand-shortened test file for all toy targets together, not the agent's best file<\/td><td><span class='res pass'>ACCEPT<\/span><\/td><td class='num'>8,331<\/td><td class='num'>20,190<\/td><td><code class='nw'>91ad2fa10ad2363b<\/code><\/td><td><code class='nw'>3c17e0c77ec8c4f9<\/code><\/td><td><code class='nw'>a891571ca685<\/code><\/td><\/tr><\/tbody><\/table><\/div><p class='small'>Lean 4.32.0; hashes shortened. A receipt's hash and signature show it is unchanged; only re-running the verification shows the proof is valid.<\/p>"}, "receipts": [{"task": "ramsey96-warm", "verdict": "ACCEPT", "display": "Ramsey96", "what": "The unmodified original, submitted to test the verifier", "targets": 96, "total": 11338478, "baseline": 11338478, "reduction_pct": 0.0, "bundle": "d0df7c8a87d5f1808d911b8cd5096ca1d78ff3fe98d6c7157644fd01e6aebd79", "root": "1972687a96a2f38de09937b1918dfdaf3d55a04c8cd868d4dd1431027fee8c41", "verifier": "a891571ca685c3acd491f394349ca72c03f0ab7233005869222e20b049021a52", "toolchain": "leanprover/lean4:v4.32.0"}, {"task": "toyarith-warm", "verdict": "ACCEPT", "display": "Toy task", "what": "A hand-shortened test file for all toy targets together, not the agent's best file", "targets": 12, "total": 8331, "baseline": 20190, "reduction_pct": 58.737, "bundle": "91ad2fa10ad2363b52d2f1db75b0d5bf32822fe428750b077e8f6fc1cf8cd0f5", "root": "3c17e0c77ec8c4f9e182f4aa7a26abc322fd9c4cc9d0a2d9c8be0da61023aa48", "verifier": "a891571ca685c3acd491f394349ca72c03f0ab7233005869222e20b049021a52", "toolchain": "leanprover/lean4:v4.32.0"}], "order": ["astra", "opus", "fable", "deepseek", "muse", "glm-flash"], "scoring_examples": {"helper": {"id": "helper", "case": "siteHelperTwice", "source": "theorem double (n : Nat) : n + n = 2 * n := (Nat.two_mul n).symm\n\ntheorem target (a b : Nat) : (a + a) + (b + b) = 2 * b + 2 * a := by\n  rw [double a, double b, Nat.add_comm]", "rows": [{"decl": "target", "what": "proof: the term `rw` leaves", "parts": [2778], "nodes": 2778}, {"decl": "double", "what": "statement + proof, counted once", "parts": [60, 64], "nodes": 124}], "note": "Inside the proof of `target`, each use of `double` and of `Nat.add_comm` is a one-node reference. `Nat.two_mul` and `Nat.add_comm` are library lemmas, so their own proofs are free.", "total": 2902}, "inductive": {"id": "inductive", "case": "siteMyNat", "source": "inductive MyNat where\n  | zero\n  | succ (n : MyNat)\n\ntheorem succ_congr (n m : MyNat) (ih : n = m) : MyNat.succ n = MyNat.succ m := congrArg MyNat.succ ih", "rows": [{"decl": "succ_congr", "what": "proof", "parts": [31], "nodes": 31}, {"decl": "MyNat", "what": "type", "parts": [3], "nodes": 3}, {"decl": "MyNat.zero", "what": "type", "parts": [1], "nodes": 1}, {"decl": "MyNat.succ", "what": "type", "parts": [3], "nodes": 3}, {"decl": "MyNat.rec", "what": "type + rule for `zero` + rule for `succ`", "parts": [26, 22, 37], "nodes": 85}], "note": "The proof only uses `MyNat.succ`, yet the whole type is charged, including both constructors and the recursor with its two rules.", "total": 123}}, "verified_summary": {"counts": {"VERIFIED": 235, "REJECTED": 17, "NO_SOURCE": 0}, "differs": 52, "differs_by": {"rejected_first": 39, "failed_first": 12, "accepted_first": 1}, "no_first_check": 1, "study_check": {"first": {"runs": 184, "verified": 183}, "second": {"runs": 36, "verified": 36}, "second_lcbench": {"runs": 3, "verified": 3}, "no_first": {"runs": 1, "verified": 1}, "failed": {"runs": 28, "verified": 12}}, "time_limit": {"runs": 17}, "by_file": {"study": 228, "time_limit": 7, "no_files": 0, "none": 0}}, "flow_kinds": {"groups": [{"key": "mechanical", "label": "Mechanical", "categories": [{"key": "sharing", "label": "Mechanical sharing", "rule": "A repeated subterm written once: named with `let` or `generalize`, or bound by a sharing pass or metaprogram."}, {"key": "automation", "label": "Removing automation", "rule": "A fact proved another way at the same place, with the argument unchanged: automation or tactic calls replaced by terms, existing lemmas or other tactics, or the reverse; also when the replacement is a library lemma."}, {"key": "counting", "label": "Counting-rule effects", "rule": "The same argument written to cost fewer nodes under the counting rule: what the kernel computes for free (definitional unfolding, `decide` checks), aliases, notation and wrappers unfolded, one-use lemmas inlined."}]}, {"key": "mathematical", "label": "Mathematical", "categories": [{"key": "restructure", "label": "Proof restructuring", "rule": "A different argument: another proof route, a stronger theorem reused or a new construction."}, {"key": "lemmas", "label": "New lemmas", "rule": "A fact proved once in a new lemma of its own, or helpers kept as separate lemmas."}]}, {"key": "library", "label": "Library reuse", "categories": [{"key": "library", "label": "Library lemmas", "rule": "A fact the proof derived by hand replaced by an existing library lemma."}]}, {"key": "other", "label": "Other", "categories": [{"key": "other", "label": "Not broken down", "rule": "Changes measured together and not broken down into kinds."}, {"key": "mixed", "label": "Mixed changes", "rule": "One edit whose kinds of change could not be compiled and measured apart; its kinds are listed."}]}], "tell_apart": "An automation call (`simp`, `omega`, `nlinarith`, `ring`, `grind`, `decide`, ...) replaced by a cheaper tactic, an explicit term or a named lemma at the same place, or tactic scaffolding replaced by the equivalent term, is “Removing automation”; a fact the proof derived by hand in several steps replaced by an existing library lemma is “Library lemmas”; a repeated subterm named once is “Mechanical sharing”; a re-encoding that costs fewer nodes under the counting rule (notation, dropped definitional steps, aliases, kernel computation, statement shape) is “Counting-rule effects”; a different proof route or construction is “Proof restructuring”; new lemma statements are “New lemmas”."}, "zero_add": {"source": [{"text": "theorem zero_add_eq (n : MyNat) : zero + n = n := by", "region": "statement"}, {"text": "  induction n with", "region": "induction"}, {"text": "  | zero => rfl", "region": "zero"}, {"text": "  | succ n ih => exact congrArg succ ih", "region": "succ"}], "tree": {"label": "fun n", "own": 1, "apps": 0, "region": "statement", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "statement", "kids": [], "size": 1, "note": "type of n"}, {"label": "MyNat.rec.{0}", "own": 2, "apps": 4, "region": "induction", "kids": [{"label": "fun n", "own": 1, "apps": 0, "region": "induction", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1, "note": "type of n"}, {"label": "Eq.{1}", "own": 3, "apps": 3, "region": "induction", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "HAdd.hAdd.{0,0,0}", "own": 4, "apps": 6, "region": "induction", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "instHAdd.{0}", "own": 2, "apps": 2, "region": "induction", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "instAddMyNat", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}], "size": 6}, {"label": "MyNat.zero", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}, {"label": "n", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}], "size": 21}, {"label": "n", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1}], "size": 29}], "size": 31, "text": "fun n => MyNat.zero + n = n", "note": "motive"}, {"label": "Eq.refl.{1}", "own": 3, "apps": 2, "region": "zero", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "HAdd.hAdd.{0,0,0}", "own": 4, "apps": 6, "region": "zero", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "instHAdd.{0}", "own": 2, "apps": 2, "region": "zero", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "instAddMyNat", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}], "size": 6}, {"label": "MyNat.zero", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}, {"label": "MyNat.zero", "own": 1, "apps": 0, "region": "zero", "kids": [], "size": 1}], "size": 21}], "size": 27, "text": "Eq.refl (MyNat.zero + MyNat.zero)", "note": "case zero"}, {"label": "fun n", "own": 1, "apps": 0, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1, "note": "type of n"}, {"label": "fun ih", "own": 1, "apps": 0, "region": "succ", "kids": [{"label": "Eq.{1}", "own": 3, "apps": 3, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "HAdd.hAdd.{0,0,0}", "own": 4, "apps": 6, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "instHAdd.{0}", "own": 2, "apps": 2, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "instAddMyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 6}, {"label": "MyNat.zero", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "n", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 21}, {"label": "n", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 29, "note": "type of ih"}, {"label": "congrArg.{1,1}", "own": 5, "apps": 6, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "MyNat.rec.{1}", "own": 3, "apps": 4, "region": "succ", "kids": [{"label": "fun x", "own": 1, "apps": 0, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1, "note": "type of x"}, {"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 3}, {"label": "MyNat.zero", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "fun x", "own": 1, "apps": 0, "region": "succ", "kids": [{"label": "MyNat", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1, "note": "type of x"}, {"label": "MyNat.succ", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 3}, {"label": "n", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 15}, {"label": "n", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "MyNat.succ", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}, {"label": "ih", "own": 1, "apps": 0, "region": "succ", "kids": [], "size": 1}], "size": 31}], "size": 61}], "size": 63, "text": "fun n ih => congrArg MyNat.succ ih", "note": "case succ"}, {"label": "n", "own": 1, "apps": 0, "region": "induction", "kids": [], "size": 1, "text": "n", "note": "the induction variable"}], "size": 128}], "size": 130}, "charged": 130, "definitions": 122, "total": 252}, "page": "rules"};
+const SITE = null;
+const CARDS = [];
+</script>
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const codeify = s => esc(s).replace(/``(.+?)``|`([^`]+)`/g, (m, dbl, one) => `<code>${dbl ?? one}</code>`);
+const fmt = n => n == null ? "—" : Number(n).toLocaleString("en-US");
+const pct = (a, b) => a ? (100 * (1 - b / a)).toFixed(1) + "%" : "—";
+const pc = (v, d = 2) => v == null ? "—" : (v < 0 ? "−" : "") + Math.abs(v).toFixed(d) + "%";
+const avg = v => v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+const fx = f => { if (f == null) return "—"; if (f === 1) return "1×"; let d = f >= 100 ? 0 : f >= 10 ? 1 : 2, t = f.toFixed(d);
+  while (Number(t) === 1 && d < 4) t = f.toFixed(++d); return Number(t) === 1 ? "≈1×" : f >= 1000 ? fmt(Number(t)) + "×" : t + "×"; };
+const nodeChange = (before, after) => after === before ? ", unchanged" : after > before ? ", larger" : "";
+const remText = r => { if (r == null) return "—"; const p = 100 * r; if (p === 100) return "100%";
+  if (p >= 99.5 && p < 100.5) { const t = p.toFixed(2); return Number(t) !== 100 ? t + "%" : p < 100 ? ">99.99%" : ">100%"; }
+  return (p >= 10 ? p.toFixed(1) : p >= 1 ? p.toFixed(2) : p.toPrecision(2)) + "%"; };
+const geo = v => v.length ? Math.exp(avg(v.map(Math.log))) : null;
+const med = v => { if (!v.length) return null; const w = v.slice().sort((p, q) => p - q), h = w.length >> 1; return w.length % 2 ? w[h] : (w[h - 1] + w[h]) / 2; };
+const removedText = (r, unit = "") => r == null ? "" : r < 0 ? `grew by ${fmt(-r)}${unit}` : `${fmt(r)}${unit} removed`;
+const plural = (n, one, many = one + "s") => `${n} ${n === 1 ? one : many}`;
+const declarationsChanged = d => !d.top.length && !d.owners_changed && !d.owners_added && !d.owners_removed
+  ? "No declaration's node count changed."
+  : `${fmt(d.owners_changed)} ${d.owners_changed === 1 ? "declaration" : "declarations"} changed, ${fmt(d.owners_added)} added, ${fmt(d.owners_removed)} removed.`;
+const numWord = n => ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] ?? String(n);
+const listText = xs => xs.length <= 1 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs.at(-1);
+function packagesText() {
+  const P = DATA.participation, L = DATA.task_sets["lcbench-v1"], O = DATA.task_sets["oai-v1"];
+  const release = (name, url) => `release <span class="setname"><a href="${esc(url)}">${esc(name)}</a></span>`;
+  const forms = T => "each with its original proofs" + (T.without_target_proofs ? " and also without its target proofs" : "");
+  const set = T => `<span class="setname">${esc(T.set)}</span>`;
+  return `Task packages to download: the toy task (${release(P.toy_release, P.toy_release_url)}); ` +
+    `the task set ${set(L)}, the study's ${numWord(L.tasks)} tasks, ${forms(L)} (${release(P.packages_release, P.packages_release_url)}); ` +
+    `the task set ${set(O)}, ${fmt(O.tasks)} tasks made from published math challenges, ${forms(O)} ` +
+    `(${release(P.oai_release, P.oai_release_url)}, <a href="difficulty.html#oai-tasks">about these tasks</a>).`;
+}
+const negZero = (v, d) => v != null && v < 0 && Math.abs(v) < 0.5 * 10 ** -d;
+const tip = $("#tip");
+let tipOwner = null;
+function placeTip(x, y, html) { tip.innerHTML = html; tip.hidden = false; tip.style.left = Math.max(4, Math.min(x + 12, innerWidth - 330)) + "px";
+  tip.style.top = Math.min(y + 14, innerHeight - tip.offsetHeight - 6) + "px"; }
+function hideTip() { tip.hidden = true; tipOwner = null; }
+function tipAtElement(el) { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, el.dataset.tip); tipOwner = el; }
+function bindTips(root) {
+  root.querySelectorAll("[data-tip]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.addEventListener("mousemove", e => { placeTip(e.clientX, e.clientY, el.dataset.tip); tipOwner = el; });
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => tipAtElement(el));
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.stopPropagation(); tipOwner === el && !tip.hidden ? hideTip() : tipAtElement(el); });
+  });
+}
+document.addEventListener("click", hideTip);
+addEventListener("scroll", () => { if (tipOwner && document.activeElement !== tipOwner) hideTip(); }, {passive: true});
+
+DATA.models = DATA.models || []; DATA.tasks = DATA.tasks || []; DATA.order = DATA.order || [];
+DATA.models.sort((p, q) => DATA.order.indexOf(p.id) - DATA.order.indexOf(q.id));
+const TASK = Object.fromEntries(DATA.tasks.map(t => [t.id, t]));
+const MODEL = Object.fromEntries(DATA.models.map(m => [m.id, m]));
+const TASK_IDX = Object.fromEntries(DATA.tasks.map((t, i) => [t.id, i]));
+const MODEL_IDX = Object.fromEntries(DATA.models.map((m, i) => [m.id, i]));
+const REP_IDX = Object.fromEntries((DATA.repeats || []).map((r, i) => [r, i]));
+const agentColor = id => `var(--ag${DATA.order.indexOf(id) + 1})`;
+const STATUS_ORDER = Object.keys(DATA.status || {});
+const RECHECK_ICON = `<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.8 1.8v3.6h-3.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON = {VALID: "✓", VALID_REPAIRED_VERIFIER: RECHECK_ICON, RAW_FAILURE: "×", UNCONFIRMED: "?",
+  VERIFIED: "✓", VERIFIED_PENDING_FIX: "✓*", REJECTED: "×", NO_SOURCE: "–"};
+const SHORT_STATUS = {};
+const statusLabel = s => ((DATA.status || {})[s] || (DATA.study_status || {})[s])[0];
+const stPill = (s, short = false) => short && SHORT_STATUS[s]
+  ? `<span class="st st-${s}" title="${esc(statusLabel(s))}"><i aria-hidden="true">${ICON[s]}</i>${esc(SHORT_STATUS[s])}</span>`
+  : `<span class="st st-${s}"><i aria-hidden="true">${ICON[s]}</i>${esc(statusLabel(s))}</span>`;
+const REP_LABELS = {};
+const repLabel = r => REP_LABELS[r] || r.replace(/^r(\d+)$/, "run $1");
+const SCORED_FILE = {study: "the run's final",
+  time_limit: "the files as they stood at the time limit (the study counted the run failed or unconfirmed)",
+  no_files: "no scored file: the run left no files", none: "none: the run left several candidate files and no single final"};
+const scoredText = s => SCORED_FILE[s.scored];
+const scoredLine = s => s.scored === "no_files" ? SCORED_FILE.no_files[0].toUpperCase() + SCORED_FILE.no_files.slice(1)
+  : s.scored && s.scored !== "study" ? `Scored file: ${scoredText(s)}` : "";
+const scorerWords = v => String(v).replace(/^(\d+\.\d+\.\d+)-rc\.(\d+)$/, "$1, release candidate $2");
+const shortN = (v, p = 2) => v >= 1e9 ? `${+(v / 1e9).toPrecision(p)}B` : v >= 1e6 ? `${+(v / 1e6).toPrecision(p)}M` : v >= 1e3 ? `${+(v / 1e3).toPrecision(p)}K` : String(v);
+const harnessName = h => h.replace(/\s+\d[\w.-]*/g, "").trim();
+const VALID_STATUS = new Set(["VERIFIED", "VERIFIED_PENDING_FIX", "VALID", "VALID_REPAIRED_VERIFIER"]);
+const isValid = s => VALID_STATUS.has(s.status);
+const isUnchanged = s => isValid(s) && s.a1 != null && s.a1 === s.a0;
+const S = DATA.slots || [];
+const count = f => S.filter(f).length;
+const MP = DATA.metaprog || {available: false, flags: {}};
+function mpOf(s) {
+  if (!MP.available) return {k: "pending", t: "check pending"};
+  const f = MP.flags[s.id];
+  if (!f) return {k: "none", t: "not checked"};
+  return f.m ? {k: "yes", t: f.c ? "yes (copy)" : "yes", e: f.e} : {k: "no", t: f.c ? "no (copy)" : "no", e: f.e};
+}
+const flagCount = k => count(s => s.flags.includes(k));
+const flagLabel = k => `“${DATA.flags[k][0]}”`;
+const MARK_ORDER = Object.keys(DATA.marks || {});
+const markSym = k => DATA.marks[k][0];
+const MARK_SHORT = {statement_differs: "run whose target statement is only definitionally equal to the original",
+  released_verifier_rejected: "run rejected by MathCompressionBench's verifier"};
+const marksOf = runs => MARK_ORDER.filter(k => runs.some(s => s.marks.includes(k)));
+const markHtml = keys => keys.map(k => `<span class="mark" title="${esc(DATA.marks[k][1])}">${esc(markSym(k))}</span>`).join("");
+const TASK_NOTE = DATA.task_notes || {};
+const taskMark = id => TASK_NOTE[id] ? `<span class="mark" title="${esc(TASK_NOTE[id].short)}">${esc(TASK_NOTE[id].mark)}</span>` : "";
+const runLabel = s => `${TASK[s.task].name}, ${MODEL[s.model].name}, ${s.budget} min, ${repLabel(s.repeat)}`;
+const linkCards = html => html.replace(/the (\w+) case study/g, (m, n) => CARDS.some(c => c.key === n.toLowerCase()) ? `the <a href="#card-${n.toLowerCase()}">${n} case study</a>` : m);
+
+const plainLabel = h => h.replace(/<[^>]*>/g, "");
+function labelCells(table) {
+  table.classList.add("stack");
+  const heads = [...table.querySelectorAll("thead th")].map(th => th.textContent.trim());
+  table.querySelectorAll("tbody tr").forEach(tr => [...tr.children].forEach((td, i) => { if (heads[i]) td.dataset.label = heads[i]; }));
+}
+const sortLabel = l => l.replace(/(\S+)$/, `<span class="nw">$1<span class="arr" aria-hidden="true"></span></span>`);
+function cellHtml(c, r) {
+  let h = c.cell(r).replace(/^<td(?: class="([^"]*)")?/, (m, cls) => `<td data-label="${esc(plainLabel(c.label))}"${cls || c.k ? ` class="${[cls, c.k && "k"].filter(Boolean).join(" ")}"` : ""}`);
+  return h.replace(/^(<td[^>]*>)([\s\S]+)(<\/td>)$/, `$1<span class="cv">$2</span>$3`);
+}
+function sortableTable(el, cols, rows, st, groupBy, opts = {}) {
+  const sorted = rows.slice();
+  if (st.key) {
+    const c = cols.find(c => c.key === st.key), dir = st.dir;
+    sorted.sort((p, q) => { const a = c.sort(p), b = c.sort(q);
+      if (a == null && b == null) return 0; if (a == null) return 1; if (b == null) return -1;
+      return (a < b ? -1 : a > b ? 1 : 0) * dir; });
+  }
+  let html = "<thead><tr>" + cols.map(c => `<th class="${c.num ? "num " : ""}${c.sort ? "sort" : ""}" ${c.sort ? `tabindex="0" data-k="${c.key}" aria-sort="${st.key === c.key ? (st.dir > 0 ? "ascending" : "descending") : "none"}"` : ""} ${c.title ? `title="${esc(c.title)}"` : ""}>${c.sort ? sortLabel(c.label) : c.label}</th>`).join("") + "</tr></thead><tbody>";
+  let last = null;
+  for (const r of sorted) {
+    if (groupBy && !st.key) { const g = groupBy(r); if (g !== last) { html += `<tr class="group"><td colspan="${cols.length}">${esc(g)}</td></tr>`; last = g; } }
+    html += "<tr>" + cols.map(c => cellHtml(c, r)).join("") + (opts.extra ? opts.extra(r) : "") +
+      (opts.title ? `<td class="ptitle">${opts.title(r)}</td>` : "") + "</tr>";
+  }
+  el.innerHTML = html + "</tbody>";
+  el.querySelectorAll("th.sort").forEach(th => {
+    const go = () => { const k = th.dataset.k; if (st.key === k) { st.dir === 1 ? st.dir = -1 : (st.key = null); } else { st.key = k; st.dir = cols.find(c => c.key === k).num ? -1 : 1; } st.render(); };
+    th.onclick = go; th.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } };
+  });
+  bindTips(el);
+}
+function fillSelect(sel, opts) { sel.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join(""); }
+
+function logTicks([l0, l1], px) {
+  const all = [];
+  for (let e = Math.floor(l0); e <= Math.ceil(l1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (Math.log10(v) >= l0 - 1e-9 && Math.log10(v) <= l1 + 1e-9) all.push(+v.toPrecision(3)); }
+  const perDecade = px / Math.max(0.3, l1 - l0);
+  return perDecade < 110 ? all.filter(v => Number.isInteger(Math.round(Math.log10(v) * 1e6) / 1e6)) : all;
+}
+const tickText = v => `${v >= 1 ? fmt(v) : Number(v.toPrecision(1))}×`;
+function lineDiff(a, b) {
+  const A = a.split("\n"), B = b.split("\n"), n = A.length, m = B.length;
+  if (n * m > 4e6) return [...A.map(t => ["del", t]), ...B.map(t => ["add", t])];
+  const L = Array.from({length: n + 1}, () => new Uint32Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0;
+  while (i < n && j < m) { if (A[i] === B[j]) { out.push(["same", A[i]]); i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) out.push(["del", A[i++]]); else out.push(["add", B[j++]]); }
+  while (i < n) out.push(["del", A[i++]]); while (j < m) out.push(["add", B[j++]]);
+  return out;
+}
+const renderDiff = rows => rows.map(([k, t]) => `<div class="${k === "same" ? "" : k}">${esc(t) || " "}</div>`).join("");
+function partBar(parts, mx, names) {
+  return `<div class="bar" role="img" aria-label="${esc(Object.keys(names).map(k => `${names[k]} ${fmt(parts[k])}`).join(", "))}">` +
+    Object.keys(names).filter(k => parts[k] > 0).map(k => `<span class="seg-${k}" style="width:${(100 * parts[k] / mx).toFixed(2)}%" data-tip="${esc(names[k] + ": " + fmt(parts[k]) + " nodes")}"></span>`).join("") + "</div>";
+}
+function labelRows(items) {
+  const ends = [];
+  return items.map(it => {
+    let r = ends.findIndex(e => it.x >= e + 4);
+    if (r < 0) { r = ends.length; ends.push(0); }
+    ends[r] = it.x + it.w;
+    return r;
+  });
+}
+function lineChart(el, pts, opts) {
+  const cw = el.clientWidth || 760, W = Math.max(300, Math.min(760, Math.round(cw))), H = W < 560 ? 300 : 250, P = {l: 64, r: 14, t: 16, b: 34};
+  const valid = pts.filter(p => p.valid && p.y != null);
+  if (!valid.length) { el.innerHTML = "<p>No attempts yet.</p>"; return; }
+  const ys = valid.map(p => p.y), ymax = Math.max(...ys, opts.baseline || 0), ymin = Math.min(...ys);
+  const log = ymax / Math.max(ymin, 1) > 6;
+  const fy = log ? (v => Math.log10(v)) : (v => v);
+  const y0 = log ? Math.floor(fy(ymin) * 4) / 4 : 0, y1 = fy(ymax) * (log ? 1.02 : 1.05);
+  const xmin = Math.min(...pts.map(p => p.x)), xmax = Math.max(...pts.map(p => p.x), xmin + 1);
+  let ticks = [];
+  if (log) { for (let e = Math.floor(y0); e <= Math.ceil(y1); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (fy(v) >= y0 && fy(v) <= y1) ticks.push(v); } }
+  else { const step = 10 ** Math.floor(Math.log10(ymax / 4)); const s = [1, 2, 5].map(k => k * step).find(k => ymax / k <= 6) || step * 10; for (let v = 0; v <= y1; v += s) ticks.push(v); }
+  P.l = 34 + 6.6 * Math.max(...ticks.map(t => fmt(t).length));
+  const hasBounds = (opts.bounds || []).length > 0, hasRej = pts.some(p => p.y == null || !p.valid);
+  const bx = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin);
+  const bl = (opts.bounds || []).map(b => { const text = W < 560 && b.short != null ? b.short : b.label; return {x: bx(b.x) + 3, w: 6.2 * text.length, at: b.x, text}; });
+  const named = bl.filter(b => b.text), namedRows = labelRows(named), rows = bl.map(b => b.text ? namedRows[named.indexOf(b)] : 0);
+  const nRows = named.length ? Math.max(...namedRows) + 1 : 0;
+  P.t = 16 + (hasBounds ? 14 + 12 * nRows : 0) + (hasRej ? 22 : 0);
+  if (!(opts.xticks || []).length) P.b = 22;
+  const labY = 18, rejY = P.t - 12;
+  const X = x => P.l + (W - P.l - P.r) * (x - xmin) / (xmax - xmin), Y = v => H - P.b - (H - P.t - P.b) * (fy(v) - y0) / (y1 - y0);
+  let low = opts.baseline ?? Infinity, stepPath = opts.baseline ? `M${X(xmin)},${Y(opts.baseline)}` : "";
+  for (const p of pts) if (p.valid && p.y < low) { stepPath += (stepPath ? `L${X(p.x)},${Y(low)}` : `M${X(p.x)},${Y(p.y)}`) + `L${X(p.x)},${Y(p.y)}`; low = p.y; }
+  if (stepPath) stepPath += `L${X(xmax)},${Y(low)}`;
+  const svg = [`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opts.aria)}">`];
+  for (const t of ticks) svg.push(`<line class="grid" x1="${P.l}" x2="${W - P.r}" y1="${Y(t)}" y2="${Y(t)}"/><text x="${P.l - 6}" y="${Y(t) + 4}" text-anchor="end">${fmt(t)}</text>`);
+  svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${H - P.b}" y2="${H - P.b}"/>`);
+  for (const x of opts.xticks || []) svg.push(`<line class="axis" x1="${X(x)}" x2="${X(x)}" y1="${H - P.b}" y2="${H - P.b + 4}"/><text x="${X(x)}" y="${H - P.b + 15}" text-anchor="middle">${x}</text>`);
+  const below = labY + 12 * Math.max(0, nRows - 1) + 4;
+  bl.forEach((b, i) => svg.push(`<line class="bound" x1="${X(b.at)}" x2="${X(b.at)}" y1="${b.text ? labY + 12 * rows[i] - 8 : below}" y2="${H - P.b}"/>`));
+  bl.forEach((b, i) => { if (b.text) svg.push(`<text class="blab" x="${b.x}" y="${labY + 12 * rows[i]}">${esc(b.text)}</text>`); });
+  if (hasRej) svg.push(`<line class="axis" x1="${P.l}" x2="${W - P.r}" y1="${P.t - 3}" y2="${P.t - 3}" style="stroke-width:.6"/><text x="${P.l - 6}" y="${rejY + 4}" text-anchor="end">rejected</text>`);
+  svg.push(`<text x="${(W + P.l) / 2}" y="${(opts.xticks || []).length ? H - 4 : H - P.b + 16}" text-anchor="middle">${esc(opts.xlabel)}</text>`);
+  svg.push(`<text x="14" y="${(H - P.b + P.t) / 2}" text-anchor="middle" transform="rotate(-90 14 ${(H - P.b + P.t) / 2})">${esc(opts.ylabel)}${log && W >= 560 ? " (log scale)" : ""}</text>`);
+  if (stepPath) svg.push(`<path d="${stepPath}" fill="none" stroke="var(--accent)" stroke-width="2"/>`);
+  pts.forEach(p => {
+    if (p.y == null || !p.valid) { svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "rejected attempt")}"><text x="${X(p.x)}" y="${rejY + 4}" text-anchor="middle" style="fill:var(--del-ink)">×</text><rect x="${X(p.x) - 6}" y="${rejY - 8}" width="12" height="16" fill="transparent"/></g>`); return; }
+    svg.push(`<g data-tip="${esc(p.label)}" aria-label="${esc(p.aria || "")}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="10" fill="transparent"/></g>`);
+  });
+  if (opts.endLabel) { const p = pts.at(-1); svg.push(`<text class="endlab" x="${X(p.x)}" y="${Math.min(Y(p.y) + 17, H - P.b - 3)}" text-anchor="end">${esc(opts.endLabel)}</text>`); }
+  if (opts.startLabel) { const p = pts[0]; svg.push(`<text class="endlab" x="${X(p.x) + 6}" y="${Y(p.y) - 9}">${esc(opts.startLabel)}</text>`); }
+  svg.push("</svg>");
+  el.innerHTML = svg.join("") + (opts.caption ? `<p class="caption">${opts.caption}${log ? " The vertical scale is logarithmic." : ""}</p>` : "");
+  bindTips(el);
+}
+
+function studyRuns() {
+  const A = DATA.about;
+  return `The study's runs: ${A.tasks} tasks × ${A.agents} agents × (${A.runs60} runs at 60 min + ${A.runs120} at 120 min) = ${A.runs} runs.`;
+}
+const CHECK_WORDS = {confirmed: "confirmed", corrected: "corrected", unverifiable: "could not be verified", refuted: "refuted"};
+function renderCard(c, chart = "", extra = "") {
+  const val = v => v.split("; ").length > 2 ? `<ul class="v">${v.split("; ").map(x => `<li>${codeify(x)}</li>`).join("")}</ul>` : `<div class="v">${codeify(v)}</div>`;
+  const lab = n => n.label.toLowerCase().includes(n.metric.toLowerCase()) ? codeify(n.label) : `${codeify(n.label)} · ${codeify(n.metric)}`;
+  const nums = list => list.map(n => `<div>${val(n.value)}<div class="l">${lab(n)}</div></div>`).join("");
+  const mechs = c.mechanisms.map(m => `<div class="mech"><h4>${codeify(m.name)}</h4><p>${codeify(m.explanation)}</p>
+     <div class="side"><div><h5>Before</h5><pre>${esc(m.before)}</pre></div><div><h5>After</h5><pre>${esc(m.after)}</pre></div></div>
+     <p style="font-size:13px"><b>Effect:</b> ${codeify(m.effect)}</p></div>`).join("");
+  const chk = Object.entries(c.checks).map(([k, v]) => `${v} ${CHECK_WORDS[k] || k}`).join(", ");
+  return `<article class="card" id="card-${esc(c.key)}"><p class="kicker">${esc(c.name)}</p><h3>${codeify(c.headline)}</h3>
+    <p>${codeify(c.summary)}</p>${chart}<p class="small">${codeify(c.task)}</p>
+    <div class="numbers">${nums(c.numbers.slice(0, 4))}</div>${extra}
+    ${c.numbers.length > 4 ? `<details><summary>More numbers (${c.numbers.length - 4})</summary><div class="numbers">${nums(c.numbers.slice(4))}</div></details>` : ""}
+    ${c.nl ? `<details><summary>In words</summary><p class="nltext">${codeify(c.nl)}</p></details>` : ""}
+    <details><summary>Mechanisms, with before and after code (${c.mechanisms.length})</summary>${mechs}</details>
+    ${c.caveats.length ? `<details><summary>Caveats (${c.caveats.length})</summary><ul class="caveats">${c.caveats.map(x => `<li>${codeify(x)}</li>`).join("")}</ul></details>` : ""}
+    ${chk ? `<p class="small">Independent review of this card's claims: ${esc(chk)}.</p>` : ""}</article>`;
+}
+function markOverflow() {
+  document.querySelectorAll(".tablewrap").forEach(w => {
+    const upd = () => { w.classList.toggle("overflows", w.scrollWidth > w.clientWidth + 2); w.classList.toggle("at-end", w.scrollLeft + w.clientWidth >= w.scrollWidth - 2); };
+    if (!w.dataset.ov) { w.addEventListener("scroll", upd, {passive: true}); w.dataset.ov = "1"; }
+    upd();
+  });
+}
+function padForHeader() { document.documentElement.style.scrollPaddingTop = ($("header.top").offsetHeight + 12) + "px"; }
+const onResize = [];
+let lastWidth = innerWidth, resizeTimer = null;
+addEventListener("resize", () => { if (innerWidth === lastWidth) return; lastWidth = innerWidth; clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { onResize.forEach(f => f()); markOverflow(); padForHeader(); }, 150); });
+function openPanel(id, scroll = true) {
+  const d = document.getElementById(id);
+  if (!d) return false;
+  for (let p = d; p; p = p.parentElement && p.parentElement.closest("details")) if (p.tagName === "DETAILS") p.open = true;
+  d.classList.add("flash"); setTimeout(() => d.classList.remove("flash"), 1200);
+  if (scroll) d.scrollIntoView({block: "nearest", behavior: "smooth"});
+  try { history.replaceState(null, "", "#" + id); } catch (e) { /* the address stays as it was */ }
+  return true;
+}
+const openFromHash = () => { const id = decodeURIComponent(location.hash.slice(1)); if (id) openPanel(id); };
+addEventListener("hashchange", openFromHash);
+function bindPanels(root, summary) {
+  root.querySelectorAll("[data-panel]").forEach(el => {
+    if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    const html = () => summary(el.dataset.panel) + "<br><i>Tap or click for details.</i>";
+    el.addEventListener("mousemove", e => placeTip(e.clientX, e.clientY, html()));
+    el.addEventListener("mouseleave", hideTip);
+    el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.bottom, html()); });
+    el.addEventListener("blur", hideTip);
+    el.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); hideTip(); openPanel(el.dataset.panel); });
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openPanel(el.dataset.panel); } });
+  });
+}
+function initChrome() {
+  document.querySelectorAll("#nav a").forEach(a => { if (a.dataset.p === document.body.dataset.page) a.setAttribute("aria-current", "page"); });
+  $("#snap").textContent = `Preview · ${DATA.measured ? `measured ${DATA.measured}` : `results snapshot ${DATA.snapshot}`}`;
+  $("#foot-snap").textContent = DATA.snapshot;
+  if (DATA.measured) $("#foot-lead").textContent = `task sizes measured ${DATA.measured}, after the results snapshot of ${DATA.snapshot}`;
+  $("#foot-dates").innerHTML = DATA.dates;
+  document.querySelectorAll("[data-v]").forEach(el => { el.textContent = DATA.values[el.dataset.v]; });
+  markOverflow(); padForHeader();
+  setTimeout(openFromHash, 0);
+}
+</script>
+<style>
+.toc { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13.5px; margin: 6px 0 0; padding: 0; list-style: none; }
+table.def td:first-child { font-weight: 600; white-space: nowrap; }
+table.def td { white-space: normal; }
+table.def.charged td:first-child { white-space: normal; min-width: 120px; }
+.formula.fsum .fl { display: block; }
+.formula.fsum .fl + .fl { padding-left: 1.2em; }
+.formula .nw { white-space: nowrap; }
+@media (max-width: 620px) { .formula.fsum { font-size: 16px; } }
+a.gl { color: inherit; text-decoration: underline dotted; text-underline-offset: 2px; }
+pre.lean { font-size: 13px; overflow-x: auto; background: var(--surface-2); padding: 8px 10px; border-radius: 0; }
+ul.breakdown { font-size: 13.5px; padding-left: 20px; }
+@media (max-width: 640px) { table.glossary td:first-child { white-space: normal; width: 30%; } }
+@media (max-width: 640px) { pre.lean { white-space: pre-wrap; overflow-wrap: anywhere; } }
+/* a whole proof, node by node: one row per node with its count; a case opens to every node */
+.bill { margin: 10px 0 0; max-width: 760px; font-family: var(--mono); font-size: 12px; line-height: 1.5; border-block: 1px solid var(--rule); padding: 8px 0; }
+.zq-row { display: flex; gap: 10px; align-items: baseline; padding: 1px 8px; margin: 1px 0; }
+.zq-row .zq-t { flex: 1 1 auto; white-space: pre; overflow-x: auto; min-width: 0; }
+.zq-row .zq-k { font-family: var(--body); font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.bill .zq-n { font-variant-numeric: tabular-nums; color: var(--ink); text-align: right; min-width: 4.5em; font-family: var(--mono); }
+.bill details > summary { list-style: none; cursor: pointer; } .bill details > summary::-webkit-details-marker { display: none; }
+.bill .tw::before { content: "▸"; color: var(--accent); } .bill details[open] > summary .tw::before { content: "▾"; }
+.bill .tw { display: inline-block; width: 1.4em; } .bill .zq-sub { color: var(--ink-2); }
+.bill .zq-sum { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--rule); margin-top: 6px; padding: 4px 8px 0 12px; font-family: var(--body); font-size: 13px; }
+.bill .zq-sum b { font-family: var(--mono); min-width: 4.5em; text-align: right; }
+.bill-note { margin: 6px 0 0; font-size: 13px; color: var(--ink-2); max-width: 80ch; }
+/* phones: the notes wrap under the label, so the counts stay inside the box */
+@media (max-width: 480px) {
+  .zq-row .zq-k { white-space: normal; } .zq-row { flex-wrap: wrap; column-gap: 6px; }
+  .bill .zq-row .zq-k { order: 3; flex-basis: 100%; padding-left: 2.2em; font-size: 11px; } .bill { font-size: 11px; }
+}
+/* the kinds of change: a group's row, then its categories indented under it, each with its diagram colour */
+#change-kinds-table tr.kind-group td { padding-top: 12px; }
+#change-kinds-table td:first-child { white-space: normal; min-width: 8.5em; }
+#change-kinds-table tr:not(.kind-group) td:first-child { font-weight: 400; padding-left: 22px; position: relative; }
+#change-kinds-table .sw { position: absolute; left: 4px; top: 12px; width: 10px; height: 10px; }
+</style>
+<main class="wrap" id="top">
+  <h1>Rules and scoring</h1>
+  <p class="summary-line">What cannot change, what is scored, what is valid.</p>
+  <ul class="toc"><li><a href="#in-short">In short</a></li><li><a href="#tasks">Tasks</a></li><li><a href="#score">Score</a></li>
+    <li><a href="#valid">Validity</a></li><li><a href="#tools">Your tools</a></li><li><a href="#ended">How every run was checked</a></li><li><a href="#which-file">Which file is scored</a></li>
+    <li><a href="#change-kinds">Kinds of change</a></li><li><a href="#glossary">Glossary</a></li></ul>
+
+  <h2 id="in-short">In short</h2>
+  <div class="tablewrap"><table class="def in-short">
+    <tbody>
+      <tr><td>A task</td><td><a class="gl" href="#g-target">Target</a> theorems in a Lean library; you compress their proofs.</td></tr>
+      <tr><td>Cannot change</td><td>The <a class="gl" href="#g-background">background</a>, and the <a class="gl" href="#g-target">target</a> (its statements and the <a class="gl" href="#g-target-definition">definitions they use</a>; proofs inside those may change). Editable: everything else.</td></tr>
+      <tr><td>Counted once each</td><td>The <a class="gl" href="#g-target">target</a> proofs and every non-<a class="gl" href="#g-background">background</a> declaration they reach, statement and proof (an inductive type with its constructors and <a class="gl" href="#g-recursor">recursor</a>).</td></tr>
+      <tr><td>Free</td><td><a class="gl" href="#g-target">Target</a> statements, library references (one node each, plus <a class="gl" href="#g-universe-level">universe levels</a>), running tactics.</td></tr>
+      <tr><td>Valid</td><td>The <a class="gl" href="#g-kernel">kernel</a> re-checks everything. Statements and definitions stay unchanged. Only allowed imports and axioms may be used.</td></tr>
+      <tr><td>Score</td><td>N<sub>final</sub>; fewer wins.</td></tr>
+    </tbody></table></div>
+
+  <h2 id="tasks">Tasks</h2>
+  <div class="tablewrap"><table class="pin" id="tasks-table"></table></div>
+  <p class="swipehint">Scroll sideways for every column →</p>
+  <p class="small" id="limit-line"></p>
+  <div id="task-notes"></div>
+
+  <h2 id="exact">Exact definition</h2>
+  <h3 id="score">Score: proof-term node count</h3>
+  <p>The score is the number of nodes in the <a class="gl" href="#g-kernel">kernel</a> proof terms of everything charged. Fewer wins.</p>
+  <details class="more" id="formula"><summary>The formula, sum by sum</summary>
+  <div class="formula fsum"><span class="fl"><span class="nw">N = Σ<sub>targets t</sub> N(proof t)</span></span>
+    <span class="fl">+ <span class="nw">Σ<sub>lemmas, definitions d</sub></span> [ <span class="nw">N(statement d)</span> + <span class="nw">N(body d)</span> ]</span>
+    <span class="fl">+ <span class="nw">Σ<sub>inductive types I</sub></span> [ <span class="nw">N(type I)</span> + <span class="nw">Σ<sub>constructors c</sub> N(type c)</span> + <span class="nw">N(I.rec type)</span> + <span class="nw">Σ<sub>rules r</sub> N(r)</span> ]</span></div>
+  <p class="small" id="formula-example"></p>
+  </details>
+
+  <h4 id="charged">What is charged</h4>
+  <div class="tablewrap"><table class="def charged">
+    <thead><tr><th>Kind</th><th>What counts</th><th>For example</th></tr></thead>
+    <tbody>
+      <tr><td><a class="gl" href="#g-target">Target</a> proofs</td><td>Only the proof of each <a class="gl" href="#g-target">target</a> theorem; its statement is free.</td><td><code>theorem target … := by rw […]</code>: the term <code>rw</code> leaves</td></tr>
+      <tr><td><a class="gl" href="#g-helper">Helper</a> lemmas</td><td>Every lemma in the task's files that a charged proof uses, directly or indirectly: statement and proof, once however often it is used.</td><td><code>theorem double (n : Nat) : n + n = 2 * n := …</code></td></tr>
+      <tr><td>Definitions used</td><td>For definitions, instances and structures in the task's files that a statement or proof uses, we count the type and value once. Those a statement uses are <a class="gl" href="#g-target-definition">the target's definitions</a>. Proofs inside them may change.</td><td>the toy task's <code>def add : MyNat → MyNat → MyNat</code> and <code>instance : Add MyNat</code>, used by its statements through <code>+</code></td></tr>
+      <tr><td>Declarations Lean generates</td><td>Equation lemmas (<code>f.eq_1</code>), auxiliary proofs (<code>_proof_1</code>), <code>match</code> and <code>casesOn</code> definitions are charged like any declaration when something charged uses them.</td><td><code>rw [f]</code> uses <code>f.eq_1</code></td></tr>
+      <tr><td>Inductive types</td><td>Using the type, any constructor or a projection charges the type, every constructor and its <a class="gl" href="#g-recursor">recursor</a>. Each pays its type, and the recursor also pays its rules, one per constructor.</td><td><code>inductive MyNat | zero | succ (n : MyNat)</code>: see below</td></tr>
+    </tbody></table></div>
+  <details class="more" id="inductive"><summary>An inductive type, expanded</summary>
+    <p class="small">For an inductive type Lean generates its <a class="gl" href="#g-recursor">recursor</a> <code>MyNat.rec</code>, the principle of proof by induction and definition by recursion. Its rules say what it computes on each constructor: <code>MyNat.rec z s zero = z</code> and <code>MyNat.rec z s (succ n) = s n (MyNat.rec z s n)</code>. The table gives the counter's numbers for this file.</p>
+    <div id="inductive-example"></div>
+    <p class="small">Other generated declarations, such as <code>MyNat.casesOn</code>, count only when something charged uses them.</p>
+  </details>
+
+  <details class="more" id="nodes"><summary>How the nodes of a term are counted</summary>
+  <p>Each <a class="gl" href="#g-kernel">kernel</a> node costs as below, plus its children.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th><a class="gl" href="#g-kernel">Kernel</a> constructor</th><th>Counts as</th></tr></thead>
+    <tbody>
+      <tr><td><code>f a</code> (application)</td><td>1 + N(f) + N(a)</td></tr>
+      <tr><td><code>fun x : T =&gt; b</code>, <code>∀ x : T, b</code></td><td>1 + N(T) + N(b)</td></tr>
+      <tr><td><code>let x : T := v; b</code> (also <code>have</code>)</td><td>1 + N(T) + N(v) + N(b)</td></tr>
+      <tr><td>constant <code>c.{u}</code></td><td>1 + nodes of its <a class="gl" href="#g-universe-level">universe levels</a>; the name's length is free</td></tr>
+      <tr><td><code>Sort u</code></td><td>1 + nodes of u</td></tr>
+      <tr><td>projection <code>e.i</code></td><td>1 + N(e)</td></tr>
+      <tr><td>bound variable; literal (any size)</td><td>1</td></tr>
+      <tr><td>metadata wrapper; binder names and binder info</td><td>0</td></tr>
+      <tr><td>a subterm that occurs twice</td><td>counted twice</td></tr>
+      <tr><td>example: <code>@congrArg.{1,1} MyNat MyNat n m succ ih</code></td><td>17</td></tr>
+    </tbody></table></div>
+  <details class="more" id="breakdown"><summary>The example, node by node</summary>
+    <ul class="breakdown">
+      <li>applications, one per argument: 6</li>
+      <li><code>congrArg.{1,1}</code>: 1, plus 2 for each <a class="gl" href="#g-universe-level">universe level</a> <code>1</code> (successor of zero): 5</li>
+      <li><code>MyNat</code>, twice: 2</li>
+      <li><code>n</code>, <code>m</code> (bound variables): 2</li>
+      <li><code>succ</code>: 1</li>
+      <li><code>ih</code> (bound variable): 1</li>
+      <li>total: 17</li>
+    </ul>
+    <p class="small">The counter gives the same 17 for this term, the proof of <code>succ_congr</code> in the inductive example above without its three binders.</p>
+  </details>
+  <details class="more" id="bill"><summary>A whole proof, node by node: <code>zero + n = n</code></summary>
+    <p class="small">A three-line induction on the toy task's <code>MyNat</code>:</p>
+    <pre class="lean" id="zq-src"></pre>
+    <p class="small">Every node costs one: a name, a variable, a <code>fun</code>, and each argument a function is applied to. A name also pays for its <a class="gl" href="#g-universe-level">universe level</a> nodes (<code>.{0}</code>: one, <code>.{1}</code>: two). Open a part to see every node.</p>
+    <div class="bill" id="zq-bill"></div>
+    <p class="bill-note" id="zq-total"></p>
+  </details>
+  </details>
+
+  <h4 id="free">What is free</h4>
+  <div class="tablewrap"><table class="def">
+    <tbody>
+      <tr><td>Library</td><td>A reference to a <a class="gl" href="#g-background">background</a> constant costs one node per use, plus its <a class="gl" href="#g-universe-level">universe levels</a>. Its own proof is never counted.</td></tr>
+      <tr><td><a class="gl" href="#g-target">Target</a> statements</td><td>The statements of the <a class="gl" href="#g-target">targets</a>.</td></tr>
+      <tr><td>Tactics, metaprograms</td><td>Running them costs nothing. Only the terms they leave are counted, and those are often large.</td></tr>
+      <tr><td><a class="gl" href="#g-kernel">Kernel</a> computation</td><td>What the <a class="gl" href="#g-kernel">kernel</a> evaluates while checking (for example <code>decide</code>) is not counted. Only the per-declaration <a class="gl" href="#g-heartbeat">heartbeat</a> limit applies.</td></tr>
+      <tr><td>Names</td><td>Names of constants, binder names and binder info.</td></tr>
+      <tr><td>Literal size</td><td>A number or string literal is one node, whatever its size.</td></tr>
+    </tbody></table></div>
+
+  <h4 id="worked">A complete example</h4>
+  <p>The counter measures one <a class="gl" href="#g-target">target</a> using a <a class="gl" href="#g-helper">helper</a> lemma twice and a library lemma once.</p>
+  <div id="worked-example"></div>
+
+  <h4 id="compare">Comparing runs</h4>
+  <div class="tablewrap"><table class="def">
+    <tbody>
+      <tr><td>Combining runs</td><td>On each task an agent's result is its best run: the smallest verified final node count among its runs. Agents are ranked on each task by it, fewest nodes first; an agent with no verified run on a task ranks last there, and tied agents share the average of the places they take: two agents tied for first both rank 1.5, and agents without a verified run on a task share the last places the same way. The overall ranking is the average rank over the tasks, each task weighted equally; lower is better. Tables count runs without a verified score under “No score”.</td></tr>
+    </tbody></table></div>
+  <p class="small">A real run: <span data-v="run_example"></span>.</p>
+
+  <h3 id="valid">Validity</h3>
+  <p>Any failed check means rejection without a score.</p>
+  <div class="tablewrap"><table class="def">
+    <tbody>
+      <tr><td><a class="gl" href="#g-kernel">Kernel</a> replay</td><td>Lean's <a class="gl" href="#g-kernel">kernel</a> re-checks every declaration</td></tr>
+      <tr><td>Statements</td><td>identical to the original<span id="statement-exception"></span></td></tr>
+      <tr><td><a class="gl" href="#g-target-definition">The target's definitions</a></td><td>Each definition a statement uses is part of the <a class="gl" href="#g-target">target</a>: its type and value (and those of everything it depends on in the task, proofs inside excluded) must hash to the recorded value. <code>./check</code> and the verifier both reject a change; the verifier's message “frozen definition changed” means one of <a class="gl" href="#g-target-definition">the target's definitions</a> changed. No proof is ever compared.</td></tr>
+      <tr><td>Imports</td><td>editable files and the task's pinned <a class="gl" href="#g-background">background</a> only</td></tr>
+      <tr><td>Axioms</td><td><code>propext</code>, <code>Quot.sound</code>, <code>Classical.choice</code> only (no <code>sorry</code>, no <code>native_decide</code>)</td></tr>
+      <tr><td>Limits</td><td><a class="gl" href="#g-kernel">kernel</a> <a class="gl" href="#g-heartbeat">heartbeats</a> per declaration decide the verdict. Memory and wall clock only stop a check, without a verdict</td></tr>
+      <tr><td>Allowed</td><td>any Lean code, metaprograms included; any proof may change, even one inside <a class="gl" href="#g-target-definition">the target's definitions</a></td></tr>
+    </tbody></table></div>
+
+  <h2 id="tools">Your tools: <code>./check</code> and <code>./submit</code></h2>
+  <div class="tablewrap"><table class="def tools">
+    <tbody>
+      <tr><td><code>./check</code></td><td>Builds your files with the task's pinned Lean toolchain, replays every editable file in Lean's <a class="gl" href="#g-kernel">kernel</a> within the <a class="gl" href="#g-kernel">kernel</a> <a class="gl" href="#g-heartbeat">heartbeat</a> limit per declaration, checks the rules above and counts the nodes. The official verification runs the same code. Nothing is sent anywhere.</td></tr>
+      <tr><td>It prints</td><td>The task and its sha256, the scorer version, then the verdict, valid or invalid, with your node count and the original's, followed by a line that compares the two. <code>--verbose</code> also lists what each declaration pays; <code>--json</code> prints the result as JSON.</td></tr>
+      <tr><td>It fails when</td><td>A rule is broken: the verdict is invalid, with one line per problem, such as a changed <a class="gl" href="#g-target">target</a> statement or <a class="gl" href="#g-target-definition">target definition</a>, an import or axiom that is not allowed, a declaration over the <a class="gl" href="#g-kernel">kernel</a> <a class="gl" href="#g-heartbeat">heartbeat</a> limit or a failed build, then the end of Lean's log (exit status 1). A safety limit (wall clock, memory, processes, disk) stops a check with no verdict (exit status 3). Time and memory never decide validity.</td></tr>
+      <tr><td><code>./submit</code></td><td>Checks again, then writes your bundle, <code>submissions/submission-&lt;first 16 hex digits of its ID&gt;.tar.gz</code>: your editable sources, the <a class="gl" href="#g-kernel">kernel</a> terms they compile to, the node count and hashes, and the run's budget and time elapsed. <code>--log DIR</code> adds your log, <code>--tokens-json FILE</code> your token usage, <code>--track agent|record</code> the kind of run (an agent alone, or any means), which decides the leaderboard tracks it can count on: <code>open</code>, and for an agent run within 60 or 120 minutes <code>agent-60</code> or <code>agent-120</code>. Nothing is sent anywhere.</td></tr>
+      <tr><td>It prints</td><td>The check's result, the bundle's path, its submission ID (the bundle's sha256) and how to submit it: a pull request that adds the bundle to the submissions repository.</td></tr>
+      <tr><td>It fails when</td><td>The check is invalid (“refusing to bundle an invalid submission”, exit status 1), a safety limit stopped the check (no bundle, exit status 3), or <code>--log</code> is not a directory or <code>--tokens-json</code> not a JSON object (exit status 1).</td></tr>
+    </tbody></table></div>
+
+  <h2 id="ended">How every run was checked</h2>
+  <p>MathCompressionBench's verifier re-checked every run's <a href="#which-file">scored file</a> in its sandbox.</p>
+  <div class="tablewrap"><table id="status-table"></table></div>
+  <p class="small" id="first-check"></p>
+  <div class="tablewrap" style="max-width:640px"><table id="study-check"></table></div>
+  <p class="small" id="first-check-diff"></p>
+
+  <h2 id="which-file">Which file is scored</h2>
+  <p id="which-file-text"></p>
+
+  <details class="more" id="receipts-box"><summary>Verified test submissions (<a class="gl" href="#g-receipt">receipts</a>)</summary><div id="receipts"></div></details>
+
+  <h2 id="change-kinds">Kinds of change</h2>
+  <div class="tablewrap"><table class="def" id="change-kinds-table"></table></div>
+
+  <h2 id="glossary">Glossary</h2>
+  <div class="tablewrap"><table class="def glossary">
+    <tbody>
+      <tr id="g-target"><td>Target</td><td>A theorem the task names, with the definitions its statement uses (<a class="gl" href="#g-target-definition">target definitions</a>). You compress its proof; its statement, and the types and values of those definitions, must stay exactly as they are.</td></tr>
+      <tr id="g-helper"><td>Helper</td><td>A declaration in the task's own files, other than a target, that a target reaches: your lemmas, the task's definitions and what Lean generates for them.</td></tr>
+      <tr id="g-background"><td>Background</td><td>The libraries the task imports, such as Mathlib or Lean's core library. They are free to use and never edited.</td></tr>
+      <tr id="g-target-definition"><td>Target definition</td><td><span id="g-fixed-definition"></span>A definition, instance or structure that a target's statement uses, and part of the target. Its type and value must stay the same. Proofs inside it may change (<a href="#valid">validity</a>).</td></tr>
+      <tr id="g-kernel"><td>Kernel</td><td>Lean's small trusted checker. It re-checks every declaration of a submission, and the terms it checks are what is counted.</td></tr>
+      <tr id="g-heartbeat"><td>Heartbeat</td><td>Lean's unit of checking work: a count of small memory allocations, the same on every machine. Each declaration must pass within the task's kernel heartbeat limit.</td></tr>
+      <tr id="g-universe-level"><td>Universe level</td><td>The level of a <code>Sort</code> (<code>Prop</code> is <code>Sort 0</code>, <code>Type</code> is <code>Sort 1</code>), also given to constants such as <code>congrArg.{1,1}</code>. Zero and a level variable are one node each. Each successor adds one, so <code>1</code> is two nodes.</td></tr>
+      <tr id="g-recursor"><td>Recursor</td><td>The eliminator Lean generates for an inductive type, such as <code>MyNat.rec</code>, for induction and recursion over that type. Its rules, one per constructor, say what it computes on that constructor.</td></tr>
+      <tr id="g-sharing-pass"><td>Automatic sharing pass</td><td>A fixed program of MathCompressionBench that writes each repeated subterm of the original proofs once (with <code>let</code>) and changes nothing else. It is a reference point, not an agent.</td></tr>
+      <tr id="g-receipt"><td>Receipt</td><td>The signed record MathCompressionBench's verifier writes when it checks a submission: its verdict, node count and hashes. A receipt file's sha256 identifies it. Its root hash is one sha256 chained over the task, the submission, its sources, the counted terms, the scores, the verdict and the verifier. Changing any of them changes the root hash.</td></tr>
+      <tr id="g-scorer"><td>Scorer version</td><td>The version of MathCompressionBench's checking and counting code: a release number, or a release candidate before the release. Every check names the version it used.</td></tr>
+      <tr id="g-first-check"><td>Study's first check</td><td>The check the study ran on each run's final during its experiments, with the checker it used then, not MathCompressionBench's verifier. A final it rejected could still count as valid when a second check of the same, unchanged file accepted it.</td></tr>
+      <tr id="g-unconfirmed"><td>Failed, unconfirmed</td><td>The study's verdicts on runs without a valid final. Failed: the final source failed a check or did not build. Unconfirmed: the study's records show no checked final source. Both mean no score in the study. This site checks each run's scored file again (<a href="#which-file">which file is scored</a>).</td></tr>
+      <tr id="g-agent"><td>Agent</td><td>A model with its <a class="gl" href="#g-harness">harness</a> and reasoning effort: <span id="agent-names"></span>.</td></tr>
+      <tr id="g-harness"><td>Harness</td><td><span id="g-muse-cli"></span>The program that runs a model as an agent. It hands the model the task files and tools and runs the commands the model asks for.</td></tr>
+      <tr id="g-sharing-metaprogram"><td>Sharing metaprogram</td><td>Lean code an agent writes into its submission that, like the <a class="gl" href="#g-sharing-pass">automatic sharing pass</a>, writes each repeated subterm once; allowed, and only the terms it leaves are counted.</td></tr>
+      <tr id="g-task-package"><td>Task package</td><td>The files a participant gets for a task: the Lean project with its editable files and the scripts that check and score it.</td></tr>
+    </tbody></table></div>
+</main>
+<script>
+function initRules() {
+  const limits = l => l ? `${fmt(l.kernel_heartbeats)} heartbeats` : "—";
+  const sameLimit = DATA.tasks.every(t => t.limits && t.limits.kernel_heartbeats === DATA.tasks[0].limits.kernel_heartbeats);
+  $("#tasks-table").innerHTML = `<thead><tr><th>Task</th><th class="num">Targets</th><th>What the targets cover</th><th>Background (free)</th><th class="num">Original node count</th>${sameLimit ? "" : `<th class="num">Kernel limit per declaration</th>`}</tr></thead><tbody>` +
+    DATA.tasks.map(t => `<tr><td><b>${esc(t.name)}</b>${taskMark(t.id)}<span class="sub">${esc(t.source)}</span></td><td class="num">${t.targets}</td>
+      <td style="min-width:260px;white-space:normal">${codeify(t.desc).replace(/_/g, "_<wbr>")}</td><td style="min-width:160px;white-space:normal">${esc(t.background) || "—"}</td>
+      <td class="num">${fmt(t.baseline_nodes)}</td>${sameLimit ? "" : `<td class="num">${limits(t.limits)}</td>`}</tr>`).join("") + "</tbody>";
+  $("#limit-line").innerHTML = sameLimit ? `Kernel limit: ${fmt(DATA.tasks[0].limits.kernel_heartbeats)} <a class="gl" href="#g-heartbeat">heartbeats</a> per declaration, every task.` : "";
+  const differs = S.filter(s => s.marks.includes("statement_differs"));
+  $("#statement-exception").textContent = differs.length ? ` (${markSym("statement_differs")}: one exception, ${listText(differs.map(runLabel))})` : "";
+  $("#task-notes").innerHTML = Object.entries(TASK_NOTE).map(([id, n]) => `<details class="more" id="task-note-${esc(id)}"><summary>${esc(n.mark)} ${esc(TASK[id].name)}: ${esc(n.short)}</summary><p class="small">${esc(n.text)}</p></details>`).join("");
+  const V = DATA.verified_summary;
+  const runsOf = k => k === "VERIFIED" ? V.counts.VERIFIED + (V.counts.VERIFIED_PENDING_FIX || 0) : V.counts[k];
+  const more = k => k === "VERIFIED" ? ` <a href="results.html#verified-count">How the verified count breaks down</a>.` : "";
+  $("#status-table").innerHTML = `<thead><tr><th>Status</th><th class="num">Runs</th><th>Meaning</th></tr></thead><tbody>` +
+    STATUS_ORDER.filter(k => k !== "VERIFIED_PENDING_FIX").map(k => `<tr><td>${stPill(k)}</td><td class="num">${runsOf(k)}</td><td style="white-space:normal">${esc(DATA.status[k][1])}${more(k)}</td></tr>`).join("") + "</tbody>";
+  labelCells($("#status-table"));
+  const B = V.differs_by, C = V.study_check;
+  $("#first-check").innerHTML = `The study's verdicts against the verifier's:`;
+  const first = `<a class="gl" href="#g-first-check">first check</a>`;
+  const groups = [["first", `<td>Valid: accepted at the ${first}</td>`], ["second", `<td>Valid: rejected at the ${first}, accepted on a second check of the same file</td>`],
+    ["second_lcbench", `<td>Valid: rejected at the ${first}; the second check was MathCompressionBench's verifier itself</td>`],
+    ["no_first", `<td>Valid: no record of a ${first}, accepted by MathCompressionBench's verifier</td>`],
+    ["failed", `<td><a class="gl" href="#g-unconfirmed">Failed or unconfirmed</a></td>`]].filter(([k]) => C[k].runs);
+  $("#study-check").innerHTML = `<thead><tr><th>The study's verdict</th><th class="num">Runs</th><th class="num">Verified now</th></tr></thead><tbody>` +
+    groups.map(([k, cell]) => `<tr>${cell}<td class="num">${C[k].runs}</td><td class="num">${C[k].verified}</td></tr>`).join("") +
+    `<tr><td><b>All runs</b></td><td class="num"><b>${groups.reduce((a, [k]) => a + C[k].runs, 0)}</b></td><td class="num"><b>${groups.reduce((a, [k]) => a + C[k].verified, 0)}</b></td></tr></tbody>`;
+  labelCells($("#study-check"));
+  $("#first-check-diff").innerHTML = `The first check and the verifier differ on ${V.differs} runs: ${B.rejected_first} rejected and ${B.failed_first} failed or unconfirmed there, now verified, ` +
+    `and ${B.accepted_first} accepted there, not verified.`;
+  const by = k => S.filter(s => s.scored === k), T = V.time_limit;
+  $("#which-file-text").innerHTML = `The run's final (${by("study").length} runs); for ${T.runs} runs the study counted ` +
+    `<a class="gl" href="#g-unconfirmed">failed or unconfirmed</a>, the files at the time limit. ` +
+    `${plural(by("none").length, "run")} left several candidate files and no single final: no score.`;
+  const agentDesc = m => m.model_name ? `${m.harness} + ${m.model_name}` : `${m.harness} · ${m.model_id}`;
+  $("#agent-names").innerHTML = listText(DATA.order.filter(id => MODEL[id]).map(id => `<a href="results.html#agents" title="${esc(agentDesc(MODEL[id]))}">${esc(MODEL[id].name)}</a>`));
+  const P = DATA.participant;
+  $("#receipts").innerHTML = `<p class="small">Receipts written by <code>mcb verify</code> for pipeline tests, not benchmark entries.</p>${P.html}`;
+  document.querySelectorAll("#receipts table").forEach(labelCells);
+  const example = ex => `<pre class="lean"><code>${esc(ex.source)}</code></pre><div class="tablewrap"><table class="def"><thead><tr>` +
+    `<th>Charged declaration</th><th>What is counted</th><th class="num">Nodes</th></tr></thead><tbody>` +
+    ex.rows.map(r => `<tr><td><code>${esc(r.decl)}</code></td><td>${codeify(r.what)}</td>` +
+      `<td class="num">${r.parts.length > 1 ? r.parts.map(fmt).join(" + ") + " = " : ""}${fmt(r.nodes)}</td></tr>`).join("") +
+    `<tr><td><b>Total</b></td><td></td><td class="num"><b>${fmt(ex.total)}</b></td></tr></tbody></table></div><p class="small">${codeify(ex.note)}</p>`;
+  $("#worked-example").innerHTML = example(DATA.scoring_examples.helper);
+  const ind = DATA.scoring_examples.inductive.rows.slice(1), rec = ind.find(r => r.decl.endsWith(".rec"));
+  const ctors = ind.filter(r => r.decl.includes(".") && r !== rec), type = ind.find(r => !r.decl.includes("."));
+  $("#formula-example").textContent = `The inductive type below: ${fmt(type.nodes)} + (${ctors.map(r => fmt(r.nodes)).join(" + ")}) + ` +
+    `${fmt(rec.parts[0])} + (${rec.parts.slice(1).map(fmt).join(" + ")}) = ${fmt(ind.reduce((a, r) => a + r.nodes, 0))}.`;
+  $("#inductive-example").innerHTML = example(DATA.scoring_examples.inductive);
+}
+function changeKinds() {
+  const K = DATA.flow_kinds;
+  $("#change-kinds-table").innerHTML = "<tbody>" + K.groups.map(g =>
+    `<tr id="kind-group-${esc(g.key)}" class="kind-group"><td>${esc(g.label)}</td><td></td></tr>` +
+    g.categories.map(c => `<tr id="kind-${esc(c.key)}"><td><i class="sw" style="background:var(--cat-${esc(c.key)})"></i>${esc(c.label)}</td>` +
+      `<td>${codeify(c.rule)}</td></tr>`).join("")).join("") +
+    `<tr id="kind-tell-apart" class="kind-group"><td>Telling kinds apart</td><td>${codeify(K.tell_apart)}</td></tr></tbody>`;
+}
+function billDetail() {
+  const Z = DATA.zero_add, T = Z.tree, [typ, rec] = T.kids;
+  $("#zq-src").textContent = Z.source.map(s => s.text).join("\n");
+  const cost = n => n.apps ? `${n.own} + ${n.apps}` : `${n.own}`;
+  const row = (n, lead, tag = "span") => `<${tag} class="zq-row"><span class="zq-t">${esc(lead)}${esc(n.label)}</span>${n.note ? `<span class="zq-k">${esc(n.note)}</span>` : ""}<span class="zq-n" title="${n.apps ? `${n.own} for the name, ${n.apps} applications` : ""}">${cost(n)}</span></${tag}>`;
+  const rows = (n, lead, branch) => row(n, lead + branch) + n.kids.map((k, i) => rows(k, lead + {"": "", "├ ": "│ ", "└ ": "  "}[branch], i === n.kids.length - 1 ? "└ " : "├ ")).join("");
+  const part = (k, lead, branch) => `<details><summary class="zq-row"><span class="zq-t">${esc(lead + branch)}<span class="tw"></span>${esc(k.text)}</span><span class="zq-k">${esc(k.note)}</span><span class="zq-n zq-sub">Σ ${fmt(k.size)}</span></summary>` +
+    rows({...k, note: ""}, lead + (branch === "└ " ? "  " : "│ "), "") + `</details>`;
+  $("#zq-bill").innerHTML = row(T, "") + row(typ, "├ ") + row(rec, "└ ") +
+    rec.kids.map((k, i) => { const b = i === rec.kids.length - 1 ? "└ " : "├ "; return k.kids.length ? part(k, "  ", b) : row(k, "  " + b); }).join("") +
+    `<div class="zq-sum"><span>proof of <code>zero_add_eq</code></span><b>${fmt(Z.charged)}</b></div>`;
+  $("#zq-total").innerHTML = `The counter charges ${fmt(Z.charged)} nodes for this proof. The definitions it uses (<code>MyNat</code>, its recursor, <code>add</code> and <code>+</code>) cost ${fmt(Z.definitions)} more, once per task: ${fmt(Z.total)} for the file.`;
+}
+initRules(); changeKinds(); billDetail();
+</script>
+
+<footer class="wrap">MathCompressionBench · <span id="foot-lead">results snapshot <span id="foot-snap"></span>, the date of the newest run shown</span>. Run dates: <span id="foot-dates"></span>. Preview; results may change.</footer>
+<script>initChrome();</script>
+</body>
+</html>
